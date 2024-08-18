@@ -5,6 +5,7 @@ export default function Fridge({ items, setItems }) {
   //Input mezők value értékei a seT-ek
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
+  ////////////////////////////////////
   const [modifyQuantity, setModifyQuantity] = useState("");
   const [isVisible, setIsVisible] = useState(false);
   const [isVisibleUpdate, setIsVisibleUpdate] = useState(false);
@@ -115,7 +116,7 @@ export default function Fridge({ items, setItems }) {
         onSubmit={handleSubmit}
       >
         <div className="input-container">
-          <label className="form-label" htmlFor="newItemNameId">
+          <label className="form-label" htmlFor="newItemNameIdFidge">
             New item name:
           </label>
           <input
@@ -123,22 +124,22 @@ export default function Fridge({ items, setItems }) {
             name="newItemName"
             value={newItem}
             placeholder="ex. banana"
-            id="newItemNameId"
+            id="newItemNameIdFridge"
             onChange={(e) => {
               setNewItem(e.target.value);
             }}
           />
         </div>
         <div className="input-container">
-          <label className="form-label" htmlFor="newItemQuantityId">
+          <label className="form-label" htmlFor="newItemQuantityIdF">
             New item quantity:{" "}
           </label>
           <input
             type="text"
-            name="newItemQuantity"
+            name="newItemQuantityF"
             placeholder="ex. 1 kg"
             value={newQuantity}
-            id="newItemQuantityId"
+            id="newItemQuantityIdF"
             onChange={(e) => {
               setNewQuantity(e.target.value);
             }}
