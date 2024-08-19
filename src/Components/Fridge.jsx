@@ -7,9 +7,9 @@ export default function Fridge({ items, setItems }) {
   const [newQuantity, setNewQuantity] = useState("");
   ////////////////////////////////////
   const [modifyQuantity, setModifyQuantity] = useState("");
+  const [updateIndex, setUpdateIndex] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isVisibleUpdate, setIsVisibleUpdate] = useState(false);
-  const [updateIndex, setUpdateIndex] = useState(null);
   // Add btn text modification
   const isText = isVisible ? "Close add form" : "Add item";
   const updateText = isVisibleUpdate ? "Close modification" : "Update item";
@@ -24,28 +24,41 @@ export default function Fridge({ items, setItems }) {
   };
 
   const handleAdd = () => {
-    if (newItem.length < 1 || newQuantity.length < 1) {
-      return alert("The name and quantity fields mustn't be empty.");
+    if (newItem.length > 0 && newQuantity.length > 0) {
+      setItems([
+        ...items,
+        { name: newItem.trim(), quantity: newQuantity.trim() },
+      ]);
+      setNewItem("");
+      setNewQuantity("");
+      setIsVisible(false); // Maybe deletem idk jet.
+    } else {
+      alert("The name and quantity fields mustn't be empty.");
     }
-    setItems([...items, { name: newItem, quantity: newQuantity }]);
-    setNewItem("");
-    setNewQuantity("");
-    setIsVisible(false); // Maybe deletem idk jet.
   };
 
   const handleDelete = (index) => {
-    const NewElements = items.filter((_, i) => {
+    const newElements = items.filter((_, i) => {
       return i !== index;
     });
-    setItems(NewElements);
+    setItems(newElements);
+    if (newElements.length === 0) {
+      setIsVisibleUpdate(false);
+      setModifyQuantity("");
+      setUpdateIndex(null);
+    }
   };
 
-  const handleUpdate = (index) => {
-    const updatedList = [...items];
-    updatedList[index].quantity = modifyQuantity;
-    setItems(updatedList);
-    setModifyQuantity("");
-    setIsVisibleUpdate(false);
+  const handleUpdate = () => {
+    if (modifyQuantity === "") {
+      alert("Please enter a quantity.");
+    } else {
+      const updatedList = [...items];
+      updatedList[updateIndex].quantity = modifyQuantity.trim();
+      setItems(updatedList);
+      setModifyQuantity("");
+      setIsVisibleUpdate(false);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -57,25 +70,29 @@ export default function Fridge({ items, setItems }) {
     <>
       <h3>Fridge items</h3>
       <ul className="fridge-ul main-item-style">
-        {items.map((item, index) => (
-          <li className="fridge-li-element" key={index}>
-            {item.name} - {item.quantity}
-            <div className="btns-container">
-              <button
-                className="btn btn-delete"
-                onClick={() => handleDelete(index)}
-              >
-                Delete item
-              </button>
-              <button
-                className="btn btn-update"
-                onClick={() => toggleVisibilityUpdate(index)}
-              >
-                {updateText}
-              </button>
-            </div>
-          </li>
-        ))}
+        {items.length === 0 ? (
+          <p>Your fridge is empty.</p>
+        ) : (
+          items.map((item, index) => (
+            <li className="fridge-li-element" key={index}>
+              {item.name} - {item.quantity}
+              <div className="btns-container">
+                <button
+                  className="btn btn-delete"
+                  onClick={() => handleDelete(index)}
+                >
+                  Delete item
+                </button>
+                <button
+                  className="btn btn-update"
+                  onClick={() => toggleVisibilityUpdate(index)}
+                >
+                  {updateText}
+                </button>
+              </div>
+            </li>
+          ))
+        )}
       </ul>
       <button className="btn btn-others" onClick={toggleVisibilityAdd}>
         {isText}
@@ -104,7 +121,7 @@ export default function Fridge({ items, setItems }) {
           className="btn btn-others"
           type="submit"
           value="Update quantity"
-          onClick={() => handleUpdate(updateIndex)}
+          onClick={handleUpdate}
         />
       </form>
       <form

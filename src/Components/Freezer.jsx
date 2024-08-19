@@ -5,10 +5,11 @@ export default function Freezer({ items, setItems }) {
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
   //////////////////////////////////////////////////
-  const [modifyQuantity, setModifyQuantity] = useState("");
-  const [updateIndex, setUpdateIndex] = useState(null);
   const [isVisibleF, setIsVisibleF] = useState(false);
   const isText = isVisibleF ? "Close add form" : "Add item";
+  ////////////////////////////////////////////////////////
+  const [updateIndex, setUpdateIndex] = useState(null);
+  const [modifyQuantity, setModifyQuantity] = useState("");
   const [isVisibleUpdateF, setIsVisibleUpdateF] = useState(false);
   const updateText = isVisibleUpdateF ? "Close modification" : "Update item";
 
@@ -24,12 +25,16 @@ export default function Freezer({ items, setItems }) {
   };
 
   const handleAdd = () => {
-    if (newItem.length < 1 || newQuantity.length < 1) {
-      alert("The name and quantity fields mustn't be empty.");
-    } else {
-      setItems([...items, { name: newItem, quantity: newQuantity }]);
+    if (newItem.length > 0 && newQuantity.length > 0) {
+      setItems([
+        ...items,
+        { name: newItem.trim(), quantity: newQuantity.trim() },
+      ]);
       setNewItem("");
       setNewQuantity("");
+      setIsVisibleF(false);
+    } else {
+      alert("The name and quantity fields mustn't be empty.");
     }
   };
   const handleDeleteF = (index) => {
@@ -39,42 +44,57 @@ export default function Freezer({ items, setItems }) {
     setItems(newList);
   };
 
-  const handleUpdate = (index) => {
-    const updatedItems = [...items];
-    updatedItems[index].quantity = modifyQuantity;
-    setItems(updatedItems);
-    setModifyQuantity("");
+  const handleUpdate = () => {
+    if (modifyQuantity === "") {
+      alert("Please enter a quantity.");
+      return;
+    } else {
+      const updatedList = [...items];
+      updatedList[updateIndex].quantity = modifyQuantity.trim();
+      setItems(updatedList);
+      setModifyQuantity("");
+      setIsVisibleUpdateF(false);
+      setUpdateIndex(null);
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
   };
 
+  ///////////////////////////////////////////////////////////////////////////
+  //     UPDATE ITEM BUXFIXET MEGCSINÁLNI A FREEZERNÉL ÉS A CHAMBERNÉL     //
+  ///////////////////////////////////////////////////////////////////////////
+
   return (
     <>
       <h3>Freezer items</h3>
       <ul className="fridge-ul main-item-style">
-        {items.map((item, index) => {
-          return (
-            <li className="fridge-li-element" key={index}>
-              {item.name} - {item.quantity}
-              <div className="btns-container">
-                <button
-                  className="btn btn-delete"
-                  onClick={() => handleDeleteF(index)}
-                >
-                  Delete item
-                </button>
-                <button
-                  className="btn btn-update"
-                  onClick={toggleVisibilityUpdateF}
-                >
-                  {updateText}
-                </button>
-              </div>
-            </li>
-          );
-        })}
+        {items.length === 0 ? (
+          <p>Your freezer is empty.</p>
+        ) : (
+          items.map((item, index) => {
+            return (
+              <li className="fridge-li-element" key={index}>
+                {item.name} - {item.quantity}
+                <div className="btns-container">
+                  <button
+                    className="btn btn-delete"
+                    onClick={() => handleDeleteF(index)}
+                  >
+                    Delete item
+                  </button>
+                  <button
+                    className="btn btn-update"
+                    onClick={() => toggleVisibilityUpdateF(index)}
+                  >
+                    {updateText}
+                  </button>
+                </div>
+              </li>
+            );
+          })
+        )}
       </ul>
       <button className="btn btn-others" onClick={toggleVisibilityAddFr}>
         {isText}
@@ -100,7 +120,7 @@ export default function Freezer({ items, setItems }) {
           type="submit"
           value="Update quantity"
           className="btn btn-others"
-          onClick={() => handleUpdate(updateIndex)}
+          onClick={handleUpdate}
         />
       </form>
       <form
