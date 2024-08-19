@@ -52,6 +52,9 @@ export default function Chamber({ items, setItems }) {
   const handleDelete = (index) => {
     const newList = items.filter((_, i) => i !== index);
     setItems(newList);
+    setIsVisibleQuantity(false);
+    setModifyQuantity("");
+    setUpdateIndex(null);
   };
 
   const handleUpdate = () => {
@@ -66,10 +69,6 @@ export default function Chamber({ items, setItems }) {
       setUpdateIndex(null);
     }
   };
-
-  ///////////////////////////////////////////////////////////////////////////
-  //     UPDATE ITEM BUXFIXET MEGCSINÁLNI A FREEZERNÉL ÉS A CHAMBERNÉL     //
-  ///////////////////////////////////////////////////////////////////////////
 
   return (
     <>

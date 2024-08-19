@@ -42,6 +42,8 @@ export default function Freezer({ items, setItems }) {
       return i !== index;
     });
     setItems(newList);
+    setIsVisibleUpdateF(false);
+    setModifyQuantity("");
   };
 
   const handleUpdate = () => {
@@ -52,19 +54,15 @@ export default function Freezer({ items, setItems }) {
       const updatedList = [...items];
       updatedList[updateIndex].quantity = modifyQuantity.trim();
       setItems(updatedList);
-      setModifyQuantity("");
       setIsVisibleUpdateF(false);
       setUpdateIndex(null);
+      setModifyQuantity("");
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
   };
-
-  ///////////////////////////////////////////////////////////////////////////
-  //     UPDATE ITEM BUXFIXET MEGCSINÁLNI A FREEZERNÉL ÉS A CHAMBERNÉL     //
-  ///////////////////////////////////////////////////////////////////////////
 
   return (
     <>
@@ -107,7 +105,7 @@ export default function Freezer({ items, setItems }) {
         action="#"
         onSubmit={handleSubmit}
       >
-        <label htmlFor="updateQuantityIdF"> New quantity:</label>
+        <label htmlFor="updateQuantityIdF"> New quantity: </label>
         <input
           type="text"
           name="updateQuantity"
@@ -133,7 +131,7 @@ export default function Freezer({ items, setItems }) {
       >
         <div className="input-container">
           <label className="form-label" htmlFor="newItemNameIdF">
-            New item name
+            New item name:
           </label>
           <input
             type="text"
@@ -148,7 +146,7 @@ export default function Freezer({ items, setItems }) {
         </div>
         <div className="input-container">
           <label className="form-label" htmlFor="newItemQuantityIdF">
-            New item quantity
+            New item quantity:
           </label>
           <input
             type="text"

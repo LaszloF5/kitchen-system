@@ -38,15 +38,11 @@ export default function Fridge({ items, setItems }) {
   };
 
   const handleDelete = (index) => {
-    const newElements = items.filter((_, i) => {
-      return i !== index;
-    });
+    const newElements = items.filter((_, i) => i !== index);
     setItems(newElements);
-    if (newElements.length === 0) {
-      setIsVisibleUpdate(false);
-      setModifyQuantity("");
-      setUpdateIndex(null);
-    }
+    setIsVisibleUpdate(false);
+    setModifyQuantity("");
+    setUpdateIndex(null);
   };
 
   const handleUpdate = () => {
@@ -141,7 +137,7 @@ export default function Fridge({ items, setItems }) {
             name="newItemName"
             value={newItem}
             placeholder="ex. banana"
-            id="newItemNameIdFridge"
+            id="newItemNameIdFidge"
             onChange={(e) => {
               setNewItem(e.target.value);
             }}
