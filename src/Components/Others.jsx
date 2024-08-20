@@ -1,10 +1,8 @@
-import { isVisible } from "@testing-library/user-event/dist/utils";
 import React, { useState } from "react";
 
 export default function Others({ items, setItems }) {
   // Validate qty with regex
-  // Ezt majd meg kell álmodni hogy hogyan fogom validálni egyenként a listaelemeken belül, és valahogy különbséget tenni a mennyiségek között.
-  const regex = /^(1(\.0+)?|0\.[1-9]+)\b.*$/;
+  const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
 
   const [newItem, setNewItem] = useState([]);
   const [newQuantity, setNewQuantity] = useState([]);
@@ -83,7 +81,7 @@ export default function Others({ items, setItems }) {
         ) : (
           items.map((item, index) => {
             return (
-              <li className="fridge-li-element" key={index}>
+              <li className={`fridge-li-element ${regex.test(item.quantity) ? "alert-color" : "default-color"}`} key={index}>
                 {item.name} - {item.quantity}
                 <div className="buttons-container">
                   <button

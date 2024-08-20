@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 
 export default function Freezer({ items, setItems }) {
+  // Validate qty with regex
+  const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
   // Input values
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
@@ -73,7 +75,7 @@ export default function Freezer({ items, setItems }) {
         ) : (
           items.map((item, index) => {
             return (
-              <li className="fridge-li-element" key={index}>
+              <li className={`fridge-li-element ${regex.test(item.quantity) ? "alert-color" : "default-color"}`} key={index}>
                 {item.name} - {item.quantity}
                 <div className="btns-container">
                   <button
