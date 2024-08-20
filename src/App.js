@@ -3,6 +3,7 @@ import Fridge from "./Components/Fridge";
 import Freezer from "./Components/Freezer";
 import Chamber from "./Components/Chamber";
 import Others from "./Components/Others";
+import ShoppingList from "./Components/ShoppingList";
 import "./App.css";
 
 export default function App() {
@@ -11,6 +12,7 @@ export default function App() {
   const [freezerItems, setFreezerItems] = useState([]);
   const [chamberItems, setChamberItems] = useState([]);
   const [otherItems, setOtherItems] = useState([]);
+  const [shoppingListItems, setShoppingListItems] = useState([]);
 
   return (
     <div className="App">
@@ -19,6 +21,7 @@ export default function App() {
       <Freezer items={freezerItems} setItems={setFreezerItems} />
       <Chamber items={chamberItems} setItems={setChamberItems} />
       <Others items={otherItems} setItems={setOtherItems} />
+      <ShoppingList items={shoppingListItems} setItems={setShoppingListItems}/>
       <footer className="footer">Footer</footer>
     </div>
   );
