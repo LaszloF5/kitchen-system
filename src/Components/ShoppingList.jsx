@@ -7,6 +7,8 @@ export default function ShoppingList({
   addToFreezer,
   addToChamber,
   addToOthers,
+  dataFromFridge,
+  clearDataFromFridge,
 }) {
   /////////////////          DONE:          /////////////////
 
@@ -19,7 +21,7 @@ export default function ShoppingList({
 
   /////////////////          TODO:          /////////////////
 
-  // 1 gomb amivel lehet váltani az adott tétel színét, jelezve a vásárlás sikerességét (esetleg pipa v x) EZ NEM BIZTOS HOGY HASZNOS ÖTLET
+  // 1 gomb amivel lehet váltani az adott tétel színét, jelezve a vásárlás sikerességét (esetleg pipa v x), vagy az adott elem nevére kattintáskor áthúzni az elemet, ezzel jelezve a vásárlás sikerességét. EZ NEM BIZTOS HOGY HASZNOS ÖTLET
   // A komponensekhez adni 1 gombot, amivel fel lehet venni az adott tételt a bevásárlólistára, mennyiség megadásával.
 
   // Input values
@@ -139,7 +141,7 @@ export default function ShoppingList({
     handleDelete(index);
     setIsVisibleMoveTo(false);
     setNewIndex(null);
-  }
+  };
 
   return (
     <>
@@ -204,7 +206,12 @@ export default function ShoppingList({
         >
           The camber
         </button>
-        <button className="btn btn-others" onClick={() => handleTransfer4(newIndex)}>The other items</button>
+        <button
+          className="btn btn-others"
+          onClick={() => handleTransfer4(newIndex)}
+        >
+          The other items
+        </button>
       </form>
       <form
         action="#"

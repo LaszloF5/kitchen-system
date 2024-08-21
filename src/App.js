@@ -14,8 +14,19 @@ export default function App() {
   const [otherItems, setOtherItems] = useState([]);
   const [shoppingListItems, setShoppingListItems] = useState([]);
 
-  // Adatátvitel a shoppinglist és a fridge komponensek között
+  // Elemek áthelyezése a shopping list komponensbe
 
+  const [toTheShoppingList, setToTheShoppingList] = useState([]);
+  const addToShoppingList = (item) => {
+    console.log(item.name, item.quantity);
+    setToTheShoppingList([...toTheShoppingList, item]);
+  };
+  const clearDataFromFridge = () => {
+    setToTheShoppingList([]);
+  };
+
+  // Adatátvitel a shoppinglist és a fridge komponensek között
+  // Folytatni a shoppinglist komponensben, mert az adatok már megérkeznek oda. Fel kell őket dolgozni.
   const [toTheFridge, setToTheFridge] = useState([]);
   const addToFridge = (item) => {
     setToTheFridge([item]);
@@ -49,10 +60,10 @@ export default function App() {
   const [toTheOthers, setToTheOthers] = useState([]);
   const addToOthers = (item) => {
     setToTheOthers([item]);
-  }
+  };
   const cleanOthersData = () => {
     setToTheOthers([]);
-  }
+  };
 
   return (
     <div className="App">
@@ -62,6 +73,7 @@ export default function App() {
         setItems={setFridgeItems}
         dataFromSL={toTheFridge}
         cleanFridgeData={cleanFridgeData}
+        addToShoppingList={addToShoppingList}
       />
       <Freezer
         items={freezerItems}
@@ -88,6 +100,8 @@ export default function App() {
         addToFreezer={addToFreezer}
         addToChamber={addToChamber}
         addToOthers={addToOthers}
+        dataFromFridge={toTheShoppingList}
+        clearDataFromFridge={clearDataFromFridge}
       />
       <footer className="footer">Footer</footer>
     </div>

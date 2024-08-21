@@ -182,4 +182,12 @@ label {
   display: flex;
 }
 
+.hiddenTransferForm {
+  display: none;
+}
+
+.visibleTransferForm {
+  display: flex;
+}
+
 /*******************************/

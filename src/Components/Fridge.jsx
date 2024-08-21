@@ -6,22 +6,52 @@ export default function Fridge({
   setItems,
   dataFromSL,
   cleanFridgeData,
+  addToShoppingList,
 }) {
-  // addToFridge egy objektum, minek van egy name és qty attribútuma.
-
   // Validate qty with regex
+
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
+
   //Input values
+
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
   const [modifyQuantity, setModifyQuantity] = useState("");
+  const [tempQty, setTempQty] = useState("");
+
   ////////////
+
   const [updateIndex, setUpdateIndex] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isVisibleUpdate, setIsVisibleUpdate] = useState(false);
+  const [tempIndex, setTempIndex] = useState(null);
+
   // Add btn text modification
+
   const isText = isVisible ? "Close add form" : "Add item";
   const updateText = isVisibleUpdate ? "Close modification" : "Update item";
+
+  // visible transfer form
+
+  const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
+  const toggleVisibleTransferForm = (index) => {
+    setTempIndex(index);
+    setIsVisibleTransferForm(!isVisibleTransferForm);
+  };
+
+  // to the shopping list
+  // Solution: Shallow copy --> Csak az első szintet másolja érték szerint (s többi referencia szerint), viszont nincs több szint, ezért elég. Így nem fogja módosítani az eredeti items tömböt, és a benne lévő objektumokat.
+  const handleTransferItem = () => {
+    if (tempQty !== "") {
+      const transferItem = { ...items[tempIndex], quantity: tempQty };
+      addToShoppingList(transferItem);
+      setTempQty("");
+      setIsVisibleTransferForm(false);
+      setTempIndex(null);
+    } else {
+      alert("Please enter a quantity.");
+    }
+  };
 
   // Datas from shopping list
 
@@ -92,7 +122,6 @@ export default function Fridge({
   const handleSubmit = (e) => {
     e.preventDefault();
   };
-  // Add item toggle btn to display the add form element.
 
   return (
     <>
@@ -110,6 +139,12 @@ export default function Fridge({
             >
               {item.name} - {item.quantity}
               <div className="btns-container">
+                <button
+                  className="btn btn-others"
+                  onClick={() => toggleVisibleTransferForm(index)}
+                >
+                  Add to the SL
+                </button>
                 <button
                   className="btn btn-delete"
                   onClick={() => handleDelete(index)}
@@ -130,6 +165,30 @@ export default function Fridge({
       <button className="btn btn-others" onClick={toggleVisibilityAdd}>
         {isText}
       </button>
+      <form
+        action="#"
+        method="GET"
+        onSubmit={handleSubmit}
+        className={`quantity-update-form main-item-style ${
+          isVisibleTransferForm ? "visibleTransferForm" : "hiddenTransferForm"
+        }`}
+      >
+        <label htmlFor="setQty">Set the quantity:</label>
+        <input
+          type="text"
+          name="setQuantity"
+          id="setQty"
+          value={tempQty}
+          placeholder="ex. 1 kg"
+          onChange={(e) => setTempQty(e.target.value)}
+        />
+        <input
+          type="submit"
+          value="Set"
+          className="btn btn-others"
+          onClick={handleTransferItem}
+        />
+      </form>
       <form
         method="GET"
         action="#"
