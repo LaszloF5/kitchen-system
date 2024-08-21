@@ -1,6 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-export default function Chamber({ items, setItems }) {
+export default function Chamber({
+  items,
+  setItems,
+  dataFromSL,
+  cleanChamberData,
+}) {
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
   // Input values
@@ -21,6 +26,23 @@ export default function Chamber({ items, setItems }) {
 
   // Functions
 
+  useEffect(() => {
+    if (dataFromSL.length > 0) {
+      const exsistingItem = items.find((item) => item.name === dataFromSL[0].name);
+      if (exsistingItem) {
+        const unit = exsistingItem.quantity.replace(Number.parseFloat(exsistingItem.quantity), "").trim();
+        const firstNum = Number.parseFloat(exsistingItem.quantity);
+        const secondNum = Number.parseFloat(dataFromSL[0].quantity);
+        const sumQty = firstNum + secondNum;
+        exsistingItem.quantity = sumQty + " " + unit;
+        setItems([...items]);
+      } else {
+        setItems([...items, ...dataFromSL]);
+      }
+      cleanChamberData();
+    }
+  }, [dataFromSL])
+
   const handleSubmit = (e) => {
     e.preventDefault();
   };
@@ -36,7 +58,7 @@ export default function Chamber({ items, setItems }) {
 
   // Item modifier functions
 
-  const handleAdd = () => {
+  const handleAddChamber = () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
       const updatedItems = [
         ...items,
@@ -81,8 +103,8 @@ export default function Chamber({ items, setItems }) {
         ) : (
           items.map((item, index) => (
             <li
-              className={`fridge-li-element ${regex.test(
-                item.quantity) ? "alert-color" : "default-color"
+              className={`fridge-li-element ${
+                regex.test(item.quantity) ? "alert-color" : "default-color"
               }`}
               key={index}
             >
@@ -169,7 +191,7 @@ export default function Chamber({ items, setItems }) {
         <input
           type="submit"
           value="Update"
-          onClick={handleAdd}
+          onClick={handleAddChamber}
           className="btn btn-others centerBtn"
         />
       </form>

@@ -1,6 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-export default function Others({ items, setItems }) {
+export default function Others({
+  items,
+  setItems,
+  dataFromSL,
+  cleanOthersData,
+}) {
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
 
@@ -21,6 +26,25 @@ export default function Others({ items, setItems }) {
 
   // Functions
 
+  useEffect(() => {
+    if (dataFromSL.length > 0) {
+      const exsistingItem = items.find((item) => item.name === dataFromSL[0].name);
+      if (exsistingItem) {
+        const unit = exsistingItem.quantity
+          .replace(Number.parseFloat(exsistingItem.quantity), "")
+          .trim();
+        const firstNum = Number.parseFloat(exsistingItem.quantity);
+        const secondNum = Number.parseFloat(dataFromSL[0].quantity);
+        const sumQty = firstNum + secondNum;
+        exsistingItem.quantity = sumQty + " " + unit;
+        setItems([...items]);
+      } else {
+        setItems([...items, ...dataFromSL]);
+      }
+      cleanOthersData();
+    }
+  }, [dataFromSL]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
   };
@@ -36,7 +60,7 @@ export default function Others({ items, setItems }) {
 
   // Item modifier functions
 
-  const handleAdd = () => {
+  const handleAddOthers = () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
       const newList = [
         ...items,
@@ -81,7 +105,12 @@ export default function Others({ items, setItems }) {
         ) : (
           items.map((item, index) => {
             return (
-              <li className={`fridge-li-element ${regex.test(item.quantity) ? "alert-color" : "default-color"}`} key={index}>
+              <li
+                className={`fridge-li-element ${
+                  regex.test(item.quantity) ? "alert-color" : "default-color"
+                }`}
+                key={index}
+              >
                 {item.name} - {item.quantity}
                 <div className="buttons-container">
                   <button
@@ -167,7 +196,7 @@ export default function Others({ items, setItems }) {
           type="submit"
           value="Update"
           className="btn btn-others centerBtn"
-          onClick={handleAdd}
+          onClick={handleAddOthers}
         />
       </form>
     </>

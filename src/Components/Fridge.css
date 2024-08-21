@@ -174,4 +174,12 @@ label {
   display: flex;
 }
 
+.hiddenMoveTo {
+  display: none;
+}
+
+.visibleMoveTo {
+  display: flex;
+}
+
 /*******************************/

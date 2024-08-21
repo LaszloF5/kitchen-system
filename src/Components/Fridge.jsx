@@ -1,7 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Fridge.css";
 
-export default function Fridge({ items, setItems }) {
+export default function Fridge({
+  items,
+  setItems,
+  dataFromSL,
+  cleanFridgeData,
+}) {
+  // addToFridge egy objektum, minek van egy name és qty attribútuma.
+
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
   //Input values
@@ -16,6 +23,29 @@ export default function Fridge({ items, setItems }) {
   const isText = isVisible ? "Close add form" : "Add item";
   const updateText = isVisibleUpdate ? "Close modification" : "Update item";
 
+  // Datas from shopping list
+
+  useEffect(() => {
+    if (dataFromSL.length > 0) {
+      const exsistingItem = items.find(
+        (item) => item.name === dataFromSL[0].name
+      );
+      if (exsistingItem) {
+        const unit = exsistingItem.quantity
+          .replace(Number.parseFloat(exsistingItem.quantity), "")
+          .trim();
+        const firstNum = Number.parseFloat(exsistingItem.quantity);
+        const secondNum = Number.parseFloat(dataFromSL[0].quantity);
+        const sumQty = firstNum + secondNum;
+        exsistingItem.quantity = sumQty + " " + unit;
+        setItems([...items]);
+      } else {
+        setItems([...items, ...dataFromSL]);
+      }
+      cleanFridgeData();
+    }
+  }, [dataFromSL]);
+
   const toggleVisibilityAdd = () => {
     setIsVisible(!isVisible);
   };
@@ -25,7 +55,7 @@ export default function Fridge({ items, setItems }) {
     setUpdateIndex(index);
   };
 
-  const handleAdd = () => {
+  const handleAddFridge = () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
       setItems([
         ...items,
@@ -169,7 +199,7 @@ export default function Fridge({ items, setItems }) {
           className="btn btn-others centerBtn"
           type="submit"
           value="Update"
-          onClick={handleAdd}
+          onClick={handleAddFridge}
         />
       </form>
     </>

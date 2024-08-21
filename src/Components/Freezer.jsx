@@ -1,6 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-export default function Freezer({ items, setItems }) {
+export default function Freezer({
+  items,
+  setItems,
+  dataFromSL,
+  cleanFreezerData,
+}) {
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
   // Input values
@@ -15,6 +20,29 @@ export default function Freezer({ items, setItems }) {
   const [isVisibleUpdateF, setIsVisibleUpdateF] = useState(false);
   const updateText = isVisibleUpdateF ? "Close modification" : "Update item";
 
+  // Data from shopping list
+
+  useEffect(() => {
+    if (dataFromSL.length > 0) {
+      const exsistingItem = items.find(
+        (item) => item.name === dataFromSL[0].name
+      );
+      if (exsistingItem) {
+        const unit = exsistingItem.quantity
+          .replace(Number.parseFloat(exsistingItem.quantity), "")
+          .trim();
+        const firstNum = Number.parseFloat(exsistingItem.quantity);
+        const secondNum = Number.parseFloat(dataFromSL[0].quantity);
+        const sumQty = firstNum + secondNum;
+        exsistingItem.quantity = sumQty + " " + unit;
+        setItems([...items]);
+      } else {
+        setItems([...items, ...dataFromSL]);
+      }
+      cleanFreezerData();
+    }
+  }, [dataFromSL]);
+
   ////////// FUNCTIONS //////////
 
   const toggleVisibilityAddFr = () => {
@@ -26,7 +54,7 @@ export default function Freezer({ items, setItems }) {
     setUpdateIndex(index);
   };
 
-  const handleAdd = () => {
+  const handleAddFreezer = () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
       setItems([
         ...items,
@@ -75,7 +103,12 @@ export default function Freezer({ items, setItems }) {
         ) : (
           items.map((item, index) => {
             return (
-              <li className={`fridge-li-element ${regex.test(item.quantity) ? "alert-color" : "default-color"}`} key={index}>
+              <li
+                className={`fridge-li-element ${
+                  regex.test(item.quantity) ? "alert-color" : "default-color"
+                }`}
+                key={index}
+              >
                 {item.name} - {item.quantity}
                 <div className="btns-container">
                   <button
@@ -165,7 +198,7 @@ export default function Freezer({ items, setItems }) {
           className="btn btn-others centerBtn"
           type="submit"
           value="Update"
-          onClick={handleAdd}
+          onClick={handleAddFreezer}
         />
       </form>
     </>
