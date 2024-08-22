@@ -40,7 +40,7 @@ export default function Fridge({
   };
 
   // to the shopping list
-  // Solution: Shallow copy --> Csak az első szintet másolja érték szerint (s többi referencia szerint), viszont nincs több szint, ezért elég. Így nem fogja módosítani az eredeti items tömböt, és a benne lévő objektumokat.
+  // Solution: Shallow copy --> Csak az első szintet másolja érték szerint (a többit referencia szerint), viszont nincs több szint, ezért elég. Így nem fogja módosítani az eredeti items tömböt, és a benne lévő objektumokat.
   const handleTransferItem = () => {
     if (tempQty !== "") {
       const transferItem = { ...items[tempIndex], quantity: tempQty };
@@ -105,6 +105,7 @@ export default function Fridge({
     setIsVisibleUpdate(false);
     setModifyQuantity("");
     setUpdateIndex(null);
+    setIsVisibleTransferForm(false);
   };
 
   const handleUpdate = () => {

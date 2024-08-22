@@ -5,6 +5,7 @@ export default function Chamber({
   setItems,
   dataFromSL,
   cleanChamberData,
+  addToShoppingList,
 }) {
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
@@ -12,6 +13,15 @@ export default function Chamber({
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
   const [modifyQuantity, setModifyQuantity] = useState("");
+  const [tempQty, setTempQty] = useState("");
+
+  // Visible transfer form
+  const [tempIndex, setTempIndex] = useState(null);
+  const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
+  const toggleVisibleTransferForm = (index) => {
+    setIsVisibleTransferForm(!isVisibleTransferForm);
+    setTempIndex(index);
+  };
 
   // Visible Add form
   const [isVisible, setIsVisible] = useState(false);
@@ -26,11 +36,31 @@ export default function Chamber({
 
   // Functions
 
+  // to the shopping list
+
+  const handleTransferItem = () => {
+    if (tempQty !== "") {
+      const transferItem = { ...items[tempIndex], quantity: tempQty };
+      addToShoppingList(transferItem);
+      setTempQty("");
+      setTempIndex(null);
+      setIsVisibleTransferForm(false);
+    } else {
+      alert("Please enter a valid quantity.");
+    }
+  };
+
+  // Datas from shopping list
+
   useEffect(() => {
     if (dataFromSL.length > 0) {
-      const exsistingItem = items.find((item) => item.name === dataFromSL[0].name);
+      const exsistingItem = items.find(
+        (item) => item.name === dataFromSL[0].name
+      );
       if (exsistingItem) {
-        const unit = exsistingItem.quantity.replace(Number.parseFloat(exsistingItem.quantity), "").trim();
+        const unit = exsistingItem.quantity
+          .replace(Number.parseFloat(exsistingItem.quantity), "")
+          .trim();
         const firstNum = Number.parseFloat(exsistingItem.quantity);
         const secondNum = Number.parseFloat(dataFromSL[0].quantity);
         const sumQty = firstNum + secondNum;
@@ -41,7 +71,7 @@ export default function Chamber({
       }
       cleanChamberData();
     }
-  }, [dataFromSL])
+  }, [dataFromSL]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -79,6 +109,7 @@ export default function Chamber({
     setIsVisibleQuantity(false);
     setModifyQuantity("");
     setUpdateIndex(null);
+    setIsVisibleTransferForm(false);
   };
 
   const handleUpdate = () => {
@@ -111,6 +142,12 @@ export default function Chamber({
               {item.name} - {item.quantity}
               <div className="btns-container">
                 <button
+                  className="btn btn-others"
+                  onClick={() => toggleVisibleTransferForm(index)}
+                >
+                  Add to the SL
+                </button>
+                <button
                   className="btn btn-delete"
                   onClick={() => handleDelete(index)}
                 >
@@ -130,6 +167,30 @@ export default function Chamber({
       <button className="btn btn-others centerBtn" onClick={toggleAddForm}>
         {isText}
       </button>
+      <form
+        action="#"
+        method="GET"
+        onSubmit={handleSubmit}
+        className={`quantity-update-form main-item-style ${
+          isVisibleTransferForm ? "visibleTransferForm" : "hiddenTransferForm"
+        }`}
+      >
+        <label htmlFor="setQty">Set the quantity</label>
+        <input
+          type="text"
+          name="setQuantity"
+          id="setQty"
+          value={tempQty}
+          placeholder="ex. 1 kg"
+          onChange={(e) => setTempQty(e.target.value)}
+        />
+        <input
+          type="submit"
+          value="Set"
+          className="btn btn-others"
+          onClick={handleTransferItem}
+        />
+      </form>
       <form
         action="#"
         method="GET"

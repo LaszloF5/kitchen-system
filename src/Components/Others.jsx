@@ -5,6 +5,7 @@ export default function Others({
   setItems,
   dataFromSL,
   cleanOthersData,
+  addToShoppingList,
 }) {
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
@@ -24,11 +25,37 @@ export default function Others({
   const [modifyQuantity, setModifyQuantity] = useState("");
   const [updateIndex, setUpdateIndex] = useState(null);
 
+  // Toggle transfer form
+
+  const [tempIndex, setTempIndex] = useState(null);
+  const [tempQty, setTempQty] = useState("");
+  const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
+  const toggleVisibleTransferForm = (index) => {
+    setTempIndex(index);
+    setIsVisibleTransferForm(!isVisibleTransferForm);
+  };
+
   // Functions
+
+  // to the shopping list
+
+  const handleTransferItem = () => {
+    if (tempQty !== "") {
+      const transferItem = { ...items[tempIndex], quantity: tempQty };
+      addToShoppingList(transferItem);
+      setTempQty("");
+      setTempIndex(null);
+      setIsVisibleTransferForm(false);
+    } else {
+      alert("Please enter a quantity.");
+    }
+  };
 
   useEffect(() => {
     if (dataFromSL.length > 0) {
-      const exsistingItem = items.find((item) => item.name === dataFromSL[0].name);
+      const exsistingItem = items.find(
+        (item) => item.name === dataFromSL[0].name
+      );
       if (exsistingItem) {
         const unit = exsistingItem.quantity
           .replace(Number.parseFloat(exsistingItem.quantity), "")
@@ -114,6 +141,12 @@ export default function Others({
                 {item.name} - {item.quantity}
                 <div className="buttons-container">
                   <button
+                    className="btn btn-others"
+                    onClick={() => toggleVisibleTransferForm(index)}
+                  >
+                    Add to the SL
+                  </button>
+                  <button
                     className="btn btn-delete"
                     onClick={() => handleDelete(index)}
                   >
@@ -134,6 +167,29 @@ export default function Others({
       <button className="btn btn-others" onClick={toggleAddElement}>
         {isText}
       </button>
+      <form
+        action="#"
+        method="GET"
+        onSubmit={handleSubmit}
+        className={`quantity-update-form main-item-style ${
+          isVisibleTransferForm ? "visibleTransferForm" : "hiddenTransferForm"
+        }`}
+      >
+        <label htmlFor="setQty">Set the quantity</label>
+        <input
+          type="text"
+          name="setQuantity"
+          id="setQty"
+          value={tempQty}
+          onChange={(e) => setTempQty(e.target.value)}
+        />
+        <input
+          type="submit"
+          value="Set"
+          className="btn btn-others"
+          onClick={handleTransferItem}
+        />
+      </form>
       <form
         action="#"
         method="GET"

@@ -5,12 +5,14 @@ export default function Freezer({
   setItems,
   dataFromSL,
   cleanFreezerData,
+  addToShoppingList,
 }) {
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
   // Input values
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
+  const [tempQty, setTempQty] = useState("");
   //////////////////////////////////////////////////
   const [isVisibleF, setIsVisibleF] = useState(false);
   const isText = isVisibleF ? "Close add form" : "Add item";
@@ -19,6 +21,7 @@ export default function Freezer({
   const [modifyQuantity, setModifyQuantity] = useState("");
   const [isVisibleUpdateF, setIsVisibleUpdateF] = useState(false);
   const updateText = isVisibleUpdateF ? "Close modification" : "Update item";
+  const [tempIndex, setTempIndex] = useState(null);
 
   // Data from shopping list
 
@@ -44,6 +47,24 @@ export default function Freezer({
   }, [dataFromSL]);
 
   ////////// FUNCTIONS //////////
+
+  const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
+  const toggleTransferForm = (index) => {
+    setTempIndex(index);
+    setIsVisibleTransferForm(!isVisibleTransferForm);
+  };
+
+  const handleTransferItem = () => {
+    if (tempQty !== "") {
+      const transferItem = { ...items[tempIndex], quantity: tempQty };
+      addToShoppingList(transferItem);
+      setTempIndex(null);
+      setTempQty("");
+      setIsVisibleTransferForm(false);
+    } else {
+      alert("Please enter a quantity.");
+    }
+  };
 
   const toggleVisibilityAddFr = () => {
     setIsVisibleF(!isVisibleF);
@@ -74,6 +95,7 @@ export default function Freezer({
     setItems(newList);
     setIsVisibleUpdateF(false);
     setModifyQuantity("");
+    setIsVisibleTransferForm(false);
   };
 
   const handleUpdate = () => {
@@ -112,6 +134,12 @@ export default function Freezer({
                 {item.name} - {item.quantity}
                 <div className="btns-container">
                   <button
+                    className="btn btn-others"
+                    onClick={() => toggleTransferForm(index)}
+                  >
+                    Add to the SL
+                  </button>
+                  <button
                     className="btn btn-delete"
                     onClick={() => handleDeleteF(index)}
                   >
@@ -132,6 +160,30 @@ export default function Freezer({
       <button className="btn btn-others" onClick={toggleVisibilityAddFr}>
         {isText}
       </button>
+      <form
+        action="#"
+        method="GET"
+        className={`quantity-update-form main-item-style ${
+          isVisibleTransferForm ? "visibleTransferForm" : "hiddenTransferForm"
+        }`}
+        onSubmit={handleSubmit}
+      >
+        <label htmlFor="setQty">Set the quantity:</label>
+        <input
+          type="text"
+          name="setQuantity"
+          id="setQty"
+          value={tempQty}
+          placeholder="ex. 1 kg"
+          onChange={(e) => setTempQty(e.target.value)}
+        />
+        <input
+          type="submit"
+          value="Set"
+          className="btn btn-others"
+          onClick={handleTransferItem}
+        />
+      </form>
       <form
         className={`quantity-update-form main-item-style fridge-form-update-quantity ${
           isVisibleUpdateF ? "fridge-form-update-quantity" : "hiddenUpdateForm"

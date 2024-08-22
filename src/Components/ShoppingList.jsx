@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function ShoppingList({
   items,
@@ -8,7 +8,7 @@ export default function ShoppingList({
   addToChamber,
   addToOthers,
   dataFromFridge,
-  clearDataFromFridge,
+  clearTransferredData,
 }) {
   /////////////////          DONE:          /////////////////
 
@@ -18,11 +18,11 @@ export default function ShoppingList({
   // A move to gomb kattintásával, felajálja a 4 lehetséges csoportot, ahova beszúrhatjuk a tételt.
   // Amint a kiválasztott csoportba helyezzük az adott tételt, ellenőrizni kell, hogy van-e már olyan tétel a kiválasztott csoportban: - ha igen: akkor össze kell vonni a 2 mennyiséget, és nem hozunk létre újabb tételt. -ha nincs: akkor létrehozunk egy új tételt, az elem nevével és mennyiségével.
   // Ha az adott tételt beszúrtuk valahova, akkor a ShoppingList felsorolásból automatikusan el kell távolítani.
+  // A komponensekhez adni 1 gombot, amivel fel lehet venni az adott tételt a bevásárlólistára, mennyiség megadásával.
 
   /////////////////          TODO:          /////////////////
 
   // 1 gomb amivel lehet váltani az adott tétel színét, jelezve a vásárlás sikerességét (esetleg pipa v x), vagy az adott elem nevére kattintáskor áthúzni az elemet, ezzel jelezve a vásárlás sikerességét. EZ NEM BIZTOS HOGY HASZNOS ÖTLET
-  // A komponensekhez adni 1 gombot, amivel fel lehet venni az adott tételt a bevásárlólistára, mennyiség megadásával.
 
   // Input values
 
@@ -142,6 +142,31 @@ export default function ShoppingList({
     setIsVisibleMoveTo(false);
     setNewIndex(null);
   };
+
+  //items from components//
+
+  useEffect(() => {
+    if (dataFromFridge.length > 0) {
+      const existItem = items.find(
+        (item) => item.name === dataFromFridge[0].name
+      );
+      if (existItem) {
+        const core = existItem.quantity.replace(
+          Number.parseFloat(existItem.quantity),
+          ""
+        );
+        const firstNum = Number.parseFloat(existItem.quantity);
+        const secondNum = Number.parseFloat(dataFromFridge[0].quantity);
+        const sumQty = firstNum + secondNum;
+        existItem.quantity = sumQty + " " + core;
+        setItems([...items]);
+        clearTransferredData();
+      } else {
+        setItems([...items, ...dataFromFridge]);
+        clearTransferredData();
+      }
+    }
+  }, [dataFromFridge]);
 
   return (
     <>
