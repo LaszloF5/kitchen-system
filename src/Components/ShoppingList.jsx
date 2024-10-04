@@ -23,6 +23,9 @@ export default function ShoppingList({
   /////////////////          TODO:          /////////////////
 
   // 1 gomb amivel lehet váltani az adott tétel színét, jelezve a vásárlás sikerességét (esetleg pipa v x), vagy az adott elem nevére kattintáskor áthúzni az elemet, ezzel jelezve a vásárlás sikerességét. EZ NEM BIZTOS HOGY HASZNOS ÖTLET
+  // Egy input mező, ahova be lehet írni / másolni hozzávalókat ételekhez, és végigfuttatni egy keresést arra vonatkozóan, hogy a beadott elemek szerepelnek-e valamelyik containerbe. Visszatérési érték az az elem lenne, amelyik nem található meg egyik container-be sem.
+  // Localstorage létrehozása.
+  // 1 dark mode gomb, amit menteni kell a localstorage-be.
 
   // Input values
 

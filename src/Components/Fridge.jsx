@@ -26,6 +26,9 @@ export default function Fridge({
   const [isVisibleUpdate, setIsVisibleUpdate] = useState(false);
   const [tempIndex, setTempIndex] = useState(null);
 
+  // Important for the localStorage !!!!!
+  const [prevItems, setPrevItems] = useState(items);
+
   // Add btn text modification
 
   const isText = isVisible ? "Close add form" : "Add item";
@@ -94,6 +97,7 @@ export default function Fridge({
       setNewItem("");
       setNewQuantity("");
       setIsVisible(false); // Maybe deletem idk jet.
+      console.log(items);
     } else {
       alert("The name and quantity fields mustn't be empty.");
     }
@@ -117,12 +121,29 @@ export default function Fridge({
       setItems(updatedList);
       setModifyQuantity("");
       setIsVisibleUpdate(false);
+      console.log("frissített lista:", updatedList);
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
   };
+
+  // Load
+
+  useEffect(() => {
+    const savedItems = JSON.parse(localStorage.getItem('items'));
+    setItems(savedItems);
+  }, []);
+
+  // Save
+
+  useEffect(() => {
+    if (JSON.stringify(prevItems) !== JSON.stringify(items)) {
+      localStorage.setItem("items", JSON.stringify(items));
+      setPrevItems(items);
+    }
+  }, [items]);
 
   return (
     <>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Fridge from "./Components/Fridge";
 import Freezer from "./Components/Freezer";
 import Chamber from "./Components/Chamber";
