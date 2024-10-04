@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 
 export default function Chamber({
-  items,
-  setItems,
+  itemsChamber,
+  setItemsChamber,
   dataFromSL,
   cleanChamberData,
   addToShoppingList,
@@ -34,13 +34,15 @@ export default function Chamber({
 
   const [updateIndex, setUpdateIndex] = useState(null);
 
+  const [prevItemsChamber, setPrevItemsChamber] = useState([]);
+
   // Functions
 
   // to the shopping list
 
   const handleTransferItem = () => {
     if (tempQty !== "") {
-      const transferItem = { ...items[tempIndex], quantity: tempQty };
+      const transferItem = { ...itemsChamber[tempIndex], quantity: tempQty };
       addToShoppingList(transferItem);
       setTempQty("");
       setTempIndex(null);
@@ -54,7 +56,7 @@ export default function Chamber({
 
   useEffect(() => {
     if (dataFromSL.length > 0) {
-      const exsistingItem = items.find(
+      const exsistingItem = itemsChamber.find(
         (item) => item.name === dataFromSL[0].name
       );
       if (exsistingItem) {
@@ -65,9 +67,9 @@ export default function Chamber({
         const secondNum = Number.parseFloat(dataFromSL[0].quantity);
         const sumQty = firstNum + secondNum;
         exsistingItem.quantity = sumQty + " " + unit;
-        setItems([...items]);
+        setItemsChamber([...itemsChamber]);
       } else {
-        setItems([...items, ...dataFromSL]);
+        setItemsChamber([...itemsChamber, ...dataFromSL]);
       }
       cleanChamberData();
     }
@@ -91,10 +93,10 @@ export default function Chamber({
   const handleAddChamber = () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
       const updatedItems = [
-        ...items,
+        ...itemsChamber,
         { name: newItem.trim(), quantity: newQuantity.trim() },
       ];
-      setItems(updatedItems);
+      setItemsChamber(updatedItems);
       setNewItem("");
       setNewQuantity("");
       setIsVisible(false);
@@ -104,8 +106,8 @@ export default function Chamber({
   };
 
   const handleDelete = (index) => {
-    const newList = items.filter((_, i) => i !== index);
-    setItems(newList);
+    const newList = itemsChamber.filter((_, i) => i !== index);
+    setItemsChamber(newList);
     setIsVisibleQuantity(false);
     setModifyQuantity("");
     setUpdateIndex(null);
@@ -116,23 +118,47 @@ export default function Chamber({
     if (modifyQuantity === "") {
       alert("Please enter a quantity.");
     } else {
-      const updatedItems = [...items];
+      const updatedItems = [...itemsChamber];
       updatedItems[updateIndex].quantity = modifyQuantity.trim();
-      setItems(updatedItems);
+      setItemsChamber(updatedItems);
       setModifyQuantity("");
       setIsVisibleQuantity(false);
       setUpdateIndex(null);
     }
   };
 
+  useEffect(() => {
+    const savedItems = JSON.parse(localStorage.getItem("itemsChamber")) || [];
+    setItemsChamber(savedItems);
+  }, []);
+  
+
+  useEffect(() => {
+    let handleChangedChamber = false;
+  
+    if (JSON.stringify(prevItemsChamber) !== JSON.stringify(itemsChamber)) {
+      const updatedItemsChamber = itemsChamber.map((item, index) => {
+        if (item.quantity !== prevItemsChamber[index]?.quantity) {
+          handleChangedChamber = true;
+          return { ...item };
+        }
+        return item;
+      });
+      if (handleChangedChamber || itemsChamber.length !== prevItemsChamber.length) {
+        localStorage.setItem("itemsChamber", JSON.stringify(updatedItemsChamber));
+        setPrevItemsChamber(updatedItemsChamber);
+      }
+    }
+  }, [itemsChamber]);
+  
   return (
     <>
       <h3>Chamber items</h3>
       <ul className="fridge-ul main-item-style">
-        {items.length === 0 ? (
+        {itemsChamber.length === 0 ? (
           <p>Your chamber is empty.</p>
         ) : (
-          items.map((item, index) => (
+          itemsChamber.map((item, index) => (
             <li
               className={`fridge-li-element ${
                 regex.test(item.quantity) ? "alert-color" : "default-color"

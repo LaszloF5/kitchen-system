@@ -118,8 +118,6 @@ export default function Freezer({
     e.preventDefault();
   };
 
-  // Load
-
   useEffect(() => {
     const savedItems = JSON.parse(localStorage.getItem('itemsFreezer')) || [];
     setItemsFreezer(savedItems);

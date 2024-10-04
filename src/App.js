@@ -82,15 +82,15 @@ export default function App() {
         addToShoppingList={addToShoppingList}
       />
       <Chamber
-        items={chamberItems}
-        setItems={setChamberItems}
+        itemsChamber={chamberItems}
+        setItemsChamber={setChamberItems}
         dataFromSL={toTheChamber}
         cleanChamberData={cleanChamberData}
         addToShoppingList={addToShoppingList}
       />
       <Others
-        items={otherItems}
-        setItems={setOtherItems}
+        itemsOthers={otherItems}
+        setItemsOthers={setOtherItems}
         dataFromSL={toTheOthers}
         cleanOthersData={cleanOthersData}
         addToShoppingList={addToShoppingList}
@@ -109,3 +109,16 @@ export default function App() {
     </div>
   );
 }
+
+
+/*
+  TODO:
+  Adatbázis készítése, összekötni az oldallal;
+  Bejelentkezési felület, és bejelentkezés;
+  Container nevek nagyobb betűméret;
+  Füzetszerű ábrázolás;
+  Bevásárlólista más színű;
+  Bizonyos termékekre mennyi volt a havi ráfordítás;
+  Dátumozva, mi mkkor került az adott container-be. /HTML details/;
+
+*/

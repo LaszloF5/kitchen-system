@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 
 export default function Others({
-  items,
-  setItems,
+  itemsOthers,
+  setItemsOthers,
   dataFromSL,
   cleanOthersData,
   addToShoppingList,
@@ -35,13 +35,15 @@ export default function Others({
     setIsVisibleTransferForm(!isVisibleTransferForm);
   };
 
+  const [prevItemsOthers, setPrevItemsOthers] = useState([]);
+
   // Functions
 
   // to the shopping list
 
   const handleTransferItem = () => {
     if (tempQty !== "") {
-      const transferItem = { ...items[tempIndex], quantity: tempQty };
+      const transferItem = { ...itemsOthers[tempIndex], quantity: tempQty };
       addToShoppingList(transferItem);
       setTempQty("");
       setTempIndex(null);
@@ -53,10 +55,11 @@ export default function Others({
 
   useEffect(() => {
     if (dataFromSL.length > 0) {
-      const exsistingItem = items.find(
+      const exsistingItemIndex = itemsOthers.findIndex(
         (item) => item.name === dataFromSL[0].name
       );
-      if (exsistingItem) {
+      if (exsistingItemIndex !== -1) {
+        const exsistingItem = { ...itemsOthers[exsistingItemIndex] };
         const unit = exsistingItem.quantity
           .replace(Number.parseFloat(exsistingItem.quantity), "")
           .trim();
@@ -64,13 +67,17 @@ export default function Others({
         const secondNum = Number.parseFloat(dataFromSL[0].quantity);
         const sumQty = firstNum + secondNum;
         exsistingItem.quantity = sumQty + " " + unit;
-        setItems([...items]);
+  
+        const updatedItems = [...itemsOthers];
+        updatedItems[exsistingItemIndex] = exsistingItem;
+        setItemsOthers(updatedItems);
       } else {
-        setItems([...items, ...dataFromSL]);
+        setItemsOthers([...itemsOthers, ...dataFromSL]);
       }
       cleanOthersData();
     }
   }, [dataFromSL]);
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -90,10 +97,10 @@ export default function Others({
   const handleAddOthers = () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
       const newList = [
-        ...items,
+        ...itemsOthers,
         { name: newItem.trim(), quantity: newQuantity.trim() },
       ];
-      setItems(newList);
+      setItemsOthers(newList);
       setNewItem("");
       setNewQuantity("");
       setIsVisibleO(false);
@@ -103,8 +110,8 @@ export default function Others({
   };
 
   const handleDelete = (index) => {
-    const newList = items.filter((_, i) => i !== index);
-    setItems(newList);
+    const newList = itemsOthers.filter((_, i) => i !== index);
+    setItemsOthers(newList);
     setIsVisibleQtyO(false);
     setUpdateIndex(null);
     setModifyQuantity("");
@@ -114,23 +121,50 @@ export default function Others({
     if (modifyQuantity === "") {
       alert("Please enter a quantity.");
     } else {
-      const updatedList = [...items];
+      const updatedList = [...itemsOthers];
       updatedList[updateIndex].quantity = modifyQuantity.trim();
-      setItems(updatedList);
+      setItemsOthers(updatedList);
       setIsVisibleQtyO(false);
       setModifyQuantity("");
       setUpdateIndex(null);
     }
   };
 
+  useEffect(() => {
+    const savedItems = JSON.parse(localStorage.getItem('itemsOthers')) || [];
+    setItemsOthers(savedItems);
+  }, []);
+  
+
+  useEffect(() => {
+    let hasChangedOthers = false;
+  
+    if (JSON.stringify(prevItemsOthers) !== JSON.stringify(itemsOthers)) {
+      const updatedOthers = itemsOthers.map((item, index) => {
+        if (
+        item.quantity !== prevItemsOthers[index]?.quantity
+        ) {
+          hasChangedOthers = true;
+          return { ...item };
+        }
+        return item;
+      });
+      if (hasChangedOthers || itemsOthers.length !== prevItemsOthers.length) {
+        localStorage.setItem("itemsOthers", JSON.stringify(updatedOthers));
+        setPrevItemsOthers(updatedOthers);
+      }
+    }
+  }, [itemsOthers]);
+  
+
   return (
     <>
       <h3>Other kitchen items</h3>
       <ul className="fridge-ul main-item-style">
-        {items.length === 0 ? (
+        {itemsOthers.length === 0 ? (
           <p>This container is empty.</p>
         ) : (
-          items.map((item, index) => {
+          itemsOthers.map((item, index) => {
             return (
               <li
                 className={`fridge-li-element ${
