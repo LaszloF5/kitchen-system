@@ -27,7 +27,7 @@ export default function Fridge({
   const [tempIndex, setTempIndex] = useState(null);
 
   // Important for the localStorage !!!!!
-  const [prevItems, setPrevItems] = useState(items);
+  const [prevItems, setPrevItems] = useState([]);
 
   // Add btn text modification
 
@@ -97,7 +97,6 @@ export default function Fridge({
       setNewItem("");
       setNewQuantity("");
       setIsVisible(false); // Maybe deletem idk jet.
-      console.log(items);
     } else {
       alert("The name and quantity fields mustn't be empty.");
     }
@@ -121,7 +120,6 @@ export default function Fridge({
       setItems(updatedList);
       setModifyQuantity("");
       setIsVisibleUpdate(false);
-      console.log("frissített lista:", updatedList);
     }
   };
 
@@ -132,16 +130,27 @@ export default function Fridge({
   // Load
 
   useEffect(() => {
-    const savedItems = JSON.parse(localStorage.getItem('items'));
+    const savedItems = JSON.parse(localStorage.getItem("items"));
     setItems(savedItems);
   }, []);
 
   // Save
 
   useEffect(() => {
+    let hasChanged = false;
+
     if (JSON.stringify(prevItems) !== JSON.stringify(items)) {
-      localStorage.setItem("items", JSON.stringify(items));
-      setPrevItems(items);
+      const updatedItems = items.map((item, index) => {
+        if (item.quantity !== prevItems[index]?.quantity) {
+          hasChanged = true;
+          return { ...item };
+        }
+        return item;
+      });
+      if (hasChanged || items.length !== prevItems.length) {
+        localStorage.setItem("items", JSON.stringify(updatedItems));
+        setPrevItems(updatedItems);
+      }
     }
   }, [items]);
 

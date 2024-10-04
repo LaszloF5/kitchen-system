@@ -75,8 +75,8 @@ export default function App() {
         addToShoppingList={addToShoppingList}
       />
       <Freezer
-        items={freezerItems}
-        setItems={setFreezerItems}
+        itemsFreezer={freezerItems}
+        setItemsFreezer={setFreezerItems}
         dataFromSL={toTheFreezer}
         cleanFreezerData={cleanFreezerData}
         addToShoppingList={addToShoppingList}

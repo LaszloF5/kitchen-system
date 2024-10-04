@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 
 export default function Freezer({
-  items,
-  setItems,
+  itemsFreezer,
+  setItemsFreezer,
   dataFromSL,
   cleanFreezerData,
   addToShoppingList,
@@ -22,12 +22,14 @@ export default function Freezer({
   const [isVisibleUpdateF, setIsVisibleUpdateF] = useState(false);
   const updateText = isVisibleUpdateF ? "Close modification" : "Update item";
   const [tempIndex, setTempIndex] = useState(null);
+  
+  const [prevItemsFreezer, setPrevItemsFreezer] = useState([]);
 
   // Data from shopping list
 
   useEffect(() => {
     if (dataFromSL.length > 0) {
-      const exsistingItem = items.find(
+      const exsistingItem = itemsFreezer.find(
         (item) => item.name === dataFromSL[0].name
       );
       if (exsistingItem) {
@@ -38,9 +40,9 @@ export default function Freezer({
         const secondNum = Number.parseFloat(dataFromSL[0].quantity);
         const sumQty = firstNum + secondNum;
         exsistingItem.quantity = sumQty + " " + unit;
-        setItems([...items]);
+        setItemsFreezer([...itemsFreezer]);
       } else {
-        setItems([...items, ...dataFromSL]);
+        setItemsFreezer([...itemsFreezer, ...dataFromSL]);
       }
       cleanFreezerData();
     }
@@ -56,7 +58,7 @@ export default function Freezer({
 
   const handleTransferItem = () => {
     if (tempQty !== "") {
-      const transferItem = { ...items[tempIndex], quantity: tempQty };
+      const transferItem = { ...itemsFreezer[tempIndex], quantity: tempQty };
       addToShoppingList(transferItem);
       setTempIndex(null);
       setTempQty("");
@@ -77,8 +79,8 @@ export default function Freezer({
 
   const handleAddFreezer = () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
-      setItems([
-        ...items,
+      setItemsFreezer([
+        ...itemsFreezer,
         { name: newItem.trim(), quantity: newQuantity.trim() },
       ]);
       setNewItem("");
@@ -89,10 +91,10 @@ export default function Freezer({
     }
   };
   const handleDeleteF = (index) => {
-    const newList = items.filter((_, i) => {
+    const newList = itemsFreezer.filter((_, i) => {
       return i !== index;
     });
-    setItems(newList);
+    setItemsFreezer(newList);
     setIsVisibleUpdateF(false);
     setModifyQuantity("");
     setIsVisibleTransferForm(false);
@@ -103,9 +105,9 @@ export default function Freezer({
       alert("Please enter a quantity.");
       return;
     } else {
-      const updatedList = [...items];
+      const updatedList = [...itemsFreezer];
       updatedList[updateIndex].quantity = modifyQuantity.trim();
-      setItems(updatedList);
+      setItemsFreezer(updatedList);
       setIsVisibleUpdateF(false);
       setUpdateIndex(null);
       setModifyQuantity("");
@@ -116,14 +118,42 @@ export default function Freezer({
     e.preventDefault();
   };
 
+  // Load
+
+  useEffect(() => {
+    const savedItems = JSON.parse(localStorage.getItem('itemsFreezer')) || [];
+    setItemsFreezer(savedItems);
+}, []);
+
+
+  // Save
+
+  useEffect(() => {
+    let hasChangedFreezer = false;
+
+    if (JSON.stringify(prevItemsFreezer) !== JSON.stringify(itemsFreezer)) {
+      const updatedItemsFreezer = itemsFreezer.map((item, index) => {
+        if (itemsFreezer.quantity !== prevItemsFreezer[index]?.quantity) {
+          hasChangedFreezer = true;
+          return { ...item };
+        }
+        return item;
+      });
+      if (hasChangedFreezer || itemsFreezer.length !== prevItemsFreezer.length) {
+        localStorage.setItem('itemsFreezer', JSON.stringify(updatedItemsFreezer));
+        setPrevItemsFreezer(updatedItemsFreezer);
+      }
+    }
+  }, [itemsFreezer])
+
   return (
     <>
       <h3>Freezer items</h3>
       <ul className="fridge-ul main-item-style">
-        {items.length === 0 ? (
+        {itemsFreezer.length === 0 ? (
           <p>Your freezer is empty.</p>
         ) : (
-          items.map((item, index) => {
+          itemsFreezer.map((item, index) => {
             return (
               <li
                 className={`fridge-li-element ${
