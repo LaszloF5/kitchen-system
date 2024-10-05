@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Fridge from "./Components/Fridge";
 import Freezer from "./Components/Freezer";
 import Chamber from "./Components/Chamber";
@@ -19,6 +19,17 @@ export default function App() {
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
   }
+
+  useEffect(() => {
+    const savedState = JSON.parse(localStorage.getItem('toggle'));
+    if (savedState) {
+      setIsDarkMode(savedState);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('toggle', JSON.stringify(isDarkMode))
+  }, [isDarkMode]);
 
   // Elemek áthelyezése a shopping list komponensbe
 
@@ -139,7 +150,7 @@ export default function App() {
   - Adatbázis készítése, összekötni az oldallal;
   - Bejelentkezési felület, és bejelentkezés;
   - Bizonyos termékekre mennyi volt a havi ráfordítás (Vagy akár az összesre.);
-  - Dátumozva, mi mkkor került az adott container-be. /HTML details/;
+  - Dátumozva, mi mikor került az adott container-be. /HTML details/;
   - 1 gomb amivel lehet váltani az adott tétel színét, jelezve a vásárlás sikerességét (esetleg pipa v x), vagy az adott elem nevére kattintáskor áthúzni az elemet, ezzel jelezve a vásárlás sikerességét. EZ NEM BIZTOS HOGY HASZNOS ÖTLET;
   - Egy input mező, ahova be lehet írni / másolni hozzávalókat ételekhez, és végigfuttatni egy keresést arra vonatkozóan, hogy a beadott    elemek szerepelnek-e valamelyik containerbe. Visszatérési érték az az elem lenne, amelyik nem található meg egyik container-be sem;
 */
