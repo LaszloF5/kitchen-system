@@ -130,7 +130,7 @@ export default function Fridge({
   // Load
 
   useEffect(() => {
-    const savedItems = JSON.parse(localStorage.getItem("items"));
+    const savedItems = JSON.parse(localStorage.getItem("items")) || [];
     setItems(savedItems);
   }, []);
 
@@ -156,7 +156,7 @@ export default function Fridge({
 
   return (
     <>
-      <h3>Fridge items</h3>
+      <h2>Fridge items</h2>
       <ul className="fridge-ul main-item-style">
         {items.length === 0 ? (
           <p>Your fridge is empty.</p>

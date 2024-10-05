@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Fridge from "./Components/Fridge";
 import Freezer from "./Components/Freezer";
 import Chamber from "./Components/Chamber";
@@ -13,6 +13,12 @@ export default function App() {
   const [chamberItems, setChamberItems] = useState([]);
   const [otherItems, setOtherItems] = useState([]);
   const [shoppingListItems, setShoppingListItems] = useState([]);
+
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  }
 
   // Elemek áthelyezése a shopping list komponensbe
 
@@ -65,8 +71,10 @@ export default function App() {
   };
 
   return (
-    <div className="App">
+    <div className={`${isDarkMode ? 'getDark' : 'getLight'} App`}>
       <h1>Kitchen system</h1>
+      {isDarkMode ? <img className="white-filter" src={process.env.PUBLIC_URL + 'dark-mode.png'} alt="Dark mode" role="button" tabIndex='0' onClick={toggleDarkMode}/> : <img src={process.env.PUBLIC_URL + 'light-mode.png'} alt="Light mode" role="button" tabIndex='0' onClick={toggleDarkMode}/>}
+
       <Fridge
         items={fridgeItems}
         setItems={setFridgeItems}
@@ -96,8 +104,8 @@ export default function App() {
         addToShoppingList={addToShoppingList}
       />
       <ShoppingList
-        items={shoppingListItems}
-        setItems={setShoppingListItems}
+        itemsSL={shoppingListItems}
+        setItemsSL={setShoppingListItems}
         addToFridge={addToFridge}
         addToFreezer={addToFreezer}
         addToChamber={addToChamber}
@@ -112,13 +120,26 @@ export default function App() {
 
 
 /*
-  TODO:
-  Adatbázis készítése, összekötni az oldallal;
-  Bejelentkezési felület, és bejelentkezés;
-  Container nevek nagyobb betűméret;
-  Füzetszerű ábrázolás;
-  Bevásárlólista más színű;
-  Bizonyos termékekre mennyi volt a havi ráfordítás;
-  Dátumozva, mi mkkor került az adott container-be. /HTML details/;
+/////////////////          DONE:          /////////////////
 
+  - Első körben 1 ugyanolyan system mint eddig.
+  - Az összes komponensbe be lehet építeni egy olyan visszajelzőt, hogy jelzi, ha az adott tételből kevés van. Pl 1 db/l vagy más mértékegység. Ha 1 van belőle, a tétel színe pirosra vált, a font-weight: bold-ra. Regex.
+  - 1 move to gomb, amivel át lehet csoportosítani a tételeket, ahova a felhasználó szeretné. Gomb neve: "Move to..."
+  - A move to gomb kattintásával, felajálja a 4 lehetséges csoportot, ahova beszúrhatjuk a tételt.
+  - Amint a kiválasztott csoportba helyezzük az adott tételt, ellenőrizni kell, hogy van-e már olyan tétel a kiválasztott csoportban: - ha igen: akkor össze kell vonni a 2 mennyiséget, és nem hozunk létre újabb tételt. -ha nincs: akkor létrehozunk egy új tételt, az elem nevével és mennyiségével.
+  - Ha az adott tételt beszúrtuk valahova, akkor a ShoppingList felsorolásból automatikusan el kell távolítani.
+  A komponensekhez adni 1 gombot, amivel fel lehet venni az adott tételt a bevásárlólistára, mennyiség megadásával.
+  - Localstorage létrehozása.
+  - Container nevek nagyobb betűméret;
+  - Füzetszerű ábrázolás;
+  - Dark mode;
+
+  TODO:
+  - Bevásárlólista más színű; /Közvéleménykutatás folyamatban./
+  - Adatbázis készítése, összekötni az oldallal;
+  - Bejelentkezési felület, és bejelentkezés;
+  - Bizonyos termékekre mennyi volt a havi ráfordítás (Vagy akár az összesre.);
+  - Dátumozva, mi mkkor került az adott container-be. /HTML details/;
+  - 1 gomb amivel lehet váltani az adott tétel színét, jelezve a vásárlás sikerességét (esetleg pipa v x), vagy az adott elem nevére kattintáskor áthúzni az elemet, ezzel jelezve a vásárlás sikerességét. EZ NEM BIZTOS HOGY HASZNOS ÖTLET;
+  - Egy input mező, ahova be lehet írni / másolni hozzávalókat ételekhez, és végigfuttatni egy keresést arra vonatkozóan, hogy a beadott    elemek szerepelnek-e valamelyik containerbe. Visszatérési érték az az elem lenne, amelyik nem található meg egyik container-be sem;
 */

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
+import './ShoppingList.css';
 
 export default function ShoppingList({
-  items,
-  setItems,
+  itemsSL,
+  setItemsSL,
   addToFridge,
   addToFreezer,
   addToChamber,
@@ -10,22 +11,6 @@ export default function ShoppingList({
   dataFromFridge,
   clearTransferredData,
 }) {
-  /////////////////          DONE:          /////////////////
-
-  // első körben 1 ugyanolyan system mint eddig.
-  // Az összes komponensbe be lehet építeni egy olyan visszajelzőt, hogy jelzi, ha az adott tételből kevés van. Pl 1 db/l vagy más mértékegység. Ha 1 van belőle, a tétel színe pirosra vált, a font-weight: bold-ra. Regex.
-  // 1 move to gomb, amivel át lehet csoportosítani a tételeket, ahova a felhasználó szeretné. Gomb neve: "Move to..."
-  // A move to gomb kattintásával, felajálja a 4 lehetséges csoportot, ahova beszúrhatjuk a tételt.
-  // Amint a kiválasztott csoportba helyezzük az adott tételt, ellenőrizni kell, hogy van-e már olyan tétel a kiválasztott csoportban: - ha igen: akkor össze kell vonni a 2 mennyiséget, és nem hozunk létre újabb tételt. -ha nincs: akkor létrehozunk egy új tételt, az elem nevével és mennyiségével.
-  // Ha az adott tételt beszúrtuk valahova, akkor a ShoppingList felsorolásból automatikusan el kell távolítani.
-  // A komponensekhez adni 1 gombot, amivel fel lehet venni az adott tételt a bevásárlólistára, mennyiség megadásával.
-  // Localstorage létrehozása.
-
-  /////////////////          TODO:          /////////////////
-
-  // 1 gomb amivel lehet váltani az adott tétel színét, jelezve a vásárlás sikerességét (esetleg pipa v x), vagy az adott elem nevére kattintáskor áthúzni az elemet, ezzel jelezve a vásárlás sikerességét. EZ NEM BIZTOS HOGY HASZNOS ÖTLET
-  // Egy input mező, ahova be lehet írni / másolni hozzávalókat ételekhez, és végigfuttatni egy keresést arra vonatkozóan, hogy a beadott elemek szerepelnek-e valamelyik containerbe. Visszatérési érték az az elem lenne, amelyik nem található meg egyik container-be sem.
-
 
   // Input values
 
@@ -60,6 +45,8 @@ export default function ShoppingList({
     setNewIndex(index);
   };
 
+  const [prevItemsSL, setPrevItemsSL] = useState([]);
+
   // Functions
 
   const handleSubmit = (e) => {
@@ -69,10 +56,10 @@ export default function ShoppingList({
   const handleAdd = () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
       const updateList = [
-        ...items,
+        ...itemsSL,
         { name: newItem.trim(), quantity: newQuantity.trim() },
       ];
-      setItems(updateList);
+      setItemsSL(updateList);
       setNewItem("");
       setNewQuantity("");
       setIsVisibleS(false);
@@ -82,10 +69,10 @@ export default function ShoppingList({
   };
 
   const handleDelete = (index) => {
-    const newList = items.filter((_, i) => {
+    const newList = itemsSL.filter((_, i) => {
       return i !== index;
     });
-    setItems(newList);
+    setItemsSL(newList);
     setIsVisibleQty(false);
     setUpdateIndex(null);
     setModifyQuantity("");
@@ -95,9 +82,9 @@ export default function ShoppingList({
     if (modifyQuantity === "") {
       alert("Please enter a quantity.");
     } else {
-      const updateList = [...items];
+      const updateList = [...itemsSL];
       updateList[updateIndex].quantity = modifyQuantity.trim();
-      setItems(updateList);
+      setItemsSL(updateList);
       setIsVisibleQty(false);
       setUpdateIndex(null);
       setModifyQuantity("");
@@ -109,7 +96,7 @@ export default function ShoppingList({
   //Fridge component//
 
   const handleTransfer1 = (index) => {
-    const transferItem = items[index];
+    const transferItem = itemsSL[index];
     addToFridge(transferItem);
     handleDelete(index);
     setIsVisibleMoveTo(false);
@@ -119,7 +106,7 @@ export default function ShoppingList({
   //Freezer component//
 
   const handleTransfer2 = (index) => {
-    const transferItem = items[index];
+    const transferItem = itemsSL[index];
     addToFreezer(transferItem);
     handleDelete(index);
     setIsVisibleMoveTo(false);
@@ -129,7 +116,7 @@ export default function ShoppingList({
   //Chamber component//
 
   const handleTransfer3 = (index) => {
-    const transferItem = items[index];
+    const transferItem = itemsSL[index];
     addToChamber(transferItem);
     handleDelete(index);
     setIsVisibleMoveTo(false);
@@ -139,7 +126,7 @@ export default function ShoppingList({
   //Others component//
 
   const handleTransfer4 = (index) => {
-    const transferItem = items[index];
+    const transferItem = itemsSL[index];
     addToOthers(transferItem);
     handleDelete(index);
     setIsVisibleMoveTo(false);
@@ -150,7 +137,7 @@ export default function ShoppingList({
 
   useEffect(() => {
     if (dataFromFridge.length > 0) {
-      const existItem = items.find(
+      const existItem = itemsSL.find(
         (item) => item.name === dataFromFridge[0].name
       );
       if (existItem) {
@@ -162,23 +149,50 @@ export default function ShoppingList({
         const secondNum = Number.parseFloat(dataFromFridge[0].quantity);
         const sumQty = firstNum + secondNum;
         existItem.quantity = sumQty + " " + core;
-        setItems([...items]);
+        setItemsSL([...itemsSL]);
         clearTransferredData();
       } else {
-        setItems([...items, ...dataFromFridge]);
+        setItemsSL([...itemsSL, ...dataFromFridge]);
         clearTransferredData();
       }
     }
   }, [dataFromFridge]);
 
+  // Load
+
+  useEffect(() => {
+    const savedItems = JSON.parse(localStorage.getItem('itemsSL')) || [];
+    setItemsSL(savedItems);
+  }, []);
+
+  // Save
+
+  useEffect(() => {
+    let hasChangedSL = false;
+
+    if (JSON.stringify(prevItemsSL) !== JSON.stringify(itemsSL)) {
+      const updatedSL = itemsSL.map((item, index) => {
+        if (item.quantity !== prevItemsSL[index]?.quantity) {
+          hasChangedSL = true;
+          return { ...item };
+        };
+        return item;
+      });
+      if (hasChangedSL || itemsSL.length !== prevItemsSL.length) {
+        localStorage.setItem('itemsSL', JSON.stringify(updatedSL));
+        setPrevItemsSL(updatedSL);
+      }
+    }
+  }, [itemsSL]);
+
   return (
     <>
-      <h3>Shopping list</h3>
-      <ul className="fridge-ul main-item-style">
-        {items.length === 0 ? (
+      <h2>Shopping list</h2>
+      <ul className="fridge-ul main-item-style unique-style">
+        {itemsSL.length === 0 ? (
           <p>Your shopping list is empty.</p>
         ) : (
-          items.map((item, index) => (
+          itemsSL.map((item, index) => (
             <li className="fridge-li-element" key={index}>
               {item.name} - {item.quantity}
               <div className="btns-container">

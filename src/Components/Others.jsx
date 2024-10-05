@@ -159,7 +159,7 @@ export default function Others({
 
   return (
     <>
-      <h3>Other kitchen items</h3>
+      <h2>Other kitchen items</h2>
       <ul className="fridge-ul main-item-style">
         {itemsOthers.length === 0 ? (
           <p>This container is empty.</p>

@@ -153,7 +153,7 @@ export default function Chamber({
   
   return (
     <>
-      <h3>Chamber items</h3>
+      <h2>Chamber items</h2>
       <ul className="fridge-ul main-item-style">
         {itemsChamber.length === 0 ? (
           <p>Your chamber is empty.</p>

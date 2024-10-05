@@ -146,7 +146,7 @@ export default function Freezer({
 
   return (
     <>
-      <h3>Freezer items</h3>
+      <h2>Freezer items</h2>
       <ul className="fridge-ul main-item-style">
         {itemsFreezer.length === 0 ? (
           <p>Your freezer is empty.</p>
