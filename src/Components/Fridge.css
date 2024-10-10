@@ -226,4 +226,19 @@ label {
   display: flex;
 }
 
+/*Date in summary*/
+
+.date {
+  visibility: hidden;
+  display: inline-block;
+  z-index: 100;
+  margin: 0;
+  padding: 0;
+  height: 26px;
+}
+
+li:hover p {
+  visibility: visible;
+}
+
 /*******************************/

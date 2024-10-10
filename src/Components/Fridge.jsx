@@ -92,7 +92,7 @@ export default function Fridge({
     if (newItem.length > 0 && newQuantity.length > 0) {
       setItems([
         ...items,
-        { name: newItem.trim(), quantity: newQuantity.trim() },
+        { name: newItem.trim(), quantity: newQuantity.trim(), date: new Date().getFullYear() +'.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.' },
       ]);
       setNewItem("");
       setNewQuantity("");
@@ -155,7 +155,7 @@ export default function Fridge({
   }, [items]);
 
   return (
-    <>
+    <div>
       <h2>Fridge items</h2>
       <ul className="fridge-ul main-item-style">
         {items.length === 0 ? (
@@ -169,6 +169,7 @@ export default function Fridge({
               key={index}
             >
               {item.name} - {item.quantity}
+              <p className="date">{item.date}</p>
               <div className="btns-container">
                 <button
                   className="btn btn-others"
@@ -292,6 +293,6 @@ export default function Fridge({
           onClick={handleAddFridge}
         />
       </form>
-    </>
+    </div>
   );
 }

@@ -144,13 +144,13 @@ export default function App() {
   - Container nevek nagyobb betűméret;
   - Füzetszerű ábrázolás;
   - Dark mode;
+  - Dátumozva, mi mikor került az adott container-be. /HTML details/ UPDATE: Nem details-el oldottam meg, találtam ésszerűbb megoldást.;
 
   TODO:
   - Bevásárlólista más színű; /Közvéleménykutatás folyamatban./
   - Adatbázis készítése, összekötni az oldallal;
   - Bejelentkezési felület, és bejelentkezés;
   - Bizonyos termékekre mennyi volt a havi ráfordítás (Vagy akár az összesre.);
-  - Dátumozva, mi mikor került az adott container-be. /HTML details/;
   - 1 gomb amivel lehet váltani az adott tétel színét, jelezve a vásárlás sikerességét (esetleg pipa v x), vagy az adott elem nevére kattintáskor áthúzni az elemet, ezzel jelezve a vásárlás sikerességét. EZ NEM BIZTOS HOGY HASZNOS ÖTLET;
-  - Egy input mező, ahova be lehet írni / másolni hozzávalókat ételekhez, és végigfuttatni egy keresést arra vonatkozóan, hogy a beadott    elemek szerepelnek-e valamelyik containerbe. Visszatérési érték az az elem lenne, amelyik nem található meg egyik container-be sem;
+  - Egy input mező, ahova be lehet írni / másolni hozzávalókat ételekhez, és végigfuttatni egy keresést arra vonatkozóan, hogy a beadott    elemek szerepelnek-e valamelyik containerbe. Visszatérési érték az az elem lenne, amelyik nem található meg egyik container-be sem /Vagy elemek/;
 */

@@ -13,6 +13,10 @@ h1 {
     color: whitesmoke;
 }
 
+p {
+    color: black;
+}
+
 /* Light mode */
 
 .getLight {

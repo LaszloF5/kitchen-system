@@ -98,7 +98,7 @@ export default function Others({
     if (newItem.length > 0 && newQuantity.length > 0) {
       const newList = [
         ...itemsOthers,
-        { name: newItem.trim(), quantity: newQuantity.trim() },
+        { name: newItem.trim(), quantity: newQuantity.trim(), date: new Date().getFullYear() + '.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.' },
       ];
       setItemsOthers(newList);
       setNewItem("");
@@ -173,6 +173,7 @@ export default function Others({
                 key={index}
               >
                 {item.name} - {item.quantity}
+                <p className="date">{item.date}</p>
                 <div className="buttons-container">
                   <button
                     className="btn btn-others"

@@ -81,7 +81,7 @@ export default function Freezer({
     if (newItem.length > 0 && newQuantity.length > 0) {
       setItemsFreezer([
         ...itemsFreezer,
-        { name: newItem.trim(), quantity: newQuantity.trim() },
+        { name: newItem.trim(), quantity: newQuantity.trim(),  date: new Date().getFullYear() +'.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.' },
       ]);
       setNewItem("");
       setNewQuantity("");
@@ -160,6 +160,7 @@ export default function Freezer({
                 key={index}
               >
                 {item.name} - {item.quantity}
+                <p className="date">{item.date}</p>
                 <div className="btns-container">
                   <button
                     className="btn btn-others"

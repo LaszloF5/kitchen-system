@@ -94,7 +94,7 @@ export default function Chamber({
     if (newItem.length > 0 && newQuantity.length > 0) {
       const updatedItems = [
         ...itemsChamber,
-        { name: newItem.trim(), quantity: newQuantity.trim() },
+        { name: newItem.trim(), quantity: newQuantity.trim(), date: new Date().getFullYear() +'.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.' },
       ];
       setItemsChamber(updatedItems);
       setNewItem("");
@@ -166,6 +166,7 @@ export default function Chamber({
               key={index}
             >
               {item.name} - {item.quantity}
+              <p className="date">{item.date}</p>
               <div className="btns-container">
                 <button
                   className="btn btn-others"

@@ -57,7 +57,7 @@ export default function ShoppingList({
     if (newItem.length > 0 && newQuantity.length > 0) {
       const updateList = [
         ...itemsSL,
-        { name: newItem.trim(), quantity: newQuantity.trim() },
+        { name: newItem.trim(), quantity: newQuantity.trim(), date: new Date().getFullYear() + '.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.' },
       ];
       setItemsSL(updateList);
       setNewItem("");
@@ -195,6 +195,7 @@ export default function ShoppingList({
           itemsSL.map((item, index) => (
             <li className="fridge-li-element" key={index}>
               {item.name} - {item.quantity}
+              <p className="date">{item.date}</p>
               <div className="btns-container">
                 <button
                   className="btn btn-move-to"
