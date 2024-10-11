@@ -13,6 +13,7 @@ export default function App() {
   const [chamberItems, setChamberItems] = useState([]);
   const [otherItems, setOtherItems] = useState([]);
   const [shoppingListItems, setShoppingListItems] = useState([]);
+  const [yourAmount, setYourAmount] = useState([]);
 
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -35,7 +36,6 @@ export default function App() {
 
   const [toTheShoppingList, setToTheShoppingList] = useState([]);
   const addToShoppingList = (item) => {
-    console.log(item.name, item.quantity);
     setToTheShoppingList([...toTheShoppingList, item]);
   };
   const clearTransferredData = () => {
@@ -83,6 +83,14 @@ export default function App() {
 
   return (
     <div className={`${isDarkMode ? 'getDark' : 'getLight'} App`}>
+        <header className="header">Heti ráfordítás:  
+    {yourAmount.length > 0 && (
+    <span>
+      {yourAmount[yourAmount.length - 1].amount} HUF
+    </span>
+  )}
+</header>
+
       <h1>Kitchen system</h1>
       {isDarkMode ? <img className="white-filter" src={process.env.PUBLIC_URL + 'dark-mode.png'} alt="Dark mode" role="button" tabIndex='0' onClick={toggleDarkMode}/> : <img src={process.env.PUBLIC_URL + 'light-mode.png'} alt="Light mode" role="button" tabIndex='0' onClick={toggleDarkMode}/>}
 
@@ -123,6 +131,8 @@ export default function App() {
         addToOthers={addToOthers}
         dataFromFridge={toTheShoppingList}
         clearTransferredData={clearTransferredData}
+        expenditure={yourAmount}
+        setExpenditure={setYourAmount}
       />
       <footer className="footer">Footer</footer>
     </div>

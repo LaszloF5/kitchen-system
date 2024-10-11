@@ -12,6 +12,11 @@ li {
   color: black;
 }
 
+.center {
+  display: block;
+  margin: 10px auto;
+}
+
 /*Unique shoppingList form*/
 
 .amount-form {
@@ -21,19 +26,17 @@ li {
   margin: 10px auto;
   flex-direction: column;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-evenly;
   border: 1px solid black;
   border-radius: 5px;
 }
 
 .amount-form_input {
-  margin: 4px;
   padding: 2px;
 }
 
 .visibleAmountForm {
   display: flex;
-  justify-content: center;
 }
 
 .hiddenAmountForm {

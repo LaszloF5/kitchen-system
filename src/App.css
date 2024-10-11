@@ -2,6 +2,12 @@
     text-align: center;
 }
 
+.header {
+    height: 10vh;
+    /* background-color: black;
+    color: whitesmoke; */
+}
+
 h1 {
     margin-top: 0;
     padding-top: 2rem;

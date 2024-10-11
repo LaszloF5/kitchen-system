@@ -11,6 +11,8 @@ export default function ShoppingList({
   addToOthers,
   dataFromFridge,
   clearTransferredData,
+  expenditure,
+  setExpenditure
 }) {
   // Input values
 
@@ -19,7 +21,6 @@ export default function ShoppingList({
   const [modifyQuantity, setModifyQuantity] = useState("");
   const [updateIndex, setUpdateIndex] = useState(null);
   const [newIndex, setNewIndex] = useState(null);
-  const [expenditure, setExpenditure] = useState([]);
 
   // Visible amount form
 
@@ -269,10 +270,10 @@ export default function ShoppingList({
           ))
         )}
       </ul>
-      <button className="btn btn-others" onClick={handleVisibleAdd}>
+      <button className="btn btn-others center" onClick={handleVisibleAdd}>
         {isTextS}
       </button>
-      <button className="btn btn-others" onClick={handleVisibleAmount}>{isTextAmount}</button>
+      <button className="btn btn-others center" onClick={handleVisibleAmount}>{isTextAmount}</button>
       <form className={`amount-form ${isVisibleAmount ? 'visibleAmountForm' : 'hiddenAmountForm'}`} onSubmit={addExpenditure}>
         <input
           className="amount-form_input"
