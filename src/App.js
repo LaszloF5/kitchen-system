@@ -145,9 +145,13 @@ export default function App() {
   - Füzetszerű ábrázolás;
   - Dark mode;
   - Dátumozva, mi mikor került az adott container-be. /HTML details/ UPDATE: Nem details-el oldottam meg, találtam ésszerűbb megoldást.;
+  - Bevásárlólista más színű;
 
   TODO:
-  - Bevásárlólista más színű; /Közvéleménykutatás folyamatban./
+  DARK MODE-BAN AZ ADD ITEM MEGNYITÁSAKOR A SZÖVEG NEM LÁTSZÓDIK, MA KÖTELEZŐ JAVÍTANI! 2024-10-11. + A VONALAZÁST IS.
+  - A bevásárlások értékének bevitele.Ezeket gyűjteni egy objektumba, heti és havi kimutatást készíteni diagram formájában is, de szerintem csak ha az aktuális heti, és havi ráfordítás megjelnne az is jó lenne. A diagramok pedig külön oldalon szerepelnének.
+  A valuta megadására hívja fel a figyelmet, ha az nincs megadva. Ez külön legyen kezelve a form-tól.
+  - Dark mode-ban az árnyék alul és jobb oldalon legyen;
   - Adatbázis készítése, összekötni az oldallal;
   - Bejelentkezési felület, és bejelentkezés;
   - Bizonyos termékekre mennyi volt a havi ráfordítás (Vagy akár az összesre.);

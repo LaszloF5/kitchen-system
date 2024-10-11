@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import './ShoppingList.css';
+import {getWeek} from 'date-fns';
+import "./ShoppingList.css";
 
 export default function ShoppingList({
   itemsSL,
@@ -11,7 +12,6 @@ export default function ShoppingList({
   dataFromFridge,
   clearTransferredData,
 }) {
-
   // Input values
 
   const [newItem, setNewItem] = useState("");
@@ -19,6 +19,15 @@ export default function ShoppingList({
   const [modifyQuantity, setModifyQuantity] = useState("");
   const [updateIndex, setUpdateIndex] = useState(null);
   const [newIndex, setNewIndex] = useState(null);
+  const [expenditure, setExpenditure] = useState([]);
+
+  // Visible amount form
+
+  const [isVisibleAmount, setIsvisibleAmount] = useState(false);
+  const isTextAmount = isVisibleAmount ? "Close expenditure form" : "Expenditure recording";
+  const handleVisibleAmount = () => {
+    setIsvisibleAmount(!isVisibleAmount);
+  }
 
   // Visible Add form
 
@@ -49,6 +58,34 @@ export default function ShoppingList({
 
   // Functions
 
+  const addExpenditure = (e) => {
+    e.preventDefault();
+    let amount = Number(e.target.amount.value);
+    if (!isNaN(amount)) {
+      const now = new Date();
+      const currentWeek = getWeek(now);
+      setExpenditure((prevExpenditure) => {
+        const existingWeekIndex = prevExpenditure.findIndex(exp => exp.week === currentWeek);
+        if (existingWeekIndex !== -1) {
+          const updatedExpenditure = [...prevExpenditure];
+          updatedExpenditure[existingWeekIndex] = {
+            ...updatedExpenditure[existingWeekIndex],
+            amount: updatedExpenditure[existingWeekIndex].amount + amount,
+          }
+          return updatedExpenditure;
+        } else {
+          return [...prevExpenditure, {week: currentWeek, amount}]
+        }
+      })
+    }
+    e.target.amount.value = '';
+    setIsvisibleAmount(false);
+  } 
+
+  useEffect(() => {
+    console.log(expenditure);
+  }, [expenditure])
+
   const handleSubmit = (e) => {
     e.preventDefault();
   };
@@ -57,7 +94,19 @@ export default function ShoppingList({
     if (newItem.length > 0 && newQuantity.length > 0) {
       const updateList = [
         ...itemsSL,
-        { name: newItem.trim(), quantity: newQuantity.trim(), date: new Date().getFullYear() + '.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.' },
+        {
+          name: newItem.trim(),
+          quantity: newQuantity.trim(),
+          date:
+            new Date().getFullYear() +
+            "." +
+            " " +
+            (new Date().getMonth() + 1) +
+            "." +
+            " " +
+            new Date().getDate() +
+            ".",
+        },
       ];
       setItemsSL(updateList);
       setNewItem("");
@@ -161,7 +210,7 @@ export default function ShoppingList({
   // Load
 
   useEffect(() => {
-    const savedItems = JSON.parse(localStorage.getItem('itemsSL')) || [];
+    const savedItems = JSON.parse(localStorage.getItem("itemsSL")) || [];
     setItemsSL(savedItems);
   }, []);
 
@@ -175,11 +224,11 @@ export default function ShoppingList({
         if (item.quantity !== prevItemsSL[index]?.quantity) {
           hasChangedSL = true;
           return { ...item };
-        };
+        }
         return item;
       });
       if (hasChangedSL || itemsSL.length !== prevItemsSL.length) {
-        localStorage.setItem('itemsSL', JSON.stringify(updatedSL));
+        localStorage.setItem("itemsSL", JSON.stringify(updatedSL));
         setPrevItemsSL(updatedSL);
       }
     }
@@ -223,6 +272,22 @@ export default function ShoppingList({
       <button className="btn btn-others" onClick={handleVisibleAdd}>
         {isTextS}
       </button>
+      <button className="btn btn-others" onClick={handleVisibleAmount}>{isTextAmount}</button>
+      <form className={`amount-form ${isVisibleAmount ? 'visibleAmountForm' : 'hiddenAmountForm'}`} onSubmit={addExpenditure}>
+        <input
+          className="amount-form_input"
+          type="number"
+          name="amount"
+          id="amountId"
+          required
+          min="0"
+          placeholder="500"
+          step='0.01'
+        />
+        <button type="submit" className="btn btn-others">
+          Add
+        </button>
+      </form>
       <form
         action="#"
         method="GET"

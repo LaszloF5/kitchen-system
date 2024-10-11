@@ -1,10 +1,43 @@
-.unique-style, .unique-style::after, .unique-style::before {
-    /* background-color: #e0d3ed; */
-    /* background-color: #e8e4dc; */
-    /* background-color: #cfe0f3; */
-    background-color: #d0e6f5;
-    /* background-color: #daf5d7; */
-  }
+.unique-style,
+.unique-style::after,
+.unique-style::before {
+  /* background-color: #e0d3ed; */
+  /* background-color: #e8e4dc; */
+  /* background-color: #cfe0f3; */
+  background-color: #d0e6f5;
+  /* background-color: #daf5d7; */
+}
 
-  /* Itt még majd választani kell a színek közül. Light és dark mode-ban is. */
-  
+li {
+  color: black;
+}
+
+/*Unique shoppingList form*/
+
+.amount-form {
+  display: flex;
+  width: 250px;
+  height: 100px;
+  margin: 10px auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  border: 1px solid black;
+  border-radius: 5px;
+}
+
+.amount-form_input {
+  margin: 4px;
+  padding: 2px;
+}
+
+.visibleAmountForm {
+  display: flex;
+  justify-content: center;
+}
+
+.hiddenAmountForm {
+  display: none;
+}
+
+/* Itt még majd választani kell a színek közül. Light és dark mode-ban is. */
