@@ -35,6 +35,8 @@ export default function Others({
     setIsVisibleTransferForm(!isVisibleTransferForm);
   };
 
+  const SLText = isVisibleTransferForm ? 'Close modification' : 'Add to the SL';
+
   const [prevItemsOthers, setPrevItemsOthers] = useState([]);
 
   // Functions
@@ -52,6 +54,7 @@ export default function Others({
       alert("Please enter a quantity.");
     }
   };
+  
 
   useEffect(() => {
     if (dataFromSL.length > 0) {
@@ -179,7 +182,7 @@ export default function Others({
                     className="btn btn-others"
                     onClick={() => toggleVisibleTransferForm(index)}
                   >
-                    Add to the SL
+                    {SLText}
                   </button>
                   <button
                     className="btn btn-delete"

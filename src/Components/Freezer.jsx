@@ -26,7 +26,7 @@ export default function Freezer({
   const [prevItemsFreezer, setPrevItemsFreezer] = useState([]);
 
   // Data from shopping list
-
+  
   useEffect(() => {
     if (dataFromSL.length > 0) {
       const exsistingItem = itemsFreezer.find(
@@ -47,15 +47,17 @@ export default function Freezer({
       cleanFreezerData();
     }
   }, [dataFromSL]);
-
+  
   ////////// FUNCTIONS //////////
-
+  
   const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
   const toggleTransferForm = (index) => {
     setTempIndex(index);
     setIsVisibleTransferForm(!isVisibleTransferForm);
   };
-
+  
+  const SLText = isVisibleTransferForm ? 'Close modification' : 'Add to the SL';
+  
   const handleTransferItem = () => {
     if (tempQty !== "") {
       const transferItem = { ...itemsFreezer[tempIndex], quantity: tempQty };
@@ -166,7 +168,7 @@ export default function Freezer({
                     className="btn btn-others"
                     onClick={() => toggleTransferForm(index)}
                   >
-                    Add to the SL
+                    {SLText}
                   </button>
                   <button
                     className="btn btn-delete"

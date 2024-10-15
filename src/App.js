@@ -14,23 +14,38 @@ export default function App() {
   const [otherItems, setOtherItems] = useState([]);
   const [shoppingListItems, setShoppingListItems] = useState([]);
   const [yourAmount, setYourAmount] = useState([]);
-
+  const headerText = "Weekly expenses: ";
+  const [currency, setCurrency] = useState("");
+  const [prevCurrency, setPrevCurrency] = useState("");
+  
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isVisibleCurrencyForm, setIsVisibleCurrencyForm] = useState(false);
+  const currencyText = isVisibleCurrencyForm ? 'Close currency form' : 'Set your currency';
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
+  };
+
+  const toggleCurrencyForm = () => {
+    setIsVisibleCurrencyForm(!isVisibleCurrencyForm);
   }
 
   useEffect(() => {
-    const savedState = JSON.parse(localStorage.getItem('toggle'));
+    const savedState = JSON.parse(localStorage.getItem("toggle"));
     if (savedState) {
       setIsDarkMode(savedState);
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('toggle', JSON.stringify(isDarkMode))
+    localStorage.setItem("toggle", JSON.stringify(isDarkMode));
   }, [isDarkMode]);
+
+  useEffect(() => {
+    if (yourAmount[yourAmount.length - 1]?.amount > 0 && currency === "") {
+        alert("Enter the currency that you want to use.");
+    }
+  }, []);
 
   // Elemek áthelyezése a shopping list komponensbe
 
@@ -81,18 +96,71 @@ export default function App() {
     setToTheOthers([]);
   };
 
+  const handleCurrency = (e) => {
+    e.preventDefault();
+    if (e.target.currency.value.length === 0) {
+      alert('This input field must be filled.');
+    } else {
+      setCurrency(e.target.currency.value.toUpperCase());
+      e.target.currency.value = '';
+      setIsVisibleCurrencyForm(false);
+    }
+  }
+
+  // Load
+
+  useEffect(() => {
+    const currentCurrency = JSON.parse(localStorage.getItem('currency'));
+    setCurrency(currentCurrency);
+  }, [])
+
+  // Save
+
+  useEffect(() => {
+    if (prevCurrency !== currency) {
+      localStorage.setItem('currency', JSON.stringify(currency));
+      setPrevCurrency(currency);
+    }
+  }, [currency])
+
   return (
-    <div className={`${isDarkMode ? 'getDark' : 'getLight'} App`}>
-        <header className="header">Heti ráfordítás:  
-    {yourAmount.length > 0 && (
-    <span>
-      {yourAmount[yourAmount.length - 1].amount} HUF
-    </span>
-  )}
-</header>
+    <div className={`${isDarkMode ? "getDark" : "getLight"} App`}>
+      <header className="header">
+        <button className="btn btn-update" onClick={toggleCurrencyForm}>{currencyText}</button>
+        <div>
+        {headerText}
+        {yourAmount.length > 0 && (
+          <span>
+            {yourAmount[yourAmount.length - 1].amount} {currency}
+          </span>
+        )}
+        </div>
+      </header>
+
+      {isVisibleCurrencyForm ? (<form className="currencyForm" onSubmit={handleCurrency}>
+        <input className="currencyForm_input" type="text" name="currency" placeholder="ex. USD" autoComplete="off"/>
+        <button className="btn btn-others" type="submit">Currency</button>
+      </form>) : null}
 
       <h1>Kitchen system</h1>
-      {isDarkMode ? <img className="white-filter" src={process.env.PUBLIC_URL + 'dark-mode.png'} alt="Dark mode" role="button" tabIndex='0' onClick={toggleDarkMode}/> : <img src={process.env.PUBLIC_URL + 'light-mode.png'} alt="Light mode" role="button" tabIndex='0' onClick={toggleDarkMode}/>}
+      {isDarkMode ? (
+        <img
+          className="white-filter"
+          src={process.env.PUBLIC_URL + "dark-mode.png"}
+          alt="Dark mode"
+          role="button"
+          tabIndex="0"
+          onClick={toggleDarkMode}
+        />
+      ) : (
+        <img
+          src={process.env.PUBLIC_URL + "light-mode.png"}
+          alt="Light mode"
+          role="button"
+          tabIndex="0"
+          onClick={toggleDarkMode}
+        />
+      )}
 
       <Fridge
         items={fridgeItems}
@@ -139,7 +207,6 @@ export default function App() {
   );
 }
 
-
 /*
 /////////////////          DONE:          /////////////////
 
@@ -156,12 +223,12 @@ export default function App() {
   - Dark mode;
   - Dátumozva, mi mikor került az adott container-be. /HTML details/ UPDATE: Nem details-el oldottam meg, találtam ésszerűbb megoldást.;
   - Bevásárlólista más színű;
+  - DARK MODE-BAN AZ ADD ITEM MEGNYITÁSAKOR A SZÖVEG NEM LÁTSZÓDIK, MA KÖTELEZŐ JAVÍTANI! 2024-10-11. + A VONALAZÁST IS;
+  - Dark mode-ban az árnyék alul és jobb oldalon legyen;
 
   TODO:
-  DARK MODE-BAN AZ ADD ITEM MEGNYITÁSAKOR A SZÖVEG NEM LÁTSZÓDIK, MA KÖTELEZŐ JAVÍTANI! 2024-10-11. + A VONALAZÁST IS.
   - A bevásárlások értékének bevitele.Ezeket gyűjteni egy objektumba, heti és havi kimutatást készíteni diagram formájában is, de szerintem csak ha az aktuális heti, és havi ráfordítás megjelnne az is jó lenne. A diagramok pedig külön oldalon szerepelnének.
   A valuta megadására hívja fel a figyelmet, ha az nincs megadva. Ez külön legyen kezelve a form-tól.
-  - Dark mode-ban az árnyék alul és jobb oldalon legyen;
   - Adatbázis készítése, összekötni az oldallal;
   - Bejelentkezési felület, és bejelentkezés;
   - Bizonyos termékekre mennyi volt a havi ráfordítás (Vagy akár az összesre.);

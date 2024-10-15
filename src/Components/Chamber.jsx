@@ -23,6 +23,8 @@ export default function Chamber({
     setTempIndex(index);
   };
 
+  const SLText = isVisibleTransferForm ? 'Close modification' : 'Add to the SL';
+
   // Visible Add form
   const [isVisible, setIsVisible] = useState(false);
   const isText = isVisible ? "Close add form" : "Add item";
@@ -172,7 +174,7 @@ export default function Chamber({
                   className="btn btn-others"
                   onClick={() => toggleVisibleTransferForm(index)}
                 >
-                  Add to the SL
+                  {SLText}
                 </button>
                 <button
                   className="btn btn-delete"

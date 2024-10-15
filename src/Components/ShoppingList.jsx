@@ -56,6 +56,7 @@ export default function ShoppingList({
   };
 
   const [prevItemsSL, setPrevItemsSL] = useState([]);
+  const [prevExpenditure, setPrevExpenditure] = useState([]);
 
   // Functions
 
@@ -81,11 +82,7 @@ export default function ShoppingList({
     }
     e.target.amount.value = '';
     setIsvisibleAmount(false);
-  } 
-
-  useEffect(() => {
-    console.log(expenditure);
-  }, [expenditure])
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -234,6 +231,22 @@ export default function ShoppingList({
       }
     }
   }, [itemsSL]);
+
+  useEffect(() => {
+    const updatedExpenditure = JSON.parse(localStorage.getItem("expenditureLT"));
+    setExpenditure(updatedExpenditure);
+  }, [])
+
+  useEffect(() => {
+    let hasChangedEx = false;
+    if (JSON.stringify(prevExpenditure) !== JSON.stringify(expenditure)) {
+      hasChangedEx = true;
+    }
+    if (hasChangedEx) {
+      localStorage.setItem("expenditureLT", JSON.stringify(expenditure));
+      setPrevExpenditure(expenditure);
+    }
+  }, [expenditure])
 
   return (
     <>

@@ -33,15 +33,16 @@ export default function Fridge({
 
   const isText = isVisible ? "Close add form" : "Add item";
   const updateText = isVisibleUpdate ? "Close modification" : "Update item";
-
+  
   // visible transfer form
-
+  
   const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
   const toggleVisibleTransferForm = (index) => {
     setTempIndex(index);
     setIsVisibleTransferForm(!isVisibleTransferForm);
   };
-
+  
+  const SLText = isVisibleTransferForm ? 'Close modification' : 'Add to the SL';
   // to the shopping list
   // Solution: Shallow copy --> Csak az első szintet másolja érték szerint (a többit referencia szerint), viszont nincs több szint, ezért elég. Így nem fogja módosítani az eredeti items tömböt, és a benne lévő objektumokat.
   const handleTransferItem = () => {
@@ -96,7 +97,7 @@ export default function Fridge({
       ]);
       setNewItem("");
       setNewQuantity("");
-      setIsVisible(false); // Maybe deletem idk jet.
+      setIsVisible(false);
     } else {
       alert("The name and quantity fields mustn't be empty.");
     }
@@ -175,7 +176,7 @@ export default function Fridge({
                   className="btn btn-others"
                   onClick={() => toggleVisibleTransferForm(index)}
                 >
-                  Add to the SL
+                  {SLText}
                 </button>
                 <button
                   className="btn btn-delete"
