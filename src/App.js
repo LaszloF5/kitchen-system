@@ -6,6 +6,12 @@ import Others from "./Components/Others";
 import ShoppingList from "./Components/ShoppingList";
 import "./App.css";
 
+/*
+  A freezer komponensben a bevitt adatok mentésre kerülnek, és törölni is lehet, bár az nem tökéletes.
+  A szerver oldalon az id-k nem passzolnak ha 1 törlés megtörténik, lehet hogy név alapján kéne törölni. 2024.10.17-én javítani.
+  Ha az adott tábla üres, az autoincrementet lehetne nullázni. 
+*/
+
 export default function App() {
   const [fridgeItems, setFridgeItems] = useState([]);
   const [freezerItems, setFreezerItems] = useState([]);

@@ -2,7 +2,7 @@ const express = require("express");
 const sqlite3 = require("sqlite3");
 const cors = require("cors");
 const app = express();
-const PORT = 3000;
+const PORT = 5500;
 
 app.use(cors());
 app.use(express.json());
@@ -56,6 +56,10 @@ db.serialize(() => {
   );
 });
 
+app.get("/", (req, res) => {
+  res.send("The server is running.");
+});
+
 // fridge items
 
 app.get("/fridge_items", (req, res) => {
@@ -68,7 +72,7 @@ app.get("/fridge_items", (req, res) => {
   });
 });
 
-app.post("/fridge_items", (req, res) => {
+app.post("/start", (req, res) => {
   const { name, quantity, date_added } = req.body;
   const sql =
     "INSERT INTO fridge_items (name, quantity, date_added) VALUES(?, ?, ?)";
@@ -84,32 +88,47 @@ app.post("/fridge_items", (req, res) => {
 // freezer items
 
 app.get("/freezer_items", (req, res) => {
-  db.all("SELECT * FROM freezer_items", [], function (err) {
-    if (err) {
-      res.status(400).json({ error: err.message });
-      return;
-    }
-    res.json({ items: rows });
+    db.all("SELECT * FROM freezer_items", [], (err, rows) => {
+      if (err) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+      res.json({ items: rows });
+    });
   });
-});
+  
+  app.post("/freezer_items", (req, res) => {
+    const { name, quantity, date_added } = req.body;
+    const sql = "INSERT INTO freezer_items (name, quantity, date_added) VALUES(?, ?, ?)";
+    
+    db.run(sql, [name, quantity, date_added], function (err) {
+      if (err) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+      res.json({ id: this.lastID, name, quantity, date_added });
+    });
+  });
 
-app.post("/freezer_items", (req, res) => {
-  const { name, quantity, date_added } = req.body;
-  const sql =
-    "INSERT INTO freezer_items (name, quantity, date_added) VALUES(?, ?, ?)";
-  db.run(sql, [name, quantity, date_added], function (err) {
-    if (err) {
-      res.status(400).json({ error: err.message });
-      return;
-    }
-    res.json({ id: this.lastID, name, quantity, date_added });
-  });
-});
+  app.delete("/freezer_items/:id", (req, res) => {
+    const id = req.params.id;
+    const sql = "DELETE FROM freezer_items WHERE id = ?";
+
+    db.run(sql, id, function(err) {
+        if (err) {
+            res.status(400).json({err: err.message});
+            return;
+        }
+        res.json({message: "Item deleted", id})
+    })
+  })
+
+  
 
 // chamber items
 
 app.get("/chamber_items", (req, res) => {
-  db.all("SELECT * FROM chamber_items", [], function (err) {
+  db.all("SELECT * FROM chamber_items", [], (err, rows) => {
     if (err) {
       res.status(400).json({ error: err.message });
       return;
@@ -134,7 +153,7 @@ app.post("/chamber_items", (req, res) => {
 // others items
 
 app.get("/others_items", (req, res) => {
-  db.all("SELECT * FROM others_items", [], function (err) {
+  db.all("SELECT * FROM others_items", [], (err, rows) => {
     if (err) {
       res.status(400).json({ error: err.message });
       return;
@@ -159,7 +178,7 @@ app.post("/others_items", (req, res) => {
 // shopping list items
 
 app.get("/shoppingList_items", (req, res) => {
-  db.all("SELECT * FROM others_items", [], function (err) {
+  db.all("SELECT * FROM others_items", [], (err, rows) => {
     if (err) {
       res.status(400).json({ error: err.message });
       return;

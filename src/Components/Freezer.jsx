@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import axios from "axios";
 
 export default function Freezer({
   itemsFreezer,
@@ -16,21 +17,20 @@ export default function Freezer({
   //////////////////////////////////////////////////
   const [isVisibleF, setIsVisibleF] = useState(false);
   const isText = isVisibleF ? "Close add form" : "Add item";
-  ////////////////////////////////////////////////////////
-  const [updateIndex, setUpdateIndex] = useState(null);
-  const [modifyQuantity, setModifyQuantity] = useState("");
   const [isVisibleUpdateF, setIsVisibleUpdateF] = useState(false);
   const updateText = isVisibleUpdateF ? "Close modification" : "Update item";
-  const [tempIndex, setTempIndex] = useState(null);
   const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
+  ////////////////////////////////////////////////////////
+  const [prevItemsFreezer, setPrevItemsFreezer] = useState([]);
+  const [modifyQuantity, setModifyQuantity] = useState("");
+  const [updateIndex, setUpdateIndex] = useState(null);
+  const [tempIndex, setTempIndex] = useState(null);
   const setQtyFreezerFormRef = useRef(null);
   const updateFreezerFormRef = useRef(null);
   const addFreezerFormRef = useRef(null);
-  
-  const [prevItemsFreezer, setPrevItemsFreezer] = useState([]);
 
   // Data from shopping list
-  
+
   useEffect(() => {
     if (dataFromSL.length > 0) {
       const exsistingItem = itemsFreezer.find(
@@ -44,7 +44,15 @@ export default function Freezer({
         const secondNum = Number.parseFloat(dataFromSL[0].quantity);
         const sumQty = firstNum + secondNum;
         exsistingItem.quantity = sumQty + " " + unit;
-        exsistingItem.date = new Date().getFullYear() +'.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.';
+        exsistingItem.date =
+          new Date().getFullYear() +
+          "." +
+          " " +
+          (new Date().getMonth() + 1) +
+          "." +
+          " " +
+          new Date().getDate() +
+          ".";
         setItemsFreezer([...itemsFreezer]);
       } else {
         setItemsFreezer([...itemsFreezer, ...dataFromSL]);
@@ -65,21 +73,46 @@ export default function Freezer({
     if (isVisibleF) {
       addFreezerFormRef.current.focus();
     }
+  }, [isVisibleTransferForm, isVisibleUpdateF, isVisibleF]);
 
-  }, [isVisibleTransferForm, isVisibleUpdateF, isVisibleF])
-  
+  // Data fetching from the database
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const response = await axios.get("http://localhost:5500/freezer_items");
+        setItemsFreezer(response.data.items);
+      } catch (error) {
+        console.error("Error fetching items: ", error);
+      }
+    };
+    fetchItems();
+  }, [setItemsFreezer]);
+
   ////////// FUNCTIONS //////////
-  
+
   const toggleTransferForm = (index) => {
     setTempIndex(index);
     setIsVisibleTransferForm(!isVisibleTransferForm);
   };
-  
-  const SLText = isVisibleTransferForm ? 'Close modification' : 'Add to the SL';
-  
+
+  const SLText = isVisibleTransferForm ? "Close modification" : "Add to the SL";
+
   const handleTransferItem = () => {
     if (tempQty !== "") {
-      const transferItem = { ...itemsFreezer[tempIndex], quantity: tempQty, date: new Date().getFullYear() +'.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.'  };
+      const transferItem = {
+        ...itemsFreezer[tempIndex],
+        quantity: tempQty,
+        date:
+          new Date().getFullYear() +
+          "." +
+          " " +
+          (new Date().getMonth() + 1) +
+          "." +
+          " " +
+          new Date().getDate() +
+          ".",
+      };
       addToShoppingList(transferItem);
       setTempIndex(null);
       setTempQty("");
@@ -98,28 +131,46 @@ export default function Freezer({
     setUpdateIndex(index);
   };
 
-  const handleAddFreezer = () => {
+  // Add item to the database.
+
+  const handleAddFreezer = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
-      setItemsFreezer([
-        ...itemsFreezer,
-        { name: newItem.trim(), quantity: newQuantity.trim(),  date: new Date().getFullYear() +'.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.' },
-      ]);
-      setNewItem("");
-      setNewQuantity("");
-      setIsVisibleF(false);
+      const newItemData = {
+        name: newItem.trim(),
+        quantity: newQuantity.trim(),
+        date_added: new Date().toISOString().split("T")[0],
+      };
+      try {
+        await axios.post("http://localhost:5500/freezer_items", newItemData);
+        setItemsFreezer([...itemsFreezer, newItemData]);
+        setNewItem("");
+        setNewQuantity("");
+        setIsVisibleF(false);
+      } catch (error) {
+        console.error("Error adding item to freezer:", error);
+      }
     } else {
       alert("The name and quantity fields mustn't be empty.");
     }
   };
-  const handleDeleteF = (index) => {
-    const newList = itemsFreezer.filter((_, i) => {
-      return i !== index;
-    });
-    setItemsFreezer(newList);
-    setIsVisibleUpdateF(false);
-    setModifyQuantity("");
-    setIsVisibleTransferForm(false);
-  };
+
+  const handleDeleteF = async (index) => {
+    const itemToDelete = itemsFreezer[index]; // Az elemet, amelyet törölni szeretnél
+    try {
+        await axios.delete(`http://localhost:5500/freezer_items/${itemToDelete.id}`); // A DELETE kérés
+
+        // Ha a törlés sikeres volt, frissítjük a helyi állapotot
+        const newList = itemsFreezer.filter((_, i) => i !== index);
+        setItemsFreezer(newList);
+        setIsVisibleUpdateF(false);
+        setModifyQuantity("");
+        setIsVisibleTransferForm(false);
+    } catch (error) {
+        console.error("Error deleting item:", error); // Hibakezelés
+        alert("Error deleting item. Please try again."); // Visszajelzés a felhasználónak
+    }
+};
+
 
   const handleUpdate = () => {
     if (modifyQuantity === "") {
@@ -139,31 +190,30 @@ export default function Freezer({
     e.preventDefault();
   };
 
-  useEffect(() => {
-    const savedItems = JSON.parse(localStorage.getItem('itemsFreezer')) || [];
-    setItemsFreezer(savedItems);
-}, []);
-
+  //   useEffect(() => {
+  //     const savedItems = JSON.parse(localStorage.getItem('itemsFreezer')) || [];
+  //     setItemsFreezer(savedItems);
+  // }, []);
 
   // Save
 
-  useEffect(() => {
-    let hasChangedFreezer = false;
+  // useEffect(() => {
+  //   let hasChangedFreezer = false;
 
-    if (JSON.stringify(prevItemsFreezer) !== JSON.stringify(itemsFreezer)) {
-      const updatedItemsFreezer = itemsFreezer.map((item, index) => {
-        if (itemsFreezer.quantity !== prevItemsFreezer[index]?.quantity) {
-          hasChangedFreezer = true;
-          return { ...item };
-        }
-        return item;
-      });
-      if (hasChangedFreezer || itemsFreezer.length !== prevItemsFreezer.length) {
-        localStorage.setItem('itemsFreezer', JSON.stringify(updatedItemsFreezer));
-        setPrevItemsFreezer(updatedItemsFreezer);
-      }
-    }
-  }, [itemsFreezer])
+  //   if (JSON.stringify(prevItemsFreezer) !== JSON.stringify(itemsFreezer)) {
+  //     const updatedItemsFreezer = itemsFreezer.map((item, index) => {
+  //       if (itemsFreezer.quantity !== prevItemsFreezer[index]?.quantity) {
+  //         hasChangedFreezer = true;
+  //         return { ...item };
+  //       }
+  //       return item;
+  //     });
+  //     if (hasChangedFreezer || itemsFreezer.length !== prevItemsFreezer.length) {
+  //       localStorage.setItem('itemsFreezer', JSON.stringify(updatedItemsFreezer));
+  //       setPrevItemsFreezer(updatedItemsFreezer);
+  //     }
+  //   }
+  // }, [itemsFreezer])
 
   return (
     <>
