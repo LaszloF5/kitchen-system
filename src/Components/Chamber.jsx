@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 export default function Chamber({
   itemsChamber,
@@ -14,16 +14,19 @@ export default function Chamber({
   const [newQuantity, setNewQuantity] = useState("");
   const [modifyQuantity, setModifyQuantity] = useState("");
   const [tempQty, setTempQty] = useState("");
+  const [tempIndex, setTempIndex] = useState(null);
+  const setQtyChamberFormRef = useRef(null);
+  const updateChamberFormRef = useRef(null);
+  const addChamberFormRef = useRef(null);
 
   // Visible transfer form
-  const [tempIndex, setTempIndex] = useState(null);
   const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
   const toggleVisibleTransferForm = (index) => {
     setIsVisibleTransferForm(!isVisibleTransferForm);
     setTempIndex(index);
   };
 
-  const SLText = isVisibleTransferForm ? 'Close modification' : 'Add to the SL';
+  const SLText = isVisibleTransferForm ? "Close modification" : "Add to the SL";
 
   // Visible Add form
   const [isVisible, setIsVisible] = useState(false);
@@ -44,7 +47,19 @@ export default function Chamber({
 
   const handleTransferItem = () => {
     if (tempQty !== "") {
-      const transferItem = { ...itemsChamber[tempIndex], quantity: tempQty };
+      const transferItem = {
+        ...itemsChamber[tempIndex],
+        quantity: tempQty,
+        date:
+          new Date().getFullYear() +
+          "." +
+          " " +
+          (new Date().getMonth() + 1) +
+          "." +
+          " " +
+          new Date().getDate() +
+          ".",
+      };
       addToShoppingList(transferItem);
       setTempQty("");
       setTempIndex(null);
@@ -69,6 +84,7 @@ export default function Chamber({
         const secondNum = Number.parseFloat(dataFromSL[0].quantity);
         const sumQty = firstNum + secondNum;
         exsistingItem.quantity = sumQty + " " + unit;
+        exsistingItem.date = new Date().getFullYear() +'.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.';
         setItemsChamber([...itemsChamber]);
       } else {
         setItemsChamber([...itemsChamber, ...dataFromSL]);
@@ -76,6 +92,20 @@ export default function Chamber({
       cleanChamberData();
     }
   }, [dataFromSL]);
+
+  useEffect(() => {
+    if (isVisibleTransferForm) {
+      setQtyChamberFormRef.current.focus();
+    }
+
+    if (isVisibleQuantity) {
+      updateChamberFormRef.current.focus();
+    }
+
+    if (isVisible) {
+      addChamberFormRef.current.focus();
+    }
+  }, [isVisibleTransferForm, isVisibleQuantity, isVisible])
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -96,7 +126,19 @@ export default function Chamber({
     if (newItem.length > 0 && newQuantity.length > 0) {
       const updatedItems = [
         ...itemsChamber,
-        { name: newItem.trim(), quantity: newQuantity.trim(), date: new Date().getFullYear() +'.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.' },
+        {
+          name: newItem.trim(),
+          quantity: newQuantity.trim(),
+          date:
+            new Date().getFullYear() +
+            "." +
+            " " +
+            (new Date().getMonth() + 1) +
+            "." +
+            " " +
+            new Date().getDate() +
+            ".",
+        },
       ];
       setItemsChamber(updatedItems);
       setNewItem("");
@@ -133,11 +175,10 @@ export default function Chamber({
     const savedItems = JSON.parse(localStorage.getItem("itemsChamber")) || [];
     setItemsChamber(savedItems);
   }, []);
-  
 
   useEffect(() => {
     let handleChangedChamber = false;
-  
+
     if (JSON.stringify(prevItemsChamber) !== JSON.stringify(itemsChamber)) {
       const updatedItemsChamber = itemsChamber.map((item, index) => {
         if (item.quantity !== prevItemsChamber[index]?.quantity) {
@@ -146,13 +187,19 @@ export default function Chamber({
         }
         return item;
       });
-      if (handleChangedChamber || itemsChamber.length !== prevItemsChamber.length) {
-        localStorage.setItem("itemsChamber", JSON.stringify(updatedItemsChamber));
+      if (
+        handleChangedChamber ||
+        itemsChamber.length !== prevItemsChamber.length
+      ) {
+        localStorage.setItem(
+          "itemsChamber",
+          JSON.stringify(updatedItemsChamber)
+        );
         setPrevItemsChamber(updatedItemsChamber);
       }
     }
   }, [itemsChamber]);
-  
+
   return (
     <>
       <h2>Chamber items</h2>
@@ -211,6 +258,7 @@ export default function Chamber({
           id="setQty"
           value={tempQty}
           placeholder="ex. 1 kg"
+          ref={setQtyChamberFormRef}
           onChange={(e) => setTempQty(e.target.value)}
         />
         <input
@@ -235,6 +283,7 @@ export default function Chamber({
           id="updateChamberItemQuantity"
           placeholder="ex. 1kg"
           value={modifyQuantity}
+          ref={updateChamberFormRef}
           onChange={(e) => setModifyQuantity(e.target.value)}
         />
         <input
@@ -262,6 +311,7 @@ export default function Chamber({
             id="newChamberItem"
             placeholder="ex. rice"
             value={newItem}
+            ref={addChamberFormRef}
             onChange={(e) => setNewItem(e.target.value)}
           />
         </div>

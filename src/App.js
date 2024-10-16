@@ -7,7 +7,6 @@ import ShoppingList from "./Components/ShoppingList";
 import "./App.css";
 
 export default function App() {
-  // useEffect later.
   const [fridgeItems, setFridgeItems] = useState([]);
   const [freezerItems, setFreezerItems] = useState([]);
   const [chamberItems, setChamberItems] = useState([]);
@@ -138,7 +137,7 @@ export default function App() {
       </header>
 
       {isVisibleCurrencyForm ? (<form className="currencyForm" onSubmit={handleCurrency}>
-        <input className="currencyForm_input" type="text" name="currency" placeholder="ex. USD" autoComplete="off"/>
+        <input className="currencyForm_input" type="text" name="currency" placeholder="ex. USD" autoComplete="off" autoFocus/>
         <button className="btn btn-others" type="submit">Currency</button>
       </form>) : null}
 

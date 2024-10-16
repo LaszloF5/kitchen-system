@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 export default function Others({
   itemsOthers,
@@ -24,18 +24,21 @@ export default function Others({
   const QtyText = isVisibleQtyO ? "Close modification" : "Update item";
   const [modifyQuantity, setModifyQuantity] = useState("");
   const [updateIndex, setUpdateIndex] = useState(null);
+  const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
+  const SLText = isVisibleTransferForm ? 'Close modification' : 'Add to the SL';
+  const setQtyOthersFormRef = useRef(null);
+  const updateOthersFormRef = useRef(null);
+  const addOthersFormRef = useRef(null);
 
   // Toggle transfer form
 
   const [tempIndex, setTempIndex] = useState(null);
   const [tempQty, setTempQty] = useState("");
-  const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
   const toggleVisibleTransferForm = (index) => {
     setTempIndex(index);
     setIsVisibleTransferForm(!isVisibleTransferForm);
   };
 
-  const SLText = isVisibleTransferForm ? 'Close modification' : 'Add to the SL';
 
   const [prevItemsOthers, setPrevItemsOthers] = useState([]);
 
@@ -45,7 +48,7 @@ export default function Others({
 
   const handleTransferItem = () => {
     if (tempQty !== "") {
-      const transferItem = { ...itemsOthers[tempIndex], quantity: tempQty };
+      const transferItem = { ...itemsOthers[tempIndex], quantity: tempQty, date: new Date().getFullYear() +'.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.'};
       addToShoppingList(transferItem);
       setTempQty("");
       setTempIndex(null);
@@ -70,7 +73,7 @@ export default function Others({
         const secondNum = Number.parseFloat(dataFromSL[0].quantity);
         const sumQty = firstNum + secondNum;
         exsistingItem.quantity = sumQty + " " + unit;
-  
+        exsistingItem.date = new Date().getFullYear() +'.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.';
         const updatedItems = [...itemsOthers];
         updatedItems[exsistingItemIndex] = exsistingItem;
         setItemsOthers(updatedItems);
@@ -80,6 +83,21 @@ export default function Others({
       cleanOthersData();
     }
   }, [dataFromSL]);
+
+  useEffect(() => {
+    if (isVisibleTransferForm) {
+      setQtyOthersFormRef.current.focus();
+    }
+
+    if (isVisibleQtyO) {
+      updateOthersFormRef.current.focus();
+    }
+
+    if (isVisibleO) {
+      addOthersFormRef.current.focus();
+    }
+
+  }, [isVisibleTransferForm, isVisibleQtyO, isVisibleO])
   
 
   const handleSubmit = (e) => {
@@ -219,6 +237,8 @@ export default function Others({
           name="setQuantity"
           id="setQty"
           value={tempQty}
+          placeholder="ex. 1 kg"
+          ref={setQtyOthersFormRef}
           onChange={(e) => setTempQty(e.target.value)}
         />
         <input
@@ -242,6 +262,8 @@ export default function Others({
             type="text"
             name="othersItemNewQty"
             value={modifyQuantity}
+            placeholder="ex. 1 kg"
+            ref={updateOthersFormRef}
             onChange={(e) => setModifyQuantity(e.target.value)}
           />
         </label>
@@ -270,6 +292,7 @@ export default function Others({
             id="othersNameId"
             placeholder="ex. chips"
             value={newItem}
+            ref={addOthersFormRef}
             onChange={(e) => setNewItem(e.target.value)}
           />
         </div>

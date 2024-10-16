@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./Fridge.css";
 
 export default function Fridge({
@@ -25,6 +25,9 @@ export default function Fridge({
   const [isVisible, setIsVisible] = useState(false);
   const [isVisibleUpdate, setIsVisibleUpdate] = useState(false);
   const [tempIndex, setTempIndex] = useState(null);
+  const setQtyFridgeFormRef = useRef(null);
+  const updateFridgeFormRef = useRef(null);
+  const addFridgeFormRef = useRef(null);
 
   // Important for the localStorage !!!!!
   const [prevItems, setPrevItems] = useState([]);
@@ -33,21 +36,33 @@ export default function Fridge({
 
   const isText = isVisible ? "Close add form" : "Add item";
   const updateText = isVisibleUpdate ? "Close modification" : "Update item";
-  
+
   // visible transfer form
-  
+
   const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
   const toggleVisibleTransferForm = (index) => {
     setTempIndex(index);
     setIsVisibleTransferForm(!isVisibleTransferForm);
   };
-  
-  const SLText = isVisibleTransferForm ? 'Close modification' : 'Add to the SL';
+
+  const SLText = isVisibleTransferForm ? "Close modification" : "Add to the SL";
   // to the shopping list
   // Solution: Shallow copy --> Csak az első szintet másolja érték szerint (a többit referencia szerint), viszont nincs több szint, ezért elég. Így nem fogja módosítani az eredeti items tömböt, és a benne lévő objektumokat.
   const handleTransferItem = () => {
     if (tempQty !== "") {
-      const transferItem = { ...items[tempIndex], quantity: tempQty };
+      const transferItem = {
+        ...items[tempIndex],
+        quantity: tempQty,
+        date:
+          new Date().getFullYear() +
+          "." +
+          " " +
+          (new Date().getMonth() + 1) +
+          "." +
+          " " +
+          new Date().getDate() +
+          ".",
+      };
       addToShoppingList(transferItem);
       setTempQty("");
       setIsVisibleTransferForm(false);
@@ -72,6 +87,15 @@ export default function Fridge({
         const secondNum = Number.parseFloat(dataFromSL[0].quantity);
         const sumQty = firstNum + secondNum;
         exsistingItem.quantity = sumQty + " " + unit;
+        exsistingItem.date =
+          new Date().getFullYear() +
+          "." +
+          " " +
+          (new Date().getMonth() + 1) +
+          "." +
+          " " +
+          new Date().getDate() +
+          ".";
         setItems([...items]);
       } else {
         setItems([...items, ...dataFromSL]);
@@ -79,6 +103,19 @@ export default function Fridge({
       cleanFridgeData();
     }
   }, [dataFromSL]);
+
+  useEffect(() => {
+    if (isVisibleTransferForm) {
+      setQtyFridgeFormRef.current.focus();
+    }
+
+    if (isVisibleUpdate) {
+      updateFridgeFormRef.current.focus();
+    }
+    if (isVisible) {
+      addFridgeFormRef.current.focus();
+    }
+  }, [isVisibleTransferForm, isVisibleUpdate, isVisible]);
 
   const toggleVisibilityAdd = () => {
     setIsVisible(!isVisible);
@@ -93,7 +130,19 @@ export default function Fridge({
     if (newItem.length > 0 && newQuantity.length > 0) {
       setItems([
         ...items,
-        { name: newItem.trim(), quantity: newQuantity.trim(), date: new Date().getFullYear() +'.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.' },
+        {
+          name: newItem.trim(),
+          quantity: newQuantity.trim(),
+          date:
+            new Date().getFullYear() +
+            "." +
+            " " +
+            (new Date().getMonth() + 1) +
+            "." +
+            " " +
+            new Date().getDate() +
+            ".",
+        },
       ]);
       setNewItem("");
       setNewQuantity("");
@@ -213,6 +262,7 @@ export default function Fridge({
           id="setQty"
           value={tempQty}
           placeholder="ex. 1 kg"
+          ref={setQtyFridgeFormRef}
           onChange={(e) => setTempQty(e.target.value)}
         />
         <input
@@ -237,6 +287,7 @@ export default function Fridge({
             name="newItemQuantity"
             placeholder="ex. 1 kg"
             value={modifyQuantity}
+            ref={updateFridgeFormRef}
             onChange={(e) => {
               setModifyQuantity(e.target.value);
             }}
@@ -267,6 +318,7 @@ export default function Fridge({
             value={newItem}
             placeholder="ex. banana"
             id="newItemNameIdFidge"
+            ref={addFridgeFormRef}
             onChange={(e) => {
               setNewItem(e.target.value);
             }}

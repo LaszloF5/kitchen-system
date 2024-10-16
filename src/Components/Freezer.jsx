@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 export default function Freezer({
   itemsFreezer,
@@ -22,6 +22,10 @@ export default function Freezer({
   const [isVisibleUpdateF, setIsVisibleUpdateF] = useState(false);
   const updateText = isVisibleUpdateF ? "Close modification" : "Update item";
   const [tempIndex, setTempIndex] = useState(null);
+  const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
+  const setQtyFreezerFormRef = useRef(null);
+  const updateFreezerFormRef = useRef(null);
+  const addFreezerFormRef = useRef(null);
   
   const [prevItemsFreezer, setPrevItemsFreezer] = useState([]);
 
@@ -40,6 +44,7 @@ export default function Freezer({
         const secondNum = Number.parseFloat(dataFromSL[0].quantity);
         const sumQty = firstNum + secondNum;
         exsistingItem.quantity = sumQty + " " + unit;
+        exsistingItem.date = new Date().getFullYear() +'.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.';
         setItemsFreezer([...itemsFreezer]);
       } else {
         setItemsFreezer([...itemsFreezer, ...dataFromSL]);
@@ -47,10 +52,24 @@ export default function Freezer({
       cleanFreezerData();
     }
   }, [dataFromSL]);
+
+  useEffect(() => {
+    if (isVisibleTransferForm) {
+      setQtyFreezerFormRef.current.focus();
+    }
+
+    if (isVisibleUpdateF) {
+      updateFreezerFormRef.current.focus();
+    }
+
+    if (isVisibleF) {
+      addFreezerFormRef.current.focus();
+    }
+
+  }, [isVisibleTransferForm, isVisibleUpdateF, isVisibleF])
   
   ////////// FUNCTIONS //////////
   
-  const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
   const toggleTransferForm = (index) => {
     setTempIndex(index);
     setIsVisibleTransferForm(!isVisibleTransferForm);
@@ -60,7 +79,7 @@ export default function Freezer({
   
   const handleTransferItem = () => {
     if (tempQty !== "") {
-      const transferItem = { ...itemsFreezer[tempIndex], quantity: tempQty };
+      const transferItem = { ...itemsFreezer[tempIndex], quantity: tempQty, date: new Date().getFullYear() +'.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.'  };
       addToShoppingList(transferItem);
       setTempIndex(null);
       setTempQty("");
@@ -206,6 +225,7 @@ export default function Freezer({
           id="setQty"
           value={tempQty}
           placeholder="ex. 1 kg"
+          ref={setQtyFreezerFormRef}
           onChange={(e) => setTempQty(e.target.value)}
         />
         <input
@@ -230,6 +250,7 @@ export default function Freezer({
           id="updateQuantityIdF"
           placeholder="ex. 1 kg"
           value={modifyQuantity}
+          ref={updateFreezerFormRef}
           onChange={(e) => setModifyQuantity(e.target.value)}
         />
         <input
@@ -257,6 +278,7 @@ export default function Freezer({
             id="newItemNameIdF"
             placeholder="ex. froozen fish"
             value={newItem}
+            ref={addFreezerFormRef}
             onChange={(e) => {
               setNewItem(e.target.value);
             }}

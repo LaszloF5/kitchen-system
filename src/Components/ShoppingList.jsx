@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {getWeek} from 'date-fns';
 import "./ShoppingList.css";
 
@@ -21,10 +21,33 @@ export default function ShoppingList({
   const [modifyQuantity, setModifyQuantity] = useState("");
   const [updateIndex, setUpdateIndex] = useState(null);
   const [newIndex, setNewIndex] = useState(null);
+  const [isVisibleAmount, setIsvisibleAmount] = useState(false);
+  const [isVisibleS, setIsVisibleS] = useState(false);
+  const [isVisibleQty, setIsVisibleQty] = useState(false);
+  const [isVisibleMoveTo, setIsVisibleMoveTo] = useState(false);
+
+  const updateSLFormRef = useRef(null);
+  const addSLFormRef = useRef(null);
+  const expenditureFormRef = useRef(null);
+
+  useEffect(() => {
+
+    if (isVisibleAmount) {
+      expenditureFormRef.current.focus();
+    }
+
+    if (isVisibleQty) {
+      updateSLFormRef.current.focus();
+    }
+
+    if (isVisibleS) {
+      addSLFormRef.current.focus();
+    }
+
+  }, [isVisibleAmount, isVisibleQty ,isVisibleS])
 
   // Visible amount form
 
-  const [isVisibleAmount, setIsvisibleAmount] = useState(false);
   const isTextAmount = isVisibleAmount ? "Close expenditure form" : "Expenditure recording";
   const handleVisibleAmount = () => {
     setIsvisibleAmount(!isVisibleAmount);
@@ -32,7 +55,6 @@ export default function ShoppingList({
 
   // Visible Add form
 
-  const [isVisibleS, setIsVisibleS] = useState(false);
   const isTextS = isVisibleS ? "Close add form" : "Add item";
   const handleVisibleAdd = () => {
     setIsVisibleS(!isVisibleS);
@@ -40,7 +62,6 @@ export default function ShoppingList({
 
   // Visible new qty form
 
-  const [isVisibleQty, setIsVisibleQty] = useState(false);
   const isTextQty = isVisibleQty ? "Close modification" : "Update item";
   const handleVisibleQty = (index) => {
     setIsVisibleQty(!isVisibleQty);
@@ -49,7 +70,6 @@ export default function ShoppingList({
 
   // Visible move to form
 
-  const [isVisibleMoveTo, setIsVisibleMoveTo] = useState(false);
   const toggleVisibleMoveTo = (index) => {
     setIsVisibleMoveTo(!isVisibleMoveTo);
     setNewIndex(index);
@@ -57,6 +77,8 @@ export default function ShoppingList({
 
   const [prevItemsSL, setPrevItemsSL] = useState([]);
   const [prevExpenditure, setPrevExpenditure] = useState([]);
+
+
 
   // Functions
 
@@ -143,7 +165,7 @@ export default function ShoppingList({
   //Fridge component//
 
   const handleTransfer1 = (index) => {
-    const transferItem = itemsSL[index];
+    const transferItem = {...itemsSL[index]};
     addToFridge(transferItem);
     handleDelete(index);
     setIsVisibleMoveTo(false);
@@ -297,6 +319,7 @@ export default function ShoppingList({
           min="0"
           placeholder="500"
           step='0.01'
+          ref={expenditureFormRef}
         />
         <button type="submit" className="btn btn-others">
           Add
@@ -349,6 +372,8 @@ export default function ShoppingList({
           name="setNewQuantity"
           id="setNewQuantity"
           value={modifyQuantity}
+          placeholder="ex. 2 kg"
+          ref={updateSLFormRef}
           onChange={(e) => setModifyQuantity(e.target.value)}
         />
         <input
@@ -376,6 +401,7 @@ export default function ShoppingList({
             id="newShoppingItemId"
             placeholder="ex. carrot"
             value={newItem}
+            ref={addSLFormRef}
             onChange={(e) => setNewItem(e.target.value)}
           />
         </div>
