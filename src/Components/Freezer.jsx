@@ -28,6 +28,9 @@ export default function Freezer({
   const setQtyFreezerFormRef = useRef(null);
   const updateFreezerFormRef = useRef(null);
   const addFreezerFormRef = useRef(null);
+    // A qty módosításához szükséges az id, hogy a szerver is megkapja a módosított adatokat.
+
+  const [updateId, setUpdateId] = useState(null);
 
   // Data from shopping list
 
@@ -82,6 +85,7 @@ export default function Freezer({
       try {
         const response = await axios.get("http://localhost:5500/freezer_items");
         setItemsFreezer(response.data.items);
+        console.log(response.data.items);
       } catch (error) {
         console.error("Error fetching items: ", error);
       }
@@ -126,9 +130,10 @@ export default function Freezer({
     setIsVisibleF(!isVisibleF);
   };
 
-  const toggleVisibilityUpdateF = (index) => {
+  const toggleVisibilityUpdateF = (index, id) => {
     setIsVisibleUpdateF(!isVisibleUpdateF);
     setUpdateIndex(index);
+    setUpdateId(id);
   };
 
   // Add item to the database.
@@ -155,34 +160,47 @@ export default function Freezer({
   };
 
   const handleDeleteF = async (index) => {
-    const itemToDelete = itemsFreezer[index]; // Az elemet, amelyet törölni szeretnél
+    const itemToDelete = itemsFreezer[index];
     try {
-        await axios.delete(`http://localhost:5500/freezer_items/${itemToDelete.id}`); // A DELETE kérés
+      await axios.delete(
+        `http://localhost:5500/freezer_items/${itemToDelete.id}`
+      );
 
-        // Ha a törlés sikeres volt, frissítjük a helyi állapotot
-        const newList = itemsFreezer.filter((_, i) => i !== index);
-        setItemsFreezer(newList);
-        setIsVisibleUpdateF(false);
-        setModifyQuantity("");
-        setIsVisibleTransferForm(false);
+      const newList = itemsFreezer.filter((_, i) => i !== index);
+      setItemsFreezer(newList);
+      setIsVisibleUpdateF(false);
+      setModifyQuantity("");
+      setIsVisibleTransferForm(false);
     } catch (error) {
-        console.error("Error deleting item:", error); // Hibakezelés
-        alert("Error deleting item. Please try again."); // Visszajelzés a felhasználónak
+      console.error("Error deleting item:", error);
+      alert("Error deleting item. Please try again.");
     }
-};
+  };
 
-
-  const handleUpdate = () => {
+  const handleUpdate = async (updateId) => {
+    console.log('frissített id: ', updateId);
     if (modifyQuantity === "") {
       alert("Please enter a quantity.");
       return;
-    } else {
+    }
+
+    try {
+      await axios.put(`http://localhost:5500/freezer_items/${updateId}`, {
+        quantity: modifyQuantity.trim(),
+      });
+
+      console.log('új mennyiség: ', modifyQuantity);
+
       const updatedList = [...itemsFreezer];
       updatedList[updateIndex].quantity = modifyQuantity.trim();
       setItemsFreezer(updatedList);
       setIsVisibleUpdateF(false);
       setUpdateIndex(null);
+      setUpdateId(null);
       setModifyQuantity("");
+    } catch (error) {
+      console.error("Error updating quantity:", error);
+      alert("Error updating quantity. Please try again.");
     }
   };
 
@@ -247,7 +265,7 @@ export default function Freezer({
                   </button>
                   <button
                     className="btn btn-update"
-                    onClick={() => toggleVisibilityUpdateF(index)}
+                    onClick={() => toggleVisibilityUpdateF(index, item.id)}
                   >
                     {updateText}
                   </button>
@@ -291,7 +309,10 @@ export default function Freezer({
         }`}
         method="GET"
         action="#"
-        onSubmit={handleSubmit}
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleUpdate(updateId);
+        }}
       >
         <label htmlFor="updateQuantityIdF"> New quantity: </label>
         <input
