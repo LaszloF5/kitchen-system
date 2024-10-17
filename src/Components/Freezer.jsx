@@ -28,7 +28,7 @@ export default function Freezer({
   const setQtyFreezerFormRef = useRef(null);
   const updateFreezerFormRef = useRef(null);
   const addFreezerFormRef = useRef(null);
-    // A qty módosításához szükséges az id, hogy a szerver is megkapja a módosított adatokat.
+  // A qty módosításához szükséges az id, hogy a szerver is megkapja a módosított adatokat.
 
   const [updateId, setUpdateId] = useState(null);
 
@@ -136,8 +136,8 @@ export default function Freezer({
     setUpdateId(id);
   };
 
-  // Add item to the database.
-
+  // Add item to the database
+  
   const handleAddFreezer = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
       const newItemData = {
@@ -147,6 +147,7 @@ export default function Freezer({
       };
       try {
         await axios.post("http://localhost:5500/freezer_items", newItemData);
+        console.log("Az api hívás befejeződött.");
         setItemsFreezer([...itemsFreezer, newItemData]);
         setNewItem("");
         setNewQuantity("");
@@ -178,7 +179,7 @@ export default function Freezer({
   };
 
   const handleUpdate = async (updateId) => {
-    console.log('frissített id: ', updateId);
+    console.log("frissített id: ", updateId);
     if (modifyQuantity === "") {
       alert("Please enter a quantity.");
       return;
@@ -189,7 +190,7 @@ export default function Freezer({
         quantity: modifyQuantity.trim(),
       });
 
-      console.log('új mennyiség: ', modifyQuantity);
+      console.log("új mennyiség: ", modifyQuantity);
 
       const updatedList = [...itemsFreezer];
       updatedList[updateIndex].quantity = modifyQuantity.trim();
@@ -207,31 +208,6 @@ export default function Freezer({
   const handleSubmit = (e) => {
     e.preventDefault();
   };
-
-  //   useEffect(() => {
-  //     const savedItems = JSON.parse(localStorage.getItem('itemsFreezer')) || [];
-  //     setItemsFreezer(savedItems);
-  // }, []);
-
-  // Save
-
-  // useEffect(() => {
-  //   let hasChangedFreezer = false;
-
-  //   if (JSON.stringify(prevItemsFreezer) !== JSON.stringify(itemsFreezer)) {
-  //     const updatedItemsFreezer = itemsFreezer.map((item, index) => {
-  //       if (itemsFreezer.quantity !== prevItemsFreezer[index]?.quantity) {
-  //         hasChangedFreezer = true;
-  //         return { ...item };
-  //       }
-  //       return item;
-  //     });
-  //     if (hasChangedFreezer || itemsFreezer.length !== prevItemsFreezer.length) {
-  //       localStorage.setItem('itemsFreezer', JSON.stringify(updatedItemsFreezer));
-  //       setPrevItemsFreezer(updatedItemsFreezer);
-  //     }
-  //   }
-  // }, [itemsFreezer])
 
   return (
     <>

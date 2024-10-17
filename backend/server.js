@@ -72,7 +72,7 @@ app.get("/fridge_items", (req, res) => {
   });
 });
 
-app.post("/start", (req, res) => {
+app.post("/fridge_items", (req, res) => {
   const { name, quantity, date_added } = req.body;
   const sql =
     "INSERT INTO fridge_items (name, quantity, date_added) VALUES(?, ?, ?)";
@@ -82,6 +82,48 @@ app.post("/start", (req, res) => {
       return;
     }
     res.json({ id: this.lastID, name, quantity, date_added });
+  });
+});
+
+app.delete("/fridge_items/:id", (req, res) => {
+  const id = req.params.id;
+  const sql = "DELETE FROM fridge_items WHERE id = ?";
+  db.run(sql, id, function (err) {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+  });
+
+  db.get("SELECT COUNT(*) AS count FROM freezer_items", (err, row) => {
+    if (row.count === 0) {
+      db.run(
+        "UPDATE sqlite_sequence SET seq = 0 WHERE name = 'freezer_items'",
+        (err) => {
+          if (err) {
+            res.status(400).json({ err: err.message });
+            return;
+          }
+          res.json({ message: "Item deleted and sequence reset", id });
+        }
+      );
+    } else {
+      res.json({ message: "Item deleted", id });
+    }
+  });
+});
+
+app.put("/fridge_items/:id", (req, res) => {
+  const { id } = req.params;
+  const { quantity } = req.body;
+  const sql = "UPDATE fridge_items SET quantity = ? WHERE id = ?";
+
+  db.run(sql, [quantity, id], function (err) {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    res.json({ message: "Item quantity updated", id, quantity });
   });
 });
 
@@ -163,8 +205,6 @@ app.put("/freezer_items/:id", (req, res) => {
     res.json({ message: "Quantity updated successfully", id, quantity });
   });
 });
-
-
 
 // chamber items
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import "./Fridge.css";
+import axios from "axios";
 
 export default function Fridge({
   items,
@@ -28,6 +29,7 @@ export default function Fridge({
   const setQtyFridgeFormRef = useRef(null);
   const updateFridgeFormRef = useRef(null);
   const addFridgeFormRef = useRef(null);
+  const [updateId, setUpdateId] = useState(null);
 
   // Important for the localStorage !!!!!
   const [prevItems, setPrevItems] = useState([]);
@@ -117,92 +119,90 @@ export default function Fridge({
     }
   }, [isVisibleTransferForm, isVisibleUpdate, isVisible]);
 
+  // Datas from the database
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const response = await axios.get("http://localhost:5500/fridge_items");
+        setItems(response.data.items);
+      } catch (error) {
+        console.error("Error fetching items: ", error);
+      }
+    };
+    fetchItems();
+  }, [setItems]);
+
   const toggleVisibilityAdd = () => {
     setIsVisible(!isVisible);
   };
 
-  const toggleVisibilityUpdate = (index) => {
-    setIsVisibleUpdate(!isVisibleUpdate);
+  const toggleVisibilityUpdate = (index, id) => {
     setUpdateIndex(index);
+    setUpdateId(id);
+    setIsVisibleUpdate(!isVisibleUpdate);
   };
 
-  const handleAddFridge = () => {
+  const handleAddFridge = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
-      setItems([
-        ...items,
-        {
-          name: newItem.trim(),
-          quantity: newQuantity.trim(),
-          date:
-            new Date().getFullYear() +
-            "." +
-            " " +
-            (new Date().getMonth() + 1) +
-            "." +
-            " " +
-            new Date().getDate() +
-            ".",
-        },
-      ]);
-      setNewItem("");
-      setNewQuantity("");
-      setIsVisible(false);
-    } else {
-      alert("The name and quantity fields mustn't be empty.");
+      const newFridgeItem = {
+        name: newItem.trim(),
+        quantity: newQuantity.trim(),
+        date_added: new Date().toISOString().split("T")[0],
+      };
+      try {
+        await axios.post("http://localhost:5500/fridge_items", newFridgeItem);
+        setItems([...items, newFridgeItem]);
+        setNewItem("");
+        setNewQuantity("");
+        setIsVisible(false);
+      } catch {
+        alert("The name and quantity fields mustn't be empty.");
+      }
     }
   };
 
-  const handleDelete = (index) => {
-    const newElements = items.filter((_, i) => i !== index);
-    setItems(newElements);
-    setIsVisibleUpdate(false);
-    setModifyQuantity("");
-    setUpdateIndex(null);
-    setIsVisibleTransferForm(false);
+  const handleDelete = async (index) => {
+    const itemToDelete = items[index];
+    try {
+      await axios.delete(
+        `http://localhost:5500/fridge_items/${itemToDelete.id}`
+      );
+      const newElements = items.filter((_, i) => i !== index);
+      setItems(newElements);
+      setIsVisibleUpdate(false);
+      setModifyQuantity("");
+      setUpdateIndex(null);
+      setIsVisibleTransferForm(false);
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      alert("Error deleting item. Please try again.");
+    }
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async (updateId) => {
+    console.log("Frissített index: ", updateId);
     if (modifyQuantity === "") {
       alert("Please enter a quantity.");
-    } else {
+    }
+    try {
+      await axios.put(`http://localhost:5500/fridge_items/${updateId}`, {
+        quantity: modifyQuantity.trim(),
+      });
       const updatedList = [...items];
       updatedList[updateIndex].quantity = modifyQuantity.trim();
       setItems(updatedList);
       setModifyQuantity("");
       setIsVisibleUpdate(false);
+      setUpdateId(null);
+    } catch (error) {
+      console.log("error: ", error);
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
   };
-
-  // Load
-
-  useEffect(() => {
-    const savedItems = JSON.parse(localStorage.getItem("items")) || [];
-    setItems(savedItems);
-  }, []);
-
-  // Save
-
-  useEffect(() => {
-    let hasChanged = false;
-
-    if (JSON.stringify(prevItems) !== JSON.stringify(items)) {
-      const updatedItems = items.map((item, index) => {
-        if (item.quantity !== prevItems[index]?.quantity) {
-          hasChanged = true;
-          return { ...item };
-        }
-        return item;
-      });
-      if (hasChanged || items.length !== prevItems.length) {
-        localStorage.setItem("items", JSON.stringify(updatedItems));
-        setPrevItems(updatedItems);
-      }
-    }
-  }, [items]);
 
   return (
     <div>
@@ -235,7 +235,7 @@ export default function Fridge({
                 </button>
                 <button
                   className="btn btn-update"
-                  onClick={() => toggleVisibilityUpdate(index)}
+                  onClick={() => toggleVisibilityUpdate(index, item.id)}
                 >
                   {updateText}
                 </button>
@@ -278,7 +278,10 @@ export default function Fridge({
         className={`quantity-update-form main-item-style fridge-form-update-quantity ${
           isVisibleUpdate ? "visibleUpdateForm" : "hiddenUpdateForm"
         }`}
-        onSubmit={handleSubmit}
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleUpdate(updateId);
+        }}
       >
         <label>
           New quantity:
@@ -297,7 +300,6 @@ export default function Fridge({
           className="btn btn-others"
           type="submit"
           value="Update quantity"
-          onClick={handleUpdate}
         />
       </form>
       <form
