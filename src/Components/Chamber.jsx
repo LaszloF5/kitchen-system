@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import axios from "axios";
 
 export default function Chamber({
   itemsChamber,
@@ -18,6 +19,7 @@ export default function Chamber({
   const setQtyChamberFormRef = useRef(null);
   const updateChamberFormRef = useRef(null);
   const addChamberFormRef = useRef(null);
+  const [updateIdChamber, setUpdateIdChamber] = useState(null);
 
   // Visible transfer form
   const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
@@ -84,7 +86,15 @@ export default function Chamber({
         const secondNum = Number.parseFloat(dataFromSL[0].quantity);
         const sumQty = firstNum + secondNum;
         exsistingItem.quantity = sumQty + " " + unit;
-        exsistingItem.date = new Date().getFullYear() +'.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.';
+        exsistingItem.date =
+          new Date().getFullYear() +
+          "." +
+          " " +
+          (new Date().getMonth() + 1) +
+          "." +
+          " " +
+          new Date().getDate() +
+          ".";
         setItemsChamber([...itemsChamber]);
       } else {
         setItemsChamber([...itemsChamber, ...dataFromSL]);
@@ -105,7 +115,7 @@ export default function Chamber({
     if (isVisible) {
       addChamberFormRef.current.focus();
     }
-  }, [isVisibleTransferForm, isVisibleQuantity, isVisible])
+  }, [isVisibleTransferForm, isVisibleQuantity, isVisible]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -115,90 +125,93 @@ export default function Chamber({
     setIsVisible(!isVisible);
   };
 
-  const toggleUpdateForm = (index) => {
+  const toggleUpdateForm = (index, id) => {
     setIsVisibleQuantity(!isVisibleQuantity);
     setUpdateIndex(index);
+    setUpdateIdChamber(id);
+    console.log(id);
   };
 
   // Item modifier functions
 
-  const handleAddChamber = () => {
+  // Datas from the database
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const response = await axios.get("http://localhost:5500/chamber_items");
+        setItemsChamber(response.data.items);
+      } catch (error) {
+        console.error("Error fetching items: ", error);
+      }
+    };
+    fetchItems();
+  }, [setItemsChamber]);
+
+  const handleAddChamber = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
-      const updatedItems = [
-        ...itemsChamber,
-        {
-          name: newItem.trim(),
-          quantity: newQuantity.trim(),
-          date:
-            new Date().getFullYear() +
-            "." +
-            " " +
-            (new Date().getMonth() + 1) +
-            "." +
-            " " +
-            new Date().getDate() +
-            ".",
-        },
-      ];
-      setItemsChamber(updatedItems);
-      setNewItem("");
-      setNewQuantity("");
-      setIsVisible(false);
+      const newChamberItem = {
+        name: newItem.trim(),
+        quantity: newQuantity.trim(),
+        date_added: new Date().toISOString().split("T")[0],
+      };
+      try {
+        axios.post("http://localhost:5500/chamber_items", newChamberItem);
+        setItemsChamber([...itemsChamber, newChamberItem]);
+        setNewItem("");
+        setNewQuantity("");
+        setIsVisible(false);
+      } catch {
+        alert("An error occurred while saving the data.");
+      }
     } else {
       alert("The name and quantity fields mustn't be empty.");
     }
   };
 
-  const handleDelete = (index) => {
-    const newList = itemsChamber.filter((_, i) => i !== index);
-    setItemsChamber(newList);
-    setIsVisibleQuantity(false);
-    setModifyQuantity("");
-    setUpdateIndex(null);
-    setIsVisibleTransferForm(false);
+  const handleDelete = async (index) => {
+    const itemToDelete = itemsChamber[index];
+    try {
+      await axios.delete(
+        `http://localhost:5500/chamber_items/${itemToDelete.id}`
+      );
+      const newElements = itemsChamber.filter((_, i) => i !== index);
+      setItemsChamber(newElements);
+      setIsVisibleQuantity(false);
+      setModifyQuantity("");
+      setUpdateIndex(null);
+      setIsVisibleTransferForm(false);
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      alert("Error deleting item. Please try again.");
+    }
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
+    console.log(updateIdChamber);
     if (modifyQuantity === "") {
       alert("Please enter a quantity.");
-    } else {
+      return;
+    }
+    try {
+     await axios.put(`http://localhost:5500/chamber_items/${updateIdChamber}`, {
+        quantity: modifyQuantity.trim(),
+      });
+      console.log("új mennyiség: ", modifyQuantity);
       const updatedItems = [...itemsChamber];
       updatedItems[updateIndex].quantity = modifyQuantity.trim();
       setItemsChamber(updatedItems);
       setModifyQuantity("");
       setIsVisibleQuantity(false);
       setUpdateIndex(null);
+      setUpdateIdChamber(null);
+    } 
+    
+    catch (error) {
+      console.error("Error updating quantity:", error);
+      alert("Error updating quantity. Please try again.");
     }
   };
-
-  useEffect(() => {
-    const savedItems = JSON.parse(localStorage.getItem("itemsChamber")) || [];
-    setItemsChamber(savedItems);
-  }, []);
-
-  useEffect(() => {
-    let handleChangedChamber = false;
-
-    if (JSON.stringify(prevItemsChamber) !== JSON.stringify(itemsChamber)) {
-      const updatedItemsChamber = itemsChamber.map((item, index) => {
-        if (item.quantity !== prevItemsChamber[index]?.quantity) {
-          handleChangedChamber = true;
-          return { ...item };
-        }
-        return item;
-      });
-      if (
-        handleChangedChamber ||
-        itemsChamber.length !== prevItemsChamber.length
-      ) {
-        localStorage.setItem(
-          "itemsChamber",
-          JSON.stringify(updatedItemsChamber)
-        );
-        setPrevItemsChamber(updatedItemsChamber);
-      }
-    }
-  }, [itemsChamber]);
 
   return (
     <>
@@ -231,7 +244,7 @@ export default function Chamber({
                 </button>
                 <button
                   className="btn btn-update"
-                  onClick={() => toggleUpdateForm(index)}
+                  onClick={() => toggleUpdateForm(index, item.id)}
                 >
                   {qunatityText}
                 </button>

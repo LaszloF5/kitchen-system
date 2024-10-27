@@ -178,13 +178,12 @@ export default function Freezer({
     }
   };
 
-  const handleUpdate = async (updateId) => {
+  const handleUpdate = async () => {
     console.log("frissített id: ", updateId);
     if (modifyQuantity === "") {
       alert("Please enter a quantity.");
       return;
     }
-
     try {
       await axios.put(`http://localhost:5500/freezer_items/${updateId}`, {
         quantity: modifyQuantity.trim(),

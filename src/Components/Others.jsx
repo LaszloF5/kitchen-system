@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import axios from "axios";
 
 export default function Others({
   itemsOthers,
@@ -25,10 +26,11 @@ export default function Others({
   const [modifyQuantity, setModifyQuantity] = useState("");
   const [updateIndex, setUpdateIndex] = useState(null);
   const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
-  const SLText = isVisibleTransferForm ? 'Close modification' : 'Add to the SL';
+  const SLText = isVisibleTransferForm ? "Close modification" : "Add to the SL";
   const setQtyOthersFormRef = useRef(null);
   const updateOthersFormRef = useRef(null);
   const addOthersFormRef = useRef(null);
+  const [updateIdOthers, setUpdateIdOthers] = useState(null);
 
   // Toggle transfer form
 
@@ -39,7 +41,6 @@ export default function Others({
     setIsVisibleTransferForm(!isVisibleTransferForm);
   };
 
-
   const [prevItemsOthers, setPrevItemsOthers] = useState([]);
 
   // Functions
@@ -48,7 +49,19 @@ export default function Others({
 
   const handleTransferItem = () => {
     if (tempQty !== "") {
-      const transferItem = { ...itemsOthers[tempIndex], quantity: tempQty, date: new Date().getFullYear() +'.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.'};
+      const transferItem = {
+        ...itemsOthers[tempIndex],
+        quantity: tempQty,
+        date:
+          new Date().getFullYear() +
+          "." +
+          " " +
+          (new Date().getMonth() + 1) +
+          "." +
+          " " +
+          new Date().getDate() +
+          ".",
+      };
       addToShoppingList(transferItem);
       setTempQty("");
       setTempIndex(null);
@@ -57,7 +70,6 @@ export default function Others({
       alert("Please enter a quantity.");
     }
   };
-  
 
   useEffect(() => {
     if (dataFromSL.length > 0) {
@@ -73,7 +85,15 @@ export default function Others({
         const secondNum = Number.parseFloat(dataFromSL[0].quantity);
         const sumQty = firstNum + secondNum;
         exsistingItem.quantity = sumQty + " " + unit;
-        exsistingItem.date = new Date().getFullYear() +'.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.';
+        exsistingItem.date =
+          new Date().getFullYear() +
+          "." +
+          " " +
+          (new Date().getMonth() + 1) +
+          "." +
+          " " +
+          new Date().getDate() +
+          ".";
         const updatedItems = [...itemsOthers];
         updatedItems[exsistingItemIndex] = exsistingItem;
         setItemsOthers(updatedItems);
@@ -96,9 +116,7 @@ export default function Others({
     if (isVisibleO) {
       addOthersFormRef.current.focus();
     }
-
-  }, [isVisibleTransferForm, isVisibleQtyO, isVisibleO])
-  
+  }, [isVisibleTransferForm, isVisibleQtyO, isVisibleO]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -108,75 +126,83 @@ export default function Others({
     setIsVisibleO(!isVisibleO);
   };
 
-  const toggleModifyQty = (index) => {
+  const toggleModifyQty = (index, id) => {
     setIsVisibleQtyO(!isVisibleQtyO);
     setUpdateIndex(index);
+    setUpdateIdOthers(id);
+    console.log(id)
   };
 
   // Item modifier functions
 
-  const handleAddOthers = () => {
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const response = await axios.get("http://localhost:5500/others_items");
+        setItemsOthers(response.data.items);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchItems();
+  }, [itemsOthers]);
+
+  const handleAddOthers = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
-      const newList = [
-        ...itemsOthers,
-        { name: newItem.trim(), quantity: newQuantity.trim(), date: new Date().getFullYear() + '.' + ' ' + (new Date().getMonth() + 1) + '.' + ' ' + new Date().getDate() + '.' },
-      ];
-      setItemsOthers(newList);
-      setNewItem("");
-      setNewQuantity("");
-      setIsVisibleO(false);
+      const newOthersItem = {
+        name: newItem.trim(),
+        quantity: newQuantity.trim(),
+        date_added: new Date().toISOString().split("T")[0],
+      };
+      try {
+        await axios.post("http://localhost:5500/others_items", newOthersItem);
+        setItemsOthers([...itemsOthers, newOthersItem]);
+        setNewItem("");
+        setNewQuantity("");
+        setIsVisibleO(false);
+      } catch (error) {
+        console.error(error);
+      }
     } else {
       alert("The name and quantity fields mustn't be empty.");
     }
   };
 
-  const handleDelete = (index) => {
-    const newList = itemsOthers.filter((_, i) => i !== index);
-    setItemsOthers(newList);
-    setIsVisibleQtyO(false);
-    setUpdateIndex(null);
-    setModifyQuantity("");
+  const handleDelete = async (index) => {
+    const itemToDelete = itemsOthers[index];
+    try {
+      await axios.delete(
+        `http://localhost:5500/others_items/${itemToDelete.id}`
+      );
+      const newList = itemsOthers.filter((_, i) => i !== index);
+      setItemsOthers(newList);
+      setIsVisibleQtyO(false);
+      setUpdateIndex(null);
+      setModifyQuantity("");
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      alert("Error deleting item. Please try again.");
+    }
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
+    console.log("id ami kell:", updateIdOthers);
     if (modifyQuantity === "") {
       alert("Please enter a quantity.");
+      return;
     } else {
+      await axios.put(`http://localhost:5500/others_items/${updateIdOthers}`, {
+        quantity: modifyQuantity.trim(),
+      });
       const updatedList = [...itemsOthers];
       updatedList[updateIndex].quantity = modifyQuantity.trim();
       setItemsOthers(updatedList);
       setIsVisibleQtyO(false);
       setModifyQuantity("");
       setUpdateIndex(null);
+      setUpdateIdOthers(null);
     }
   };
-
-  useEffect(() => {
-    const savedItems = JSON.parse(localStorage.getItem('itemsOthers')) || [];
-    setItemsOthers(savedItems);
-  }, []);
-  
-
-  useEffect(() => {
-    let hasChangedOthers = false;
-  
-    if (JSON.stringify(prevItemsOthers) !== JSON.stringify(itemsOthers)) {
-      const updatedOthers = itemsOthers.map((item, index) => {
-        if (
-        item.quantity !== prevItemsOthers[index]?.quantity
-        ) {
-          hasChangedOthers = true;
-          return { ...item };
-        }
-        return item;
-      });
-      if (hasChangedOthers || itemsOthers.length !== prevItemsOthers.length) {
-        localStorage.setItem("itemsOthers", JSON.stringify(updatedOthers));
-        setPrevItemsOthers(updatedOthers);
-      }
-    }
-  }, [itemsOthers]);
-  
 
   return (
     <>
@@ -210,7 +236,7 @@ export default function Others({
                   </button>
                   <button
                     className="btn btn-update"
-                    onClick={() => toggleModifyQty(index)}
+                    onClick={() => toggleModifyQty(index, item.id)}
                   >
                     {QtyText}
                   </button>

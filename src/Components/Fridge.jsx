@@ -159,6 +159,8 @@ export default function Fridge({
       } catch {
         alert("The name and quantity fields mustn't be empty.");
       }
+    } else {
+      alert("The name and quantity fields mustn't be empty.");
     }
   };
 
@@ -180,7 +182,7 @@ export default function Fridge({
     }
   };
 
-  const handleUpdate = async (updateId) => {
+  const handleUpdate = async () => {
     console.log("Frissített index: ", updateId);
     if (modifyQuantity === "") {
       alert("Please enter a quantity.");
