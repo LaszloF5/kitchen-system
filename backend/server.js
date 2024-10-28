@@ -424,6 +424,47 @@ app.put("/shoppingList_items/:id", (req, res) => {
   res.json({ message: "Quantity updated successfully", quantity, id });
 });
 
+// Elemek mozgatása a shopping list komponensből a többi komponensbe.
+
+app.post("/move-item", (req, res) => {
+  
+  const { id, sourceTable, targetTable} = req.body;
+
+  const validTables = [
+    "fridge_items",
+    "freezer_items",
+    "chamber_items",
+    "others_items",
+    "shoppingList_items"
+  ]
+
+  if (!validTables.includes(sourceTable) || (!validTables.includes(targetTable))) {
+    return res.status(400).json({error: 'Invalid table name.'})
+  }
+
+  db.get(`SELECT * FROM  ${sourceTable} WHERE id = ? `, [id], (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (!row) {
+      return res.status(404).json({ error: 'Item not found in source table.'})
+    }
+
+    db.run(`INSERT INTO  ${targetTable} (name, quantity, date_added) VALUES (?, ?, ?)`, [row.name, row.quantity, row.date_added], function (err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+     db.run(`DELETE FROM ${sourceTable} WHERE id = ?`, [id], function (err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.json({ message: "Item moved successfully", id });
+     }) 
+    })
+
+  })
+})
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
