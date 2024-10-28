@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
-import {getWeek} from 'date-fns';
+import { getWeek } from "date-fns";
+import axios from "axios";
 import "./ShoppingList.css";
 
 export default function ShoppingList({
@@ -12,7 +13,7 @@ export default function ShoppingList({
   dataFromFridge,
   clearTransferredData,
   expenditure,
-  setExpenditure
+  setExpenditure,
 }) {
   // Input values
 
@@ -25,13 +26,13 @@ export default function ShoppingList({
   const [isVisibleS, setIsVisibleS] = useState(false);
   const [isVisibleQty, setIsVisibleQty] = useState(false);
   const [isVisibleMoveTo, setIsVisibleMoveTo] = useState(false);
+  const [updateIdSL, setUpdateIdSL] = useState(null);
 
   const updateSLFormRef = useRef(null);
   const addSLFormRef = useRef(null);
   const expenditureFormRef = useRef(null);
 
   useEffect(() => {
-
     if (isVisibleAmount) {
       expenditureFormRef.current.focus();
     }
@@ -43,15 +44,16 @@ export default function ShoppingList({
     if (isVisibleS) {
       addSLFormRef.current.focus();
     }
-
-  }, [isVisibleAmount, isVisibleQty ,isVisibleS])
+  }, [isVisibleAmount, isVisibleQty, isVisibleS]);
 
   // Visible amount form
 
-  const isTextAmount = isVisibleAmount ? "Close expenditure form" : "Expenditure recording";
+  const isTextAmount = isVisibleAmount
+    ? "Close expenditure form"
+    : "Expenditure recording";
   const handleVisibleAmount = () => {
     setIsvisibleAmount(!isVisibleAmount);
-  }
+  };
 
   // Visible Add form
 
@@ -63,9 +65,10 @@ export default function ShoppingList({
   // Visible new qty form
 
   const isTextQty = isVisibleQty ? "Close modification" : "Update item";
-  const handleVisibleQty = (index) => {
+  const handleVisibleQty = (index, id) => {
     setIsVisibleQty(!isVisibleQty);
     setUpdateIndex(index);
+    setUpdateIdSL(id);
   };
 
   // Visible move to form
@@ -78,8 +81,6 @@ export default function ShoppingList({
   const [prevItemsSL, setPrevItemsSL] = useState([]);
   const [prevExpenditure, setPrevExpenditure] = useState([]);
 
-
-
   // Functions
 
   const addExpenditure = (e) => {
@@ -89,74 +90,94 @@ export default function ShoppingList({
       const now = new Date();
       const currentWeek = getWeek(now);
       setExpenditure((prevExpenditure) => {
-        const existingWeekIndex = prevExpenditure.findIndex(exp => exp.week === currentWeek);
+        const existingWeekIndex = prevExpenditure.findIndex(
+          (exp) => exp.week === currentWeek
+        );
         if (existingWeekIndex !== -1) {
           const updatedExpenditure = [...prevExpenditure];
           updatedExpenditure[existingWeekIndex] = {
             ...updatedExpenditure[existingWeekIndex],
             amount: updatedExpenditure[existingWeekIndex].amount + amount,
-          }
+          };
           return updatedExpenditure;
         } else {
-          return [...prevExpenditure, {week: currentWeek, amount}]
+          return [...prevExpenditure, { week: currentWeek, amount }];
         }
-      })
+      });
     }
-    e.target.amount.value = '';
+    e.target.amount.value = "";
     setIsvisibleAmount(false);
-  }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
   };
 
-  const handleAdd = () => {
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const response = await axios.get("http://localhost:5500/shoppingList_items");
+        setItemsSL(response.data.items);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchItems();
+  }, [])
+
+  const handleAdd = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
-      const updateList = [
-        ...itemsSL,
-        {
-          name: newItem.trim(),
-          quantity: newQuantity.trim(),
-          date:
-            new Date().getFullYear() +
-            "." +
-            " " +
-            (new Date().getMonth() + 1) +
-            "." +
-            " " +
-            new Date().getDate() +
-            ".",
-        },
-      ];
-      setItemsSL(updateList);
-      setNewItem("");
-      setNewQuantity("");
-      setIsVisibleS(false);
+      const newItemSL = {
+        name: newItem.trim(),
+        quantity: newQuantity.trim(),
+        date_added: new Date().toISOString().split("T")[0],
+      };
+      try {
+        await axios.post("http://localhost:5500/shoppingList_items", newItemSL);
+        setItemsSL([...itemsSL, newItemSL]);
+        setNewItem("");
+        setNewQuantity("");
+        setIsVisibleS(false);
+      } catch (error) {
+        console.error(error);
+      }
     } else {
       alert("The name and quantity fields mustn't be empty.");
     }
   };
 
-  const handleDelete = (index) => {
-    const newList = itemsSL.filter((_, i) => {
-      return i !== index;
-    });
-    setItemsSL(newList);
-    setIsVisibleQty(false);
-    setUpdateIndex(null);
-    setModifyQuantity("");
+  const handleDelete = async (index) => {
+    try {
+      const itemToDelete = itemsSL[index];
+      await axios.delete(`http://localhost:5500/shoppingList_items/${itemToDelete.id}`);
+      const newList = itemsSL.filter((_, i) => {
+        return i !== index;
+      });
+      setItemsSL(newList);
+      setIsVisibleQty(false);
+      setUpdateIndex(null);
+      setModifyQuantity("");
+    } catch {
+      alert("An error occurred while deleting the item.");
+    }
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (modifyQuantity === "") {
       alert("Please enter a quantity.");
-    } else {
+      return;
+    }
+    try {
+      await axios.put(`http://localhost:5500/shoppingList_items/${updateIdSL}`, {quantity: modifyQuantity});
       const updateList = [...itemsSL];
       updateList[updateIndex].quantity = modifyQuantity.trim();
       setItemsSL(updateList);
       setIsVisibleQty(false);
       setUpdateIndex(null);
+      setUpdateIdSL(null);
       setModifyQuantity("");
+    } catch (error){
+      console.log(error);
     }
   };
 
@@ -165,7 +186,7 @@ export default function ShoppingList({
   //Fridge component//
 
   const handleTransfer1 = (index) => {
-    const transferItem = {...itemsSL[index]};
+    const transferItem = { ...itemsSL[index] };
     addToFridge(transferItem);
     handleDelete(index);
     setIsVisibleMoveTo(false);
@@ -227,37 +248,12 @@ export default function ShoppingList({
     }
   }, [dataFromFridge]);
 
-  // Load
-
   useEffect(() => {
-    const savedItems = JSON.parse(localStorage.getItem("itemsSL")) || [];
-    setItemsSL(savedItems);
-  }, []);
-
-  // Save
-
-  useEffect(() => {
-    let hasChangedSL = false;
-
-    if (JSON.stringify(prevItemsSL) !== JSON.stringify(itemsSL)) {
-      const updatedSL = itemsSL.map((item, index) => {
-        if (item.quantity !== prevItemsSL[index]?.quantity) {
-          hasChangedSL = true;
-          return { ...item };
-        }
-        return item;
-      });
-      if (hasChangedSL || itemsSL.length !== prevItemsSL.length) {
-        localStorage.setItem("itemsSL", JSON.stringify(updatedSL));
-        setPrevItemsSL(updatedSL);
-      }
-    }
-  }, [itemsSL]);
-
-  useEffect(() => {
-    const updatedExpenditure = JSON.parse(localStorage.getItem("expenditureLT"));
+    const updatedExpenditure = JSON.parse(
+      localStorage.getItem("expenditureLT")
+    );
     setExpenditure(updatedExpenditure);
-  }, [])
+  }, []);
 
   useEffect(() => {
     let hasChangedEx = false;
@@ -268,7 +264,7 @@ export default function ShoppingList({
       localStorage.setItem("expenditureLT", JSON.stringify(expenditure));
       setPrevExpenditure(expenditure);
     }
-  }, [expenditure])
+  }, [expenditure]);
 
   return (
     <>
@@ -296,7 +292,7 @@ export default function ShoppingList({
                 </button>
                 <button
                   className="btn btn-update"
-                  onClick={() => handleVisibleQty(index)}
+                  onClick={() => handleVisibleQty(index, item.id)}
                 >
                   {isTextQty}
                 </button>
@@ -308,8 +304,15 @@ export default function ShoppingList({
       <button className="btn btn-others center" onClick={handleVisibleAdd}>
         {isTextS}
       </button>
-      <button className="btn btn-others center" onClick={handleVisibleAmount}>{isTextAmount}</button>
-      <form className={`amount-form ${isVisibleAmount ? 'visibleAmountForm' : 'hiddenAmountForm'}`} onSubmit={addExpenditure}>
+      <button className="btn btn-others center" onClick={handleVisibleAmount}>
+        {isTextAmount}
+      </button>
+      <form
+        className={`amount-form ${
+          isVisibleAmount ? "visibleAmountForm" : "hiddenAmountForm"
+        }`}
+        onSubmit={addExpenditure}
+      >
         <input
           className="amount-form_input"
           type="number"
@@ -318,7 +321,7 @@ export default function ShoppingList({
           required
           min="0"
           placeholder="500"
-          step='0.01'
+          step="0.01"
           ref={expenditureFormRef}
         />
         <button type="submit" className="btn btn-others">
