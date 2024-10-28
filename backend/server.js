@@ -426,9 +426,8 @@ app.put("/shoppingList_items/:id", (req, res) => {
 
 // Elemek mozgatása a shopping list komponensből a többi komponensbe.
 
-app.post("/move-item", (req, res) => {
-  
-  const { id, sourceTable, targetTable} = req.body;
+app.post('/move-item', (req, res) => {
+  const { id, sourceTable, targetTable } = req.body;
 
   const validTables = [
     "fridge_items",
@@ -436,34 +435,31 @@ app.post("/move-item", (req, res) => {
     "chamber_items",
     "others_items",
     "shoppingList_items"
-  ]
-
-  if (!validTables.includes(sourceTable) || (!validTables.includes(targetTable))) {
-    return res.status(400).json({error: 'Invalid table name.'})
+  ];
+  if (!validTables.includes(sourceTable) || !validTables.includes(targetTable)) {
+    return res.status(400).json({ error: "Invalid table name." });
   }
 
-  db.get(`SELECT * FROM  ${sourceTable} WHERE id = ? `, [id], (err, row) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    if (!row) {
-      return res.status(404).json({ error: 'Item not found in source table.'})
-    }
+  db.get(`SELECT * FROM ${sourceTable} WHERE id = ?`, [id], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
 
-    db.run(`INSERT INTO  ${targetTable} (name, quantity, date_added) VALUES (?, ?, ?)`, [row.name, row.quantity, row.date_added], function (err) {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-     db.run(`DELETE FROM ${sourceTable} WHERE id = ?`, [id], function (err) {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      res.json({ message: "Item moved successfully", id });
-     }) 
-    })
+    if (!row) return res.status(404).json({ error: "Item not found." });
 
-  })
-})
+    db.run(
+      `INSERT INTO ${targetTable} (name, quantity, date_added) VALUES (?, ?, ?)`,
+      [row.name, row.quantity, row.date_added],
+      function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+
+        db.run(`DELETE FROM ${sourceTable} WHERE id = ?`, [id], function (err) {
+          if (err) return res.status(500).json({ error: err.message });
+
+          res.json({ message: "Item moved succesfully.", id });
+        });
+      }
+    );
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
