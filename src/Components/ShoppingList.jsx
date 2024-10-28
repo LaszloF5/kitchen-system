@@ -176,70 +176,55 @@ export default function ShoppingList({
 
   // Elemek mozgatása komponensek között //
 
+  const moveItem = async (itemId, sourceTable, targetTable) => {
+    try {
+      const response = await axios.post("http://localhost:5500/move-item", {
+        id: itemId,
+        sourceTable,
+        targetTable,
+      });
+  
+      if (response.status === 200) {
+        const newList = await axios.get("http://localhost:5500/shoppingList_items");
+        setItemsSL(newList.data.items);
+        setIsVisibleMoveTo(false);
+        setNewIndex(null);
+        alert("Elem sikeresen áthelyezve.")
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Hiba a mozgatáskor.");
+    }
+  }
+
+
   //Fridge component//
 
   const handleTransfer1 = (index) => {
-    const transferItem = { ...itemsSL[index] };
-    addToFridge(transferItem);
-    handleDelete(index);
-    setIsVisibleMoveTo(false);
-    setNewIndex(null);
+    const itemToTransfer = itemsSL[index];
+    moveItem(itemToTransfer.id, "shoppingList_items", "fridge_items");
   };
 
   //Freezer component//
 
   const handleTransfer2 = (index) => {
-    const transferItem = itemsSL[index];
-    addToFreezer(transferItem);
-    handleDelete(index);
-    setIsVisibleMoveTo(false);
-    setNewIndex(null);
+    const itemToTransfer = itemsSL[index];
+    moveItem(itemToTransfer.id, "shoppingList_items", "freezer_items");
   };
 
   //Chamber component//
 
   const handleTransfer3 = (index) => {
-    const transferItem = itemsSL[index];
-    addToChamber(transferItem);
-    handleDelete(index);
-    setIsVisibleMoveTo(false);
-    setNewIndex(null);
+    const itemToTransfer = itemsSL[index];
+    moveItem(itemToTransfer.id, "shoppingList_items", "chamber_items");
   };
 
   //Others component//
 
   const handleTransfer4 = (index) => {
-    const transferItem = itemsSL[index];
-    addToOthers(transferItem);
-    handleDelete(index);
-    setIsVisibleMoveTo(false);
-    setNewIndex(null);
+    const itemToTransfer = itemsSL[index];
+    moveItem(itemToTransfer.id, "shoppingList_items", "others_items");
   };
-
-  //items from components//
-
-  useEffect(() => {
-    if (dataFromFridge.length > 0) {
-      const existItem = itemsSL.find(
-        (item) => item.name === dataFromFridge[0].name
-      );
-      if (existItem) {
-        const core = existItem.quantity.replace(
-          Number.parseFloat(existItem.quantity),
-          ""
-        );
-        const firstNum = Number.parseFloat(existItem.quantity);
-        const secondNum = Number.parseFloat(dataFromFridge[0].quantity);
-        const sumQty = firstNum + secondNum;
-        existItem.quantity = sumQty + " " + core;
-        setItemsSL([...itemsSL]);
-        clearTransferredData();
-      } else {
-        setItemsSL([...itemsSL, ...dataFromFridge]);
-        clearTransferredData();
-      }
-    }
-  }, [dataFromFridge]);
 
   useEffect(() => {
     const updatedExpenditure = JSON.parse(

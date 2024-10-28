@@ -4,8 +4,6 @@ import axios from "axios";
 export default function Freezer({
   itemsFreezer,
   setItemsFreezer,
-  dataFromSL,
-  cleanFreezerData,
   addToShoppingList,
 }) {
   // Validate qty with regex
@@ -26,38 +24,6 @@ export default function Freezer({
   const updateFreezerFormRef = useRef(null);
   const addFreezerFormRef = useRef(null);
   const [updateId, setUpdateId] = useState(null);
-
-  // Data from shopping list
-
-  useEffect(() => {
-    if (dataFromSL.length > 0) {
-      const exsistingItem = itemsFreezer.find(
-        (item) => item.name === dataFromSL[0].name
-      );
-      if (exsistingItem) {
-        const unit = exsistingItem.quantity
-          .replace(Number.parseFloat(exsistingItem.quantity), "")
-          .trim();
-        const firstNum = Number.parseFloat(exsistingItem.quantity);
-        const secondNum = Number.parseFloat(dataFromSL[0].quantity);
-        const sumQty = firstNum + secondNum;
-        exsistingItem.quantity = sumQty + " " + unit;
-        exsistingItem.date =
-          new Date().getFullYear() +
-          "." +
-          " " +
-          (new Date().getMonth() + 1) +
-          "." +
-          " " +
-          new Date().getDate() +
-          ".";
-        setItemsFreezer([...itemsFreezer]);
-      } else {
-        setItemsFreezer([...itemsFreezer, ...dataFromSL]);
-      }
-      cleanFreezerData();
-    }
-  }, [dataFromSL]);
 
   useEffect(() => {
     if (isVisibleTransferForm) {
@@ -80,13 +46,12 @@ export default function Freezer({
       try {
         const response = await axios.get("http://localhost:5500/freezer_items");
         setItemsFreezer(response.data.items);
-        console.log(response.data.items);
       } catch (error) {
         console.error("Error fetching items: ", error);
       }
     };
     fetchItems();
-  }, [setItemsFreezer]);
+  }, [itemsFreezer]);
 
   ////////// FUNCTIONS //////////
 

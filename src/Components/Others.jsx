@@ -4,8 +4,6 @@ import axios from "axios";
 export default function Others({
   itemsOthers,
   setItemsOthers,
-  dataFromSL,
-  cleanOthersData,
   addToShoppingList,
 }) {
   // Validate qty with regex
@@ -67,39 +65,6 @@ export default function Others({
       alert("Please enter a quantity.");
     }
   };
-
-  useEffect(() => {
-    if (dataFromSL.length > 0) {
-      const exsistingItemIndex = itemsOthers.findIndex(
-        (item) => item.name === dataFromSL[0].name
-      );
-      if (exsistingItemIndex !== -1) {
-        const exsistingItem = { ...itemsOthers[exsistingItemIndex] };
-        const unit = exsistingItem.quantity
-          .replace(Number.parseFloat(exsistingItem.quantity), "")
-          .trim();
-        const firstNum = Number.parseFloat(exsistingItem.quantity);
-        const secondNum = Number.parseFloat(dataFromSL[0].quantity);
-        const sumQty = firstNum + secondNum;
-        exsistingItem.quantity = sumQty + " " + unit;
-        exsistingItem.date =
-          new Date().getFullYear() +
-          "." +
-          " " +
-          (new Date().getMonth() + 1) +
-          "." +
-          " " +
-          new Date().getDate() +
-          ".";
-        const updatedItems = [...itemsOthers];
-        updatedItems[exsistingItemIndex] = exsistingItem;
-        setItemsOthers(updatedItems);
-      } else {
-        setItemsOthers([...itemsOthers, ...dataFromSL]);
-      }
-      cleanOthersData();
-    }
-  }, [dataFromSL]);
 
   useEffect(() => {
     if (isVisibleTransferForm) {

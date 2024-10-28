@@ -46,55 +46,6 @@ export default function App() {
     }
   }, []);
 
-  // Elemek áthelyezése a shopping list komponensbe
-
-  const [toTheShoppingList, setToTheShoppingList] = useState([]);
-  const addToShoppingList = (item) => {
-    setToTheShoppingList([...toTheShoppingList, item]);
-  };
-  const clearTransferredData = () => {
-    setToTheShoppingList([]);
-  };
-
-  // Adatátvitel a shoppinglist és a fridge komponensek között
-  const [toTheFridge, setToTheFridge] = useState([]);
-  const addToFridge = (item) => {
-    setToTheFridge([item]);
-  };
-  const cleanFridgeData = () => {
-    setToTheFridge([]);
-  };
-
-  // Adatátvitel a shoppinglist és a freezer komponensek között
-
-  const [toTheFreezer, setToTheFreezer] = useState([]);
-  const addToFreezer = (item) => {
-    setToTheFreezer([item]);
-  };
-  const cleanFreezerData = () => {
-    setToTheFreezer([]);
-  };
-
-  // Adatátvitel a shoppinglist és a Chamber komponensek között
-
-  const [toTheChamber, setToTheChamber] = useState([]);
-  const addToChamber = (item) => {
-    setToTheChamber([item]);
-  };
-  const cleanChamberData = () => {
-    setToTheChamber([]);
-  };
-
-  // Adatátvitel a shoppinglist és a Chamber komponensek között
-
-  const [toTheOthers, setToTheOthers] = useState([]);
-  const addToOthers = (item) => {
-    setToTheOthers([item]);
-  };
-  const cleanOthersData = () => {
-    setToTheOthers([]);
-  };
-
   const handleCurrency = (e) => {
     e.preventDefault();
     if (e.target.currency.value.length === 0) {
@@ -164,40 +115,22 @@ export default function App() {
       <Fridge
         items={fridgeItems}
         setItems={setFridgeItems}
-        dataFromSL={toTheFridge}
-        cleanFridgeData={cleanFridgeData}
-        addToShoppingList={addToShoppingList}
       />
       <Freezer
         itemsFreezer={freezerItems}
         setItemsFreezer={setFreezerItems}
-        dataFromSL={toTheFreezer}
-        cleanFreezerData={cleanFreezerData}
-        addToShoppingList={addToShoppingList}
       />
       <Chamber
         itemsChamber={chamberItems}
         setItemsChamber={setChamberItems}
-        dataFromSL={toTheChamber}
-        cleanChamberData={cleanChamberData}
-        addToShoppingList={addToShoppingList}
       />
       <Others
         itemsOthers={otherItems}
         setItemsOthers={setOtherItems}
-        dataFromSL={toTheOthers}
-        cleanOthersData={cleanOthersData}
-        addToShoppingList={addToShoppingList}
       />
       <ShoppingList
         itemsSL={shoppingListItems}
         setItemsSL={setShoppingListItems}
-        addToFridge={addToFridge}
-        addToFreezer={addToFreezer}
-        addToChamber={addToChamber}
-        addToOthers={addToOthers}
-        dataFromFridge={toTheShoppingList}
-        clearTransferredData={clearTransferredData}
         expenditure={yourAmount}
         setExpenditure={setYourAmount}
       />

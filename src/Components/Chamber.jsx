@@ -4,8 +4,6 @@ import axios from "axios";
 export default function Chamber({
   itemsChamber,
   setItemsChamber,
-  dataFromSL,
-  cleanChamberData,
   addToShoppingList,
 }) {
   // Validate qty with regex
@@ -67,38 +65,6 @@ export default function Chamber({
     }
   };
 
-  // Datas from shopping list
-
-  useEffect(() => {
-    if (dataFromSL.length > 0) {
-      const exsistingItem = itemsChamber.find(
-        (item) => item.name === dataFromSL[0].name
-      );
-      if (exsistingItem) {
-        const unit = exsistingItem.quantity
-          .replace(Number.parseFloat(exsistingItem.quantity), "")
-          .trim();
-        const firstNum = Number.parseFloat(exsistingItem.quantity);
-        const secondNum = Number.parseFloat(dataFromSL[0].quantity);
-        const sumQty = firstNum + secondNum;
-        exsistingItem.quantity = sumQty + " " + unit;
-        exsistingItem.date =
-          new Date().getFullYear() +
-          "." +
-          " " +
-          (new Date().getMonth() + 1) +
-          "." +
-          " " +
-          new Date().getDate() +
-          ".";
-        setItemsChamber([...itemsChamber]);
-      } else {
-        setItemsChamber([...itemsChamber, ...dataFromSL]);
-      }
-      cleanChamberData();
-    }
-  }, [dataFromSL]);
-
   useEffect(() => {
     if (isVisibleTransferForm) {
       setQtyChamberFormRef.current.focus();
@@ -140,7 +106,7 @@ export default function Chamber({
       }
     };
     fetchItems();
-  }, [setItemsChamber]);
+  }, [itemsChamber]);
 
   const handleAddChamber = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
