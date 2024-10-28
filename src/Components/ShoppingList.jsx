@@ -20,7 +20,6 @@ export default function ShoppingList({
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
   const [modifyQuantity, setModifyQuantity] = useState("");
-  const [updateIndex, setUpdateIndex] = useState(null);
   const [newIndex, setNewIndex] = useState(null);
   const [isVisibleAmount, setIsvisibleAmount] = useState(false);
   const [isVisibleS, setIsVisibleS] = useState(false);
@@ -67,7 +66,6 @@ export default function ShoppingList({
   const isTextQty = isVisibleQty ? "Close modification" : "Update item";
   const handleVisibleQty = (index, id) => {
     setIsVisibleQty(!isVisibleQty);
-    setUpdateIndex(index);
     setUpdateIdSL(id);
   };
 
@@ -78,7 +76,6 @@ export default function ShoppingList({
     setNewIndex(index);
   };
 
-  const [prevItemsSL, setPrevItemsSL] = useState([]);
   const [prevExpenditure, setPrevExpenditure] = useState([]);
 
   // Functions
@@ -134,7 +131,8 @@ export default function ShoppingList({
       };
       try {
         await axios.post("http://localhost:5500/shoppingList_items", newItemSL);
-        setItemsSL([...itemsSL, newItemSL]);
+        const response = await axios.get("http://localhost:5500/shoppingList_items");
+        setItemsSL(response.data.items);
         setNewItem("");
         setNewQuantity("");
         setIsVisibleS(false);
@@ -150,12 +148,9 @@ export default function ShoppingList({
     try {
       const itemToDelete = itemsSL[index];
       await axios.delete(`http://localhost:5500/shoppingList_items/${itemToDelete.id}`);
-      const newList = itemsSL.filter((_, i) => {
-        return i !== index;
-      });
-      setItemsSL(newList);
+      const response = await axios.get("http://localhost:5500/shoppingList_items");
+      setItemsSL(response.data.items);
       setIsVisibleQty(false);
-      setUpdateIndex(null);
       setModifyQuantity("");
     } catch {
       alert("An error occurred while deleting the item.");
@@ -169,11 +164,9 @@ export default function ShoppingList({
     }
     try {
       await axios.put(`http://localhost:5500/shoppingList_items/${updateIdSL}`, {quantity: modifyQuantity});
-      const updateList = [...itemsSL];
-      updateList[updateIndex].quantity = modifyQuantity.trim();
-      setItemsSL(updateList);
+      const response = await axios.get("http://localhost:5500/shoppingList_items");
+      setItemsSL(response.data.items);
       setIsVisibleQty(false);
-      setUpdateIndex(null);
       setUpdateIdSL(null);
       setModifyQuantity("");
     } catch (error){

@@ -22,7 +22,6 @@ export default function Fridge({
 
   ////////////
 
-  const [updateIndex, setUpdateIndex] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isVisibleUpdate, setIsVisibleUpdate] = useState(false);
   const [tempIndex, setTempIndex] = useState(null);
@@ -30,9 +29,6 @@ export default function Fridge({
   const updateFridgeFormRef = useRef(null);
   const addFridgeFormRef = useRef(null);
   const [updateId, setUpdateId] = useState(null);
-
-  // Important for the localStorage !!!!!
-  const [prevItems, setPrevItems] = useState([]);
 
   // Add btn text modification
 
@@ -119,6 +115,15 @@ export default function Fridge({
     }
   }, [isVisibleTransferForm, isVisibleUpdate, isVisible]);
 
+  const toggleVisibilityAdd = () => {
+    setIsVisible(!isVisible);
+  };
+
+  const toggleVisibilityUpdate = (index, id) => {
+    setUpdateId(id);
+    setIsVisibleUpdate(!isVisibleUpdate);
+  };
+
   // Datas from the database
 
   useEffect(() => {
@@ -133,15 +138,7 @@ export default function Fridge({
     fetchItems();
   }, [setItems]);
 
-  const toggleVisibilityAdd = () => {
-    setIsVisible(!isVisible);
-  };
-
-  const toggleVisibilityUpdate = (index, id) => {
-    setUpdateIndex(index);
-    setUpdateId(id);
-    setIsVisibleUpdate(!isVisibleUpdate);
-  };
+  // functions
 
   const handleAddFridge = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
@@ -152,7 +149,8 @@ export default function Fridge({
       };
       try {
         await axios.post("http://localhost:5500/fridge_items", newFridgeItem);
-        setItems([...items, newFridgeItem]);
+        const response = await axios.get("http://localhost:5500/fridge_items");
+        setItems(response.data.items);
         setNewItem("");
         setNewQuantity("");
         setIsVisible(false);
@@ -170,11 +168,10 @@ export default function Fridge({
       await axios.delete(
         `http://localhost:5500/fridge_items/${itemToDelete.id}`
       );
-      const newElements = items.filter((_, i) => i !== index);
-      setItems(newElements);
+      const response = await axios.get("http://localhost:5500/fridge_items");
+      setItems(response.data.items);
       setIsVisibleUpdate(false);
       setModifyQuantity("");
-      setUpdateIndex(null);
       setIsVisibleTransferForm(false);
     } catch (error) {
       console.error("Error deleting item:", error);
@@ -183,7 +180,6 @@ export default function Fridge({
   };
 
   const handleUpdate = async () => {
-    console.log("Frissített index: ", updateId);
     if (modifyQuantity === "") {
       alert("Please enter a quantity.");
     }
@@ -191,9 +187,8 @@ export default function Fridge({
       await axios.put(`http://localhost:5500/fridge_items/${updateId}`, {
         quantity: modifyQuantity.trim(),
       });
-      const updatedList = [...items];
-      updatedList[updateIndex].quantity = modifyQuantity.trim();
-      setItems(updatedList);
+      const response = await axios.get("http://localhost:5500/fridge_items");
+      setItems(response.data.items);
       setModifyQuantity("");
       setIsVisibleUpdate(false);
       setUpdateId(null);

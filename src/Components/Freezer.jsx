@@ -14,22 +14,17 @@ export default function Freezer({
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
   const [tempQty, setTempQty] = useState("");
-  //////////////////////////////////////////////////
+
   const [isVisibleF, setIsVisibleF] = useState(false);
-  const isText = isVisibleF ? "Close add form" : "Add item";
   const [isVisibleUpdateF, setIsVisibleUpdateF] = useState(false);
-  const updateText = isVisibleUpdateF ? "Close modification" : "Update item";
   const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
-  ////////////////////////////////////////////////////////
-  const [prevItemsFreezer, setPrevItemsFreezer] = useState([]);
+  const isText = isVisibleF ? "Close add form" : "Add item";
+  const updateText = isVisibleUpdateF ? "Close modification" : "Update item";
   const [modifyQuantity, setModifyQuantity] = useState("");
-  const [updateIndex, setUpdateIndex] = useState(null);
   const [tempIndex, setTempIndex] = useState(null);
   const setQtyFreezerFormRef = useRef(null);
   const updateFreezerFormRef = useRef(null);
   const addFreezerFormRef = useRef(null);
-  // A qty módosításához szükséges az id, hogy a szerver is megkapja a módosított adatokat.
-
   const [updateId, setUpdateId] = useState(null);
 
   // Data from shopping list
@@ -132,7 +127,6 @@ export default function Freezer({
 
   const toggleVisibilityUpdateF = (index, id) => {
     setIsVisibleUpdateF(!isVisibleUpdateF);
-    setUpdateIndex(index);
     setUpdateId(id);
   };
 
@@ -147,8 +141,8 @@ export default function Freezer({
       };
       try {
         await axios.post("http://localhost:5500/freezer_items", newItemData);
-        console.log("Az api hívás befejeződött.");
-        setItemsFreezer([...itemsFreezer, newItemData]);
+        const response = await axios.get("http://localhost:5500/freezer_items");
+        setItemsFreezer(response.data.items);
         setNewItem("");
         setNewQuantity("");
         setIsVisibleF(false);
@@ -166,9 +160,8 @@ export default function Freezer({
       await axios.delete(
         `http://localhost:5500/freezer_items/${itemToDelete.id}`
       );
-
-      const newList = itemsFreezer.filter((_, i) => i !== index);
-      setItemsFreezer(newList);
+      const response = await axios.get("http://localhost:5500/freezer_items");
+      setItemsFreezer(response.data.items);
       setIsVisibleUpdateF(false);
       setModifyQuantity("");
       setIsVisibleTransferForm(false);
@@ -188,14 +181,9 @@ export default function Freezer({
       await axios.put(`http://localhost:5500/freezer_items/${updateId}`, {
         quantity: modifyQuantity.trim(),
       });
-
-      console.log("új mennyiség: ", modifyQuantity);
-
-      const updatedList = [...itemsFreezer];
-      updatedList[updateIndex].quantity = modifyQuantity.trim();
-      setItemsFreezer(updatedList);
+      const response = await axios.get("http://localhost:5500/freezer_items");
+      setItemsFreezer(response.data.items);
       setIsVisibleUpdateF(false);
-      setUpdateIndex(null);
       setUpdateId(null);
       setModifyQuantity("");
     } catch (error) {

@@ -6,12 +6,6 @@ import Others from "./Components/Others";
 import ShoppingList from "./Components/ShoppingList";
 import "./App.css";
 
-/*
-  A freezer komponensben a bevitt adatok mentésre kerülnek, és törölni is lehet, bár az nem tökéletes.
-  A szerver oldalon az id-k nem passzolnak ha 1 törlés megtörténik, lehet hogy név alapján kéne törölni. 2024.10.17-én javítani.
-  Ha az adott tábla üres, az autoincrementet lehetne nullázni. 
-*/
-
 export default function App() {
   const [fridgeItems, setFridgeItems] = useState([]);
   const [freezerItems, setFreezerItems] = useState([]);
@@ -230,11 +224,11 @@ export default function App() {
   - Bevásárlólista más színű;
   - DARK MODE-BAN AZ ADD ITEM MEGNYITÁSAKOR A SZÖVEG NEM LÁTSZÓDIK, MA KÖTELEZŐ JAVÍTANI! 2024-10-11. + A VONALAZÁST IS;
   - Dark mode-ban az árnyék alul és jobb oldalon legyen;
+  - Adatbázis készítése, összekötni az oldallal;
 
   TODO:
   - A bevásárlások értékének bevitele.Ezeket gyűjteni egy objektumba, heti és havi kimutatást készíteni diagram formájában is, de szerintem csak ha az aktuális heti, és havi ráfordítás megjelnne az is jó lenne. A diagramok pedig külön oldalon szerepelnének.
   A valuta megadására hívja fel a figyelmet, ha az nincs megadva. Ez külön legyen kezelve a form-tól.
-  - Adatbázis készítése, összekötni az oldallal;
   - Bejelentkezési felület, és bejelentkezés;
   - Bizonyos termékekre mennyi volt a havi ráfordítás (Vagy akár az összesre.);
   - 1 gomb amivel lehet váltani az adott tétel színét, jelezve a vásárlás sikerességét (esetleg pipa v x), vagy az adott elem nevére kattintáskor áthúzni az elemet, ezzel jelezve a vásárlás sikerességét. EZ NEM BIZTOS HOGY HASZNOS ÖTLET;

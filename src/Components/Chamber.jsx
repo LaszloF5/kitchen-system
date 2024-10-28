@@ -39,10 +39,6 @@ export default function Chamber({
   const [isVisibleQuantity, setIsVisibleQuantity] = useState(false);
   const qunatityText = isVisibleQuantity ? "Close modification" : "Update item";
 
-  const [updateIndex, setUpdateIndex] = useState(null);
-
-  const [prevItemsChamber, setPrevItemsChamber] = useState([]);
-
   // Functions
 
   // to the shopping list
@@ -127,9 +123,7 @@ export default function Chamber({
 
   const toggleUpdateForm = (index, id) => {
     setIsVisibleQuantity(!isVisibleQuantity);
-    setUpdateIndex(index);
     setUpdateIdChamber(id);
-    console.log(id);
   };
 
   // Item modifier functions
@@ -156,8 +150,9 @@ export default function Chamber({
         date_added: new Date().toISOString().split("T")[0],
       };
       try {
-        axios.post("http://localhost:5500/chamber_items", newChamberItem);
-        setItemsChamber([...itemsChamber, newChamberItem]);
+        await axios.post("http://localhost:5500/chamber_items", newChamberItem);
+        const response = await axios.get("http://localhost:5500/chamber_items");
+        setItemsChamber(response.data.items);
         setNewItem("");
         setNewQuantity("");
         setIsVisible(false);
@@ -175,11 +170,10 @@ export default function Chamber({
       await axios.delete(
         `http://localhost:5500/chamber_items/${itemToDelete.id}`
       );
-      const newElements = itemsChamber.filter((_, i) => i !== index);
-      setItemsChamber(newElements);
+      const response = await axios.get("http://localhost:5500/chamber_items");
+      setItemsChamber(response.data.items);
       setIsVisibleQuantity(false);
       setModifyQuantity("");
-      setUpdateIndex(null);
       setIsVisibleTransferForm(false);
     } catch (error) {
       console.error("Error deleting item:", error);
@@ -197,13 +191,10 @@ export default function Chamber({
      await axios.put(`http://localhost:5500/chamber_items/${updateIdChamber}`, {
         quantity: modifyQuantity.trim(),
       });
-      console.log("új mennyiség: ", modifyQuantity);
-      const updatedItems = [...itemsChamber];
-      updatedItems[updateIndex].quantity = modifyQuantity.trim();
-      setItemsChamber(updatedItems);
+      const response = await axios.get("http://localhost:5500/chamber_items");
+      setItemsChamber(response.data.items);
       setModifyQuantity("");
       setIsVisibleQuantity(false);
-      setUpdateIndex(null);
       setUpdateIdChamber(null);
     } 
     

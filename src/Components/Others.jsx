@@ -24,7 +24,6 @@ export default function Others({
   const [isVisibleQtyO, setIsVisibleQtyO] = useState(false);
   const QtyText = isVisibleQtyO ? "Close modification" : "Update item";
   const [modifyQuantity, setModifyQuantity] = useState("");
-  const [updateIndex, setUpdateIndex] = useState(null);
   const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
   const SLText = isVisibleTransferForm ? "Close modification" : "Add to the SL";
   const setQtyOthersFormRef = useRef(null);
@@ -40,8 +39,6 @@ export default function Others({
     setTempIndex(index);
     setIsVisibleTransferForm(!isVisibleTransferForm);
   };
-
-  const [prevItemsOthers, setPrevItemsOthers] = useState([]);
 
   // Functions
 
@@ -128,7 +125,6 @@ export default function Others({
 
   const toggleModifyQty = (index, id) => {
     setIsVisibleQtyO(!isVisibleQtyO);
-    setUpdateIndex(index);
     setUpdateIdOthers(id);
     console.log(id)
   };
@@ -156,7 +152,8 @@ export default function Others({
       };
       try {
         await axios.post("http://localhost:5500/others_items", newOthersItem);
-        setItemsOthers([...itemsOthers, newOthersItem]);
+        const response = await axios.get("http://localhost:5500/others_items");
+        setItemsOthers(response.data.items);
         setNewItem("");
         setNewQuantity("");
         setIsVisibleO(false);
@@ -174,10 +171,9 @@ export default function Others({
       await axios.delete(
         `http://localhost:5500/others_items/${itemToDelete.id}`
       );
-      const newList = itemsOthers.filter((_, i) => i !== index);
-      setItemsOthers(newList);
+      const response = await axios.get("http://localhost:5500/others_items");
+      setItemsOthers(response.data.items);
       setIsVisibleQtyO(false);
-      setUpdateIndex(null);
       setModifyQuantity("");
     } catch (error) {
       console.error("Error deleting item:", error);
@@ -194,12 +190,10 @@ export default function Others({
       await axios.put(`http://localhost:5500/others_items/${updateIdOthers}`, {
         quantity: modifyQuantity.trim(),
       });
-      const updatedList = [...itemsOthers];
-      updatedList[updateIndex].quantity = modifyQuantity.trim();
-      setItemsOthers(updatedList);
+      const response = await axios.get("http://localhost:5500/others_items");
+      setItemsOthers(response.data.items);
       setIsVisibleQtyO(false);
       setModifyQuantity("");
-      setUpdateIndex(null);
       setUpdateIdOthers(null);
     }
   };
