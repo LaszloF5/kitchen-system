@@ -95,10 +95,10 @@ app.delete("/fridge_items/:id", (req, res) => {
     }
   });
 
-  db.get("SELECT COUNT(*) AS count FROM freezer_items", (err, row) => {
+  db.get("SELECT COUNT(*) AS count FROM fridge_items", (err, row) => {
     if (row.count === 0) {
       db.run(
-        "UPDATE sqlite_sequence SET seq = 0 WHERE name = 'freezer_items'",
+        "UPDATE sqlite_sequence SET seq = 0 WHERE name = 'fridge_items'",
         (err) => {
           if (err) {
             res.status(400).json({ err: err.message });
@@ -358,7 +358,7 @@ app.put("/others_items/:id", (req, res) => {
 // shopping list items
 
 app.get("/shoppingList_items", (req, res) => {
-  db.all("SELECT * FROM others_items", [], (err, rows) => {
+  db.all("SELECT * FROM shoppingList_items", [], (err, rows) => {
     if (err) {
       res.status(400).json({ error: err.message });
       return;
@@ -369,6 +369,7 @@ app.get("/shoppingList_items", (req, res) => {
 
 app.post("/shoppingList_items", (req, res) => {
   const { name, quantity, date_added } = req.body;
+  console.log(req.body);
   const sql =
     "INSERT INTO shoppingList_items (name, quantity, date_added) VALUES(?, ?, ?)";
   db.run(sql, [name, quantity, date_added], function (err) {
@@ -378,6 +379,49 @@ app.post("/shoppingList_items", (req, res) => {
     }
     res.json({ id: this.lastID, name, quantity, date_added });
   });
+});
+
+app.delete("/shoppingList_items/:id", (req, res) => {
+  const id = req.params.id;
+  const sql = "DELETE FROM shoppingList_items WHERE id = ?";
+
+  db.run(sql, id, function (err) {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    db.get("SELECT COUNT(*) AS count FROM shoppingList_items", (err, row) => {
+      if (row.count === 0) {
+        db.run(
+          "UPDATE sqlite_sequence SET seq = 0 WHERE name = 'shoppingList_items'",
+          (err) => {
+            if (err) {
+              res.status(400).json({ err: err.message });
+              return;
+            }
+            // Visszajelzés a törlésről és a reset-ről
+            res.json({ message: "Item deleted and sequence reset", id });
+          }
+        );
+      } else {
+        // Ha nem üres, csak a törlés visszajelzése
+        res.json({ message: "Item deleted", id });
+      }
+    });
+  });
+});
+
+app.put("/shoppingList_items/:id", (req, res) => {
+  const { id } = req.params;
+  const { quantity } = req.body;
+  const sql = "UPDATE shoppinglist_items SET quantity = ? WHERE id = ?";
+
+  db.run(sql, [quantity, id], function (err) {
+    if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+  });
+  res.json({ message: "Quantity updated successfully", quantity, id });
 });
 
 app.listen(PORT, () => {
