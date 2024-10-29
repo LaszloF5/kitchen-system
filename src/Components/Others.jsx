@@ -5,9 +5,9 @@ export default function Others({
   itemsOthers,
   setItemsOthers,
   addToShoppingList,
+  regex,
+  regexQtyBreakdown,
 }) {
-  // Validate qty with regex
-  const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
 
   const [newItem, setNewItem] = useState([]);
   const [newQuantity, setNewQuantity] = useState([]);
@@ -110,9 +110,11 @@ export default function Others({
 
   const handleAddOthers = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
+      const validQty = Number(...newQuantity.match(regexQtyBreakdown));
+      const unit = newQuantity.replace(Number.parseFloat(newQuantity), '');
       const newOthersItem = {
         name: newItem.trim(),
-        quantity: newQuantity.trim(),
+        quantity: `${validQty} ${unit}`,
         date_added: new Date().toISOString().split("T")[0],
       };
       try {
@@ -179,7 +181,7 @@ export default function Others({
                 key={index}
               >
                 {item.name} - {item.quantity}
-                <p className="date">{item.date}</p>
+                <p className="date">{item.date_added}</p>
                 <div className="buttons-container">
                   <button
                     className="btn btn-others"

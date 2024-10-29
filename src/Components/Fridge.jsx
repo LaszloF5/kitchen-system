@@ -5,14 +5,10 @@ import axios from "axios";
 export default function Fridge({
   items,
   setItems,
-  dataFromSL,
-  cleanFridgeData,
   addToShoppingList,
+  regex,
+  regexQtyBreakdown,
 }) {
-  // Validate qty with regex
-
-  const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
-
   //Input values
 
   const [newItem, setNewItem] = useState("");
@@ -110,9 +106,11 @@ export default function Fridge({
 
   const handleAddFridge = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
+      const validQty = Number(...newQuantity.match(regexQtyBreakdown));
+      const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
       const newFridgeItem = {
         name: newItem.trim(),
-        quantity: newQuantity.trim(),
+        quantity: `${validQty} ${unit}`,
         date_added: new Date().toISOString().split("T")[0],
       };
       try {
@@ -184,7 +182,7 @@ export default function Fridge({
               key={index}
             >
               {item.name} - {item.quantity}
-              <p className="date">{item.date}</p>
+              <p className="date">{item.date_added}</p>
               <div className="btns-container">
                 <button
                   className="btn btn-others"

@@ -16,6 +16,10 @@ export default function App() {
   const headerText = "Weekly expenses: ";
   const [currency, setCurrency] = useState("");
   const [prevCurrency, setPrevCurrency] = useState("");
+
+    // Validate qty with regex
+  const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
+  const regexQtyBreakdown = /\d+(\.\d+)?/;
   
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isVisibleCurrencyForm, setIsVisibleCurrencyForm] = useState(false);
@@ -115,24 +119,34 @@ export default function App() {
       <Fridge
         items={fridgeItems}
         setItems={setFridgeItems}
+        regex = {regex}
+        regexQtyBreakdown = {regexQtyBreakdown}
       />
       <Freezer
         itemsFreezer={freezerItems}
         setItemsFreezer={setFreezerItems}
+        regex = {regex}
+        regexQtyBreakdown = {regexQtyBreakdown}
       />
       <Chamber
         itemsChamber={chamberItems}
         setItemsChamber={setChamberItems}
+        regex = {regex}
+        regexQtyBreakdown = {regexQtyBreakdown}
       />
       <Others
         itemsOthers={otherItems}
         setItemsOthers={setOtherItems}
+        regex = {regex}
+        regexQtyBreakdown = {regexQtyBreakdown}
       />
       <ShoppingList
         itemsSL={shoppingListItems}
         setItemsSL={setShoppingListItems}
         expenditure={yourAmount}
         setExpenditure={setYourAmount}
+        regex = {regex}
+        regexQtyBreakdown = {regexQtyBreakdown}
       />
       <footer className="footer">Footer</footer>
     </div>

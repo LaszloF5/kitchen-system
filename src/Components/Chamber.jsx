@@ -5,9 +5,10 @@ export default function Chamber({
   itemsChamber,
   setItemsChamber,
   addToShoppingList,
+  regex,
+  regexQtyBreakdown,
 }) {
-  // Validate qty with regex
-  const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
+
   // Input values
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
@@ -110,9 +111,11 @@ export default function Chamber({
 
   const handleAddChamber = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
+      const vaildQty = Number(...newQuantity.match(regexQtyBreakdown));
+      const unit = newQuantity.replace(Number.parseFloat(newQuantity), '');
       const newChamberItem = {
         name: newItem.trim(),
-        quantity: newQuantity.trim(),
+        quantity: `${vaildQty} ${unit}`,
         date_added: new Date().toISOString().split("T")[0],
       };
       try {
@@ -185,7 +188,7 @@ export default function Chamber({
               key={index}
             >
               {item.name} - {item.quantity}
-              <p className="date">{item.date}</p>
+              <p className="date">{item.date_added}</p>
               <div className="btns-container">
                 <button
                   className="btn btn-others"

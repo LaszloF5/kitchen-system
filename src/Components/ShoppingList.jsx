@@ -6,14 +6,10 @@ import "./ShoppingList.css";
 export default function ShoppingList({
   itemsSL,
   setItemsSL,
-  addToFridge,
-  addToFreezer,
-  addToChamber,
-  addToOthers,
-  dataFromFridge,
-  clearTransferredData,
   expenditure,
   setExpenditure,
+  regex,
+  regexQtyBreakdown,
 }) {
   // Input values
 
@@ -124,9 +120,11 @@ export default function ShoppingList({
 
   const handleAdd = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
+      const validQty = Number(...newQuantity.match(regexQtyBreakdown));
+      const unit = newQuantity.replace(Number.parseFloat(newQuantity), '');
       const newItemSL = {
         name: newItem.trim(),
-        quantity: newQuantity.trim(),
+        quantity: `${validQty} ${unit}`,
         date_added: new Date().toISOString().split("T")[0],
       };
       try {
@@ -176,10 +174,11 @@ export default function ShoppingList({
 
   // Elemek mozgatása komponensek között //
 
-  const moveItem = async (itemId, sourceTable, targetTable) => {
+  const moveItem = async (itemId, itemName, sourceTable, targetTable) => {
     try {
       const response = await axios.post("http://localhost:5500/move-item", {
         id: itemId,
+        itemName,
         sourceTable,
         targetTable,
       });
@@ -202,28 +201,28 @@ export default function ShoppingList({
 
   const handleTransfer1 = (index) => {
     const itemToTransfer = itemsSL[index];
-    moveItem(itemToTransfer.id, "shoppingList_items", "fridge_items");
+    moveItem(itemToTransfer.id, itemToTransfer.name, "shoppingList_items", "fridge_items");
   };
 
   //Freezer component//
 
   const handleTransfer2 = (index) => {
     const itemToTransfer = itemsSL[index];
-    moveItem(itemToTransfer.id, "shoppingList_items", "freezer_items");
+    moveItem(itemToTransfer.id, itemToTransfer.name,"shoppingList_items", "freezer_items");
   };
 
   //Chamber component//
 
   const handleTransfer3 = (index) => {
     const itemToTransfer = itemsSL[index];
-    moveItem(itemToTransfer.id, "shoppingList_items", "chamber_items");
+    moveItem(itemToTransfer.id, itemToTransfer.name, "shoppingList_items", "chamber_items");
   };
 
   //Others component//
 
   const handleTransfer4 = (index) => {
     const itemToTransfer = itemsSL[index];
-    moveItem(itemToTransfer.id, "shoppingList_items", "others_items");
+    moveItem(itemToTransfer.id, itemToTransfer.name,"shoppingList_items", "others_items");
   };
 
   useEffect(() => {
@@ -254,7 +253,7 @@ export default function ShoppingList({
           itemsSL.map((item, index) => (
             <li className="fridge-li-element" key={index}>
               {item.name} - {item.quantity}
-              <p className="date">{item.date}</p>
+              <p className="date">{item.date_added}</p>
               <div className="btns-container">
                 <button
                   className="btn btn-move-to"

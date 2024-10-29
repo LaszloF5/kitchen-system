@@ -5,9 +5,9 @@ export default function Freezer({
   itemsFreezer,
   setItemsFreezer,
   addToShoppingList,
+  regex,
+  regexQtyBreakdown,
 }) {
-  // Validate qty with regex
-  const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
   // Input values
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
@@ -96,12 +96,14 @@ export default function Freezer({
   };
 
   // Add item to the database
-  
+
   const handleAddFreezer = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
+      const validQty = Number(...newQuantity.match(regexQtyBreakdown)); // A visszatérési értéke 1 tömb, ezért bontani kell, és számmá alakítani.
+      const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
       const newItemData = {
         name: newItem.trim(),
-        quantity: newQuantity.trim(),
+        quantity: `${validQty} ${unit}`,
         date_added: new Date().toISOString().split("T")[0],
       };
       try {
@@ -177,7 +179,7 @@ export default function Freezer({
                 key={index}
               >
                 {item.name} - {item.quantity}
-                <p className="date">{item.date}</p>
+                <p className="date">{item.date_added}</p>
                 <div className="btns-container">
                   <button
                     className="btn btn-others"
