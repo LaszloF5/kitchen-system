@@ -369,7 +369,7 @@ app.get("/shoppingList_items", (req, res) => {
 
 app.post("/shoppingList_items", (req, res) => {
   const { name, quantity, date_added } = req.body;
-  console.log(req.body);
+  console.log("itt a hiba: ", req.body);
   const sql =
     "INSERT INTO shoppingList_items (name, quantity, date_added) VALUES(?, ?, ?)";
   db.run(sql, [name, quantity, date_added], function (err) {
@@ -449,74 +449,82 @@ app.post("/move-item", (req, res) => {
     (err, sourceRow) => {
       if (err) return res.status(500).json({ error: err.message });
       if (!sourceRow) return res.status(404).json({ error: "Item not found." });
-      if (sourceRow) {
-        const [sourceQuantity, sourceUnit] = sourceRow.quantity.split(" ");
-        const sourceQuantityValue = parseFloat(sourceQuantity);
-        db.get(
-          `SELECT * FROM ${targetTable} WHERE name = ?`,
-          [itemName],
-          (err, targetRow) => {
-            if (err) return res.status(500).json({ error: err.message });
-            if (targetRow) {
-              const [targetQuantity, targetUnit] =
-                targetRow.quantity.split(" ");
-              const targetQuantityValue = parseFloat(targetQuantity);
-              if (sourceUnit === targetUnit) {
-                const newQuantity = sourceQuantityValue + targetQuantityValue;
-                const updatedQuantity = `${newQuantity} ${targetUnit}`;
-                db.run(
-                  `UPDATE ${targetTable} SET quantity = ? WHERE name = ?`,
-                  [updatedQuantity, itemName],
-                  function (err) {
-                    if (err)
-                      return res.status(500).json({ error: err.message });
-                    db.run(
-                      `DELETE FROM ${sourceTable} WHERE id = ?`,
-                      [id],
-                      function (err) {
-                        if (err)
-                          return res.status(500).json({ error: err.message });
-                        res.json({ message: "Item moved succesfully.", id });
-                      }
-                    );
-                  }
-                );
-              }
-            } else {
-              db.get(
-                `SELECT * FROM ${sourceTable} WHERE id = ?`,
-                [id],
-                (err, row) => {
+
+      // Forrás mennyiség és mértékegység bontása
+      const cleanedSourceQuantity = sourceRow.quantity.replace(/\s+/, ' ').trim();
+      const [sourceQuantity, sourceUnit] = cleanedSourceQuantity.split(" ");
+      const sourceQuantityValue = parseFloat(sourceQuantity);
+
+      // Cél tábla lekérdezése az itemName alapján
+      db.get(
+        `SELECT * FROM ${targetTable} WHERE name = ?`,
+        [itemName],
+        (err, targetRow) => {
+          if (err) return res.status(500).json({ error: err.message });
+
+          if (targetRow) {
+            // Cél mennyiség és mértékegység bontása
+            const cleanedTargetQuantity = targetRow.quantity.replace(/\s+/, ' ').trim();
+            const [targetQuantity, targetUnit] = cleanedTargetQuantity.split(" ");
+            const targetQuantityValue = parseFloat(targetQuantity);
+
+            // Ellenőrzi, hogy a mértékegységek egyeznek-e
+            if (sourceUnit === targetUnit) {
+              const newQuantity = sourceQuantityValue + targetQuantityValue;
+              const updatedQuantity = `${newQuantity} ${targetUnit}`;
+
+              db.run(
+                `UPDATE ${targetTable} SET quantity = ? WHERE name = ?`,
+                [updatedQuantity, itemName],
+                function (err) {
                   if (err) return res.status(500).json({ error: err.message });
 
-                  if (!row)
-                    return res.status(404).json({ error: "Item not found." });
-
+                  // Sikeres UPDATE után törli a forrástáblából
                   db.run(
-                    `INSERT INTO ${targetTable} (name, quantity, date_added) VALUES (?, ?, ?)`,
-                    [row.name, row.quantity, row.date_added],
+                    `DELETE FROM ${sourceTable} WHERE name = ?`,
+                    [itemName],
                     function (err) {
                       if (err)
                         return res.status(500).json({ error: err.message });
-
-                      db.run(
-                        `DELETE FROM ${sourceTable} WHERE id = ?`,
-                        [id],
-                        function (err) {
-                          if (err)
-                            return res.status(500).json({ error: err.message });
-
-                          res.json({ message: "Item moved succesfully.", id });
-                        }
-                      );
+                      res.json({
+                        message: "Item moved successfully.",
+                        id: sourceRow.id,
+                      });
                     }
                   );
                 }
               );
+            } else {
+              res
+                .status(400)
+                .json({ error: "Unit mismatch between source and target." });
             }
+          } else {
+            // Ha nincs cél tábla sor, akkor beszúrja az új elemet
+            db.run(
+              `INSERT INTO ${targetTable} (name, quantity, date_added) VALUES (?, ?, ?)`,
+              [sourceRow.name, sourceRow.quantity, sourceRow.date_added],
+              function (err) {
+                if (err) return res.status(500).json({ error: err.message });
+
+                // Sikeres INSERT után törli a forrástáblából
+                db.run(
+                  `DELETE FROM ${sourceTable} WHERE name = ?`,
+                  [itemName],
+                  function (err) {
+                    if (err)
+                      return res.status(500).json({ error: err.message });
+                    res.json({
+                      message: "Item moved successfully.",
+                      id: sourceRow.id,
+                    });
+                  }
+                );
+              }
+            );
           }
-        );
-      }
+        }
+      );
     }
   );
 });

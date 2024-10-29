@@ -106,13 +106,13 @@ export default function Fridge({
 
   const handleAddFridge = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {
-      const validQty = Number(...newQuantity.match(regexQtyBreakdown));
-      const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
-      const newFridgeItem = {
-        name: newItem.trim(),
-        quantity: `${validQty} ${unit}`,
-        date_added: new Date().toISOString().split("T")[0],
-      };
+        const validQty = Number(...newQuantity.match(regexQtyBreakdown));
+        const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
+        var newFridgeItem = {
+          name: newItem.trim(),
+          quantity: `${validQty} ${unit}`,
+          date_added: new Date().toISOString().split("T")[0],
+      }
       try {
         await axios.post("http://localhost:5500/fridge_items", newFridgeItem);
         const response = await axios.get("http://localhost:5500/fridge_items");
@@ -150,8 +150,10 @@ export default function Fridge({
       alert("Please enter a quantity.");
     }
     try {
+      const modifiedQuantity = Number(...modifyQuantity.match(regexQtyBreakdown));
+        const modifiedUnit = newQuantity.replace(Number.parseFloat(modifyQuantity), "");
       await axios.put(`http://localhost:5500/fridge_items/${updateId}`, {
-        quantity: modifyQuantity.trim(),
+        quantity: `${modifiedQuantity} ${modifiedUnit}`,
       });
       const response = await axios.get("http://localhost:5500/fridge_items");
       setItems(response.data.items);
