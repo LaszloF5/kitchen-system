@@ -116,9 +116,13 @@ app.delete("/fridge_items/:id", (req, res) => {
 app.put("/fridge_items/:id", (req, res) => {
   const { id } = req.params;
   const { quantity } = req.body;
-  const sql = "UPDATE fridge_items SET quantity = ? WHERE id = ?";
+  const sql = "UPDATE fridge_items SET quantity = ? WHERE id = ?"
+  const regex = /\d+(\.\d+)?/;
+  const qty = Number(...quantity.match(regex));
+  const unit = quantity.replace(Number.parseFloat(quantity), "");
+  const validQty = `${qty} ${unit}`;
 
-  db.run(sql, [quantity, id], function (err) {
+  db.run(sql, [validQty, id], function (err) {
     if (err) {
       res.status(400).json({ error: err.message });
       return;
@@ -189,13 +193,17 @@ app.put("/freezer_items/:id", (req, res) => {
   console.log("PUT request received"); // Ez a lognak meg kell jelennie
   const { id } = req.params;
   const { quantity } = req.body;
+  const regex = /\d+(\.\d+)?/;
+  const qty = Number(...quantity.match(regex));
+  const unit = quantity.replace(Number.parseFloat(quantity), "");
+  const validQty = `${qty} ${unit}`;
 
   // Ellenőrzés: logold az ID-t és a quantity-t
   console.log(`Updating item with ID: ${id}, new quantity: ${quantity}`);
 
   const sql = "UPDATE freezer_items SET quantity = ? WHERE id = ?";
 
-  db.run(sql, [quantity, id], function (err) {
+  db.run(sql, [validQty, id], function (err) {
     if (err) {
       console.log("Error in SQL:", err.message); // Ha hiba történik az SQL futásnál, ez megjelenik
       res.status(400).json({ error: err.message });
@@ -264,15 +272,18 @@ app.delete("/chamber_items/:id", (req, res) => {
 app.put("/chamber_items/:id", (req, res) => {
   const { id } = req.params;
   console.log("ID param:", id);
-
   const { quantity } = req.body;
+  const regex = /\d+(\.\d+)?/;
+  const qty = Number(...quantity.match(regex));
+  const unit = quantity.replace(Number.parseFloat(quantity), "");
+  const validQty = `${qty} ${unit}`;
 
   // Ellenőrzés: logold az ID-t és a quantity-t
   console.log(`Updating item with ID: ${id}, new quantity: ${quantity}`);
 
   const sql = "UPDATE chamber_items SET quantity = ? WHERE id = ?";
 
-  db.run(sql, [quantity, id], function (err) {
+  db.run(sql, [validQty, id], function (err) {
     if (err) {
       console.log("Error in SQL:", err.message); // Ha hiba történik az SQL futásnál, ez megjelenik
       res.status(400).json({ error: err.message });
@@ -340,12 +351,16 @@ app.delete("/others_items/:id", (req, res) => {
 app.put("/others_items/:id", (req, res) => {
   const { id } = req.params;
   const { quantity } = req.body;
+  const regex = /\d+(\.\d+)?/;
+  const qty = Number(...quantity.match(regex));
+  const unit = quantity.replace(Number.parseFloat(quantity), "");
+  const validQty = `${qty} ${unit}`;
 
   console.log(`Updating item with ID: ${id}, new quantity: ${quantity}`);
 
   const sql = "UPDATE others_items SET quantity = ? WHERE id = ?";
 
-  db.run(sql, [quantity, id], function (err) {
+  db.run(sql, [validQty, id], function (err) {
     if (err) {
       console.log("Error in SQL:", err.message); // Ha hiba történik az SQL futásnál, ez megjelenik
       res.status(400).json({ error: err.message });
@@ -414,9 +429,13 @@ app.delete("/shoppingList_items/:id", (req, res) => {
 app.put("/shoppingList_items/:id", (req, res) => {
   const { id } = req.params;
   const { quantity } = req.body;
+  const regex = /\d+(\.\d+)?/;
+  const qty = Number(...quantity.match(regex));
+  const unit = quantity.replace(Number.parseFloat(quantity), "");
+  const validQty = `${qty} ${unit}`;
   const sql = "UPDATE shoppinglist_items SET quantity = ? WHERE id = ?";
 
-  db.run(sql, [quantity, id], function (err) {
+  db.run(sql, [validQty, id], function (err) {
     if (err) {
       return res.status(400).json({ error: err.message });
     }
@@ -451,7 +470,9 @@ app.post("/move-item", (req, res) => {
       if (!sourceRow) return res.status(404).json({ error: "Item not found." });
 
       // Forrás mennyiség és mértékegység bontása
-      const cleanedSourceQuantity = sourceRow.quantity.replace(/\s+/, ' ').trim();
+      const cleanedSourceQuantity = sourceRow.quantity
+        .replace(/\s+/, " ")
+        .trim();
       const [sourceQuantity, sourceUnit] = cleanedSourceQuantity.split(" ");
       const sourceQuantityValue = parseFloat(sourceQuantity);
 
@@ -464,8 +485,11 @@ app.post("/move-item", (req, res) => {
 
           if (targetRow) {
             // Cél mennyiség és mértékegység bontása
-            const cleanedTargetQuantity = targetRow.quantity.replace(/\s+/, ' ').trim();
-            const [targetQuantity, targetUnit] = cleanedTargetQuantity.split(" ");
+            const cleanedTargetQuantity = targetRow.quantity
+              .replace(/\s+/, " ")
+              .trim();
+            const [targetQuantity, targetUnit] =
+              cleanedTargetQuantity.split(" ");
             const targetQuantityValue = parseFloat(targetQuantity);
 
             // Ellenőrzi, hogy a mértékegységek egyeznek-e

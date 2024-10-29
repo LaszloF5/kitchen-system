@@ -150,10 +150,8 @@ export default function Fridge({
       alert("Please enter a quantity.");
     }
     try {
-      const modifiedQuantity = Number(...modifyQuantity.match(regexQtyBreakdown));
-        const modifiedUnit = newQuantity.replace(Number.parseFloat(modifyQuantity), "");
       await axios.put(`http://localhost:5500/fridge_items/${updateId}`, {
-        quantity: `${modifiedQuantity} ${modifiedUnit}`,
+        quantity: modifyQuantity.trim(),
       });
       const response = await axios.get("http://localhost:5500/fridge_items");
       setItems(response.data.items);
