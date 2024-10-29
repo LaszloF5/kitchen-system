@@ -20,7 +20,7 @@ db.serialize(() => {
     `CREATE TABLE IF NOT EXISTS fridge_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        quantity INTEGER NOT NULL,
+        quantity TEXT NOT NULL,
         date_added TEXT NOT NULL
         )`
   );
@@ -28,7 +28,7 @@ db.serialize(() => {
     `CREATE TABLE IF NOT EXISTS freezer_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        quantity INTEGER NOT NULL,
+        quantity TEXT NOT NULL,
         date_added TEXT NOT NULL
         )`
   );
@@ -36,7 +36,7 @@ db.serialize(() => {
     `CREATE TABLE IF NOT EXISTS chamber_items(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        quantity INTEGER NOT NULL,
+        quantity TEXT NOT NULL,
         date_added TEXT NOT NULL
         )`
   );
@@ -44,14 +44,14 @@ db.serialize(() => {
     `CREATE TABLE IF NOT EXISTS others_items(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        quantity INTEGER NOT NULL,
+        quantity TEXT NOT NULL,
         date_added TEXT NOT NULL)`
   );
   db.run(
     `CREATE TABLE IF NOT EXISTS shoppingList_items(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        quantity INTEGER NOT NULL,
+        quantity TEXT NOT NULL,
         date_added TEXT NOT NULL)`
   );
 });
@@ -426,39 +426,99 @@ app.put("/shoppingList_items/:id", (req, res) => {
 
 // Elemek mozgatása a shopping list komponensből a többi komponensbe.
 
-app.post('/move-item', (req, res) => {
-  const { id, sourceTable, targetTable } = req.body;
+app.post("/move-item", (req, res) => {
+  const { id, itemName, sourceTable, targetTable } = req.body;
 
   const validTables = [
     "fridge_items",
     "freezer_items",
     "chamber_items",
     "others_items",
-    "shoppingList_items"
+    "shoppingList_items",
   ];
-  if (!validTables.includes(sourceTable) || !validTables.includes(targetTable)) {
+  if (
+    !validTables.includes(sourceTable) ||
+    !validTables.includes(targetTable)
+  ) {
     return res.status(400).json({ error: "Invalid table name." });
   }
 
-  db.get(`SELECT * FROM ${sourceTable} WHERE id = ?`, [id], (err, row) => {
-    if (err) return res.status(500).json({ error: err.message });
+  db.get(
+    `SELECT * FROM ${sourceTable} WHERE name = ?`,
+    [itemName],
+    (err, sourceRow) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!sourceRow) return res.status(404).json({ error: "Item not found." });
+      if (sourceRow) {
+        const [sourceQuantity, sourceUnit] = sourceRow.quantity.split(" ");
+        const sourceQuantityValue = parseFloat(sourceQuantity);
+        db.get(
+          `SELECT * FROM ${targetTable} WHERE name = ?`,
+          [itemName],
+          (err, targetRow) => {
+            if (err) return res.status(500).json({ error: err.message });
+            if (targetRow) {
+              const [targetQuantity, targetUnit] =
+                targetRow.quantity.split(" ");
+              const targetQuantityValue = parseFloat(targetQuantity);
+              if (sourceUnit === targetUnit) {
+                const newQuantity = sourceQuantityValue + targetQuantityValue;
+                const updatedQuantity = `${newQuantity} ${targetUnit}`;
+                db.run(
+                  `UPDATE ${targetTable} SET quantity = ? WHERE name = ?`,
+                  [updatedQuantity, itemName],
+                  function (err) {
+                    if (err)
+                      return res.status(500).json({ error: err.message });
+                    db.run(
+                      `DELETE FROM ${sourceTable} WHERE id = ?`,
+                      [id],
+                      function (err) {
+                        if (err)
+                          return res.status(500).json({ error: err.message });
+                        res.json({ message: "Item moved succesfully.", id });
+                      }
+                    );
+                  }
+                );
+              }
+            } else {
+              db.get(
+                `SELECT * FROM ${sourceTable} WHERE id = ?`,
+                [id],
+                (err, row) => {
+                  if (err) return res.status(500).json({ error: err.message });
 
-    if (!row) return res.status(404).json({ error: "Item not found." });
+                  if (!row)
+                    return res.status(404).json({ error: "Item not found." });
 
-    db.run(
-      `INSERT INTO ${targetTable} (name, quantity, date_added) VALUES (?, ?, ?)`,
-      [row.name, row.quantity, row.date_added],
-      function (err) {
-        if (err) return res.status(500).json({ error: err.message });
+                  db.run(
+                    `INSERT INTO ${targetTable} (name, quantity, date_added) VALUES (?, ?, ?)`,
+                    [row.name, row.quantity, row.date_added],
+                    function (err) {
+                      if (err)
+                        return res.status(500).json({ error: err.message });
 
-        db.run(`DELETE FROM ${sourceTable} WHERE id = ?`, [id], function (err) {
-          if (err) return res.status(500).json({ error: err.message });
+                      db.run(
+                        `DELETE FROM ${sourceTable} WHERE id = ?`,
+                        [id],
+                        function (err) {
+                          if (err)
+                            return res.status(500).json({ error: err.message });
 
-          res.json({ message: "Item moved succesfully.", id });
-        });
+                          res.json({ message: "Item moved succesfully.", id });
+                        }
+                      );
+                    }
+                  );
+                }
+              );
+            }
+          }
+        );
       }
-    );
-  });
+    }
+  );
 });
 
 app.listen(PORT, () => {
