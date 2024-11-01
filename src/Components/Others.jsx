@@ -4,7 +4,7 @@ import axios from "axios";
 export default function Others({
   itemsOthers,
   setItemsOthers,
-  addToShoppingList,
+  moveToSL,
   regex,
   regexQtyBreakdown,
 }) {
@@ -23,7 +23,7 @@ export default function Others({
   const QtyText = isVisibleQtyO ? "Close modification" : "Update item";
   const [modifyQuantity, setModifyQuantity] = useState("");
   const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
-  const SLText = isVisibleTransferForm ? "Close modification" : "Add to the SL";
+  const SLText = isVisibleTransferForm ? "Close modification" : "Add to SL";
   const setQtyOthersFormRef = useRef(null);
   const updateOthersFormRef = useRef(null);
   const addOthersFormRef = useRef(null);
@@ -48,16 +48,9 @@ export default function Others({
         ...itemsOthers[tempIndex],
         quantity: tempQty,
         date:
-          new Date().getFullYear() +
-          "." +
-          " " +
-          (new Date().getMonth() + 1) +
-          "." +
-          " " +
-          new Date().getDate() +
-          ".",
+          new Date().toISOString().split('T')[0],
       };
-      addToShoppingList(transferItem);
+      moveToSL(transferItem.name, transferItem.quantity, transferItem.date, 'others_items', 'shoppingList_items');
       setTempQty("");
       setTempIndex(null);
       setIsVisibleTransferForm(false);

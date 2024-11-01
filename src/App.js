@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from 'axios';
 import Fridge from "./Components/Fridge";
 import Freezer from "./Components/Freezer";
 import Chamber from "./Components/Chamber";
@@ -49,6 +50,20 @@ export default function App() {
         alert("Enter the currency that you want to use.");
     }
   }, []);
+
+  const moveToSL = async (itemName, newQuantity, date, sourceTable, targetTable) => {
+    try {
+      await axios.post("http://localhost:5500/moveto_sl", {
+        itemName,
+        newQuantity,
+        date,
+        sourceTable,
+        targetTable,
+      })
+    } catch {
+      alert("Error moving to the SL.");
+    }
+  }
 
   const handleCurrency = (e) => {
     e.preventDefault();
@@ -119,24 +134,28 @@ export default function App() {
       <Fridge
         items={fridgeItems}
         setItems={setFridgeItems}
+        moveToSL={moveToSL}
         regex = {regex}
         regexQtyBreakdown = {regexQtyBreakdown}
       />
       <Freezer
         itemsFreezer={freezerItems}
         setItemsFreezer={setFreezerItems}
+        moveToSL={moveToSL}
         regex = {regex}
         regexQtyBreakdown = {regexQtyBreakdown}
       />
       <Chamber
         itemsChamber={chamberItems}
         setItemsChamber={setChamberItems}
+        moveToSL={moveToSL}
         regex = {regex}
         regexQtyBreakdown = {regexQtyBreakdown}
       />
       <Others
         itemsOthers={otherItems}
         setItemsOthers={setOtherItems}
+        moveToSL={moveToSL}
         regex = {regex}
         regexQtyBreakdown = {regexQtyBreakdown}
       />

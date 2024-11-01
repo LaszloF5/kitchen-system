@@ -5,7 +5,7 @@ import axios from "axios";
 export default function Fridge({
   items,
   setItems,
-  addToShoppingList,
+  moveToSL,
   regex,
   regexQtyBreakdown,
 }) {
@@ -39,25 +39,19 @@ export default function Fridge({
     setIsVisibleTransferForm(!isVisibleTransferForm);
   };
 
-  const SLText = isVisibleTransferForm ? "Close modification" : "Add to the SL";
+  const SLText = isVisibleTransferForm ? "Close modification" : "Add to SL";
   // to the shopping list
   // Solution: Shallow copy --> Csak az első szintet másolja érték szerint (a többit referencia szerint), viszont nincs több szint, ezért elég. Így nem fogja módosítani az eredeti items tömböt, és a benne lévő objektumokat.
+
   const handleTransferItem = () => {
     if (tempQty !== "") {
       const transferItem = {
         ...items[tempIndex],
         quantity: tempQty,
         date:
-          new Date().getFullYear() +
-          "." +
-          " " +
-          (new Date().getMonth() + 1) +
-          "." +
-          " " +
-          new Date().getDate() +
-          ".",
+          new Date().toISOString().split("T")[0]
       };
-      addToShoppingList(transferItem);
+      moveToSL(transferItem.name, transferItem.quantity, transferItem.date, "fridge_items", "shoppingList_items");
       setTempQty("");
       setIsVisibleTransferForm(false);
       setTempIndex(null);

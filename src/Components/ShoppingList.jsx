@@ -116,7 +116,7 @@ export default function ShoppingList({
       }
     }
     fetchItems();
-  }, [])
+  }, [itemsSL])
 
   const handleAdd = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {

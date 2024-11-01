@@ -4,7 +4,7 @@ import axios from "axios";
 export default function Chamber({
   itemsChamber,
   setItemsChamber,
-  addToShoppingList,
+  moveToSL,
   regex,
   regexQtyBreakdown,
 }) {
@@ -27,7 +27,7 @@ export default function Chamber({
     setTempIndex(index);
   };
 
-  const SLText = isVisibleTransferForm ? "Close modification" : "Add to the SL";
+  const SLText = isVisibleTransferForm ? "Close modification" : "Add to SL";
 
   // Visible Add form
   const [isVisible, setIsVisible] = useState(false);
@@ -48,16 +48,9 @@ export default function Chamber({
         ...itemsChamber[tempIndex],
         quantity: tempQty,
         date:
-          new Date().getFullYear() +
-          "." +
-          " " +
-          (new Date().getMonth() + 1) +
-          "." +
-          " " +
-          new Date().getDate() +
-          ".",
+          new Date().toISOString().split('T')[0],
       };
-      addToShoppingList(transferItem);
+      moveToSL(transferItem.name, transferItem.quantity, transferItem.date, 'chamber_items', 'shoppingList_items')
       setTempQty("");
       setTempIndex(null);
       setIsVisibleTransferForm(false);

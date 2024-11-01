@@ -4,7 +4,7 @@ import axios from "axios";
 export default function Freezer({
   itemsFreezer,
   setItemsFreezer,
-  addToShoppingList,
+  moveToSL,
   regex,
   regexQtyBreakdown,
 }) {
@@ -60,24 +60,30 @@ export default function Freezer({
     setIsVisibleTransferForm(!isVisibleTransferForm);
   };
 
-  const SLText = isVisibleTransferForm ? "Close modification" : "Add to the SL";
+  const SLText = isVisibleTransferForm ? "Close modification" : "Add to SL";
+
+  // const moveToSL = async (itemName, newQuantity, date, sourceTable, targetTable) => {
+  //   try {
+  //     await axios.post("http://localhost:5500/moveto_sl", {
+  //       itemName,
+  //       newQuantity,
+  //       date,
+  //       sourceTable,
+  //       targetTable,
+  //     })
+  //   } catch {
+  //     alert("Error moving to the SL.");
+  //   }
+  // }
 
   const handleTransferItem = () => {
     if (tempQty !== "") {
       const transferItem = {
         ...itemsFreezer[tempIndex],
         quantity: tempQty,
-        date:
-          new Date().getFullYear() +
-          "." +
-          " " +
-          (new Date().getMonth() + 1) +
-          "." +
-          " " +
-          new Date().getDate() +
-          ".",
+        date: new Date().toISOString().split("T")[0],
       };
-      addToShoppingList(transferItem);
+      moveToSL(transferItem.name, transferItem.quantity, transferItem.date, 'freezer_items', 'shoppingList_items');
       setTempIndex(null);
       setTempQty("");
       setIsVisibleTransferForm(false);
