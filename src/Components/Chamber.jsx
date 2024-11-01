@@ -4,6 +4,7 @@ import axios from "axios";
 export default function Chamber({
   itemsChamber,
   setItemsChamber,
+  fetchItems,
   moveToSL,
   regex,
   regexQtyBreakdown,
@@ -91,16 +92,12 @@ export default function Chamber({
   // Datas from the database
 
   useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const response = await axios.get("http://localhost:5500/chamber_items");
-        setItemsChamber(response.data.items);
-      } catch (error) {
-        console.error("Error fetching items: ", error);
-      }
+    const getDatas = async () => {
+      const data = await fetchItems('chamber_items');
+        setItemsChamber(data);
     };
-    fetchItems();
-  }, [itemsChamber]);
+    getDatas();
+  }, []);
 
   const handleAddChamber = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {

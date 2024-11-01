@@ -62,11 +62,19 @@ app.get("/", (req, res) => {
 
 // fridge items
 
-app.get("/fridge_items", (req, res) => {
-  db.all("SELECT * FROM fridge_items", [], (err, rows) => {
+app.get("/:table/items", (req, res) => {
+  const {table} = req.params;
+  const validTables = ["fridge_items", "freezer_items", "chamber_items", "others_items", "shoppingList_items"];
+
+  if (!validTables.includes(table)) {
+    return res.status(400).json({error: "Invalid table name."})
+  }
+
+  const sql = `SELECT * FROM ${table}`;
+
+  db.all(sql, [], (err, rows) => {
     if (err) {
-      res.status(400).json({ error: err.message });
-      return;
+      return res.status(400).json({ error: err.message });
     }
     res.json({ items: rows });
   });
@@ -133,15 +141,15 @@ app.put("/fridge_items/:id", (req, res) => {
 
 // freezer items
 
-app.get("/freezer_items", (req, res) => {
-  db.all("SELECT * FROM freezer_items", [], (err, rows) => {
-    if (err) {
-      res.status(400).json({ error: err.message });
-      return;
-    }
-    res.json({ items: rows });
-  });
-});
+// app.get("/freezer_items", (req, res) => {
+//   db.all("SELECT * FROM freezer_items", [], (err, rows) => {
+//     if (err) {
+//       res.status(400).json({ error: err.message });
+//       return;
+//     }
+//     res.json({ items: rows });
+//   });
+// });
 
 app.post("/freezer_items", (req, res) => {
   const { name, quantity, date_added } = req.body;
@@ -216,15 +224,15 @@ app.put("/freezer_items/:id", (req, res) => {
 
 // chamber items
 
-app.get("/chamber_items", (req, res) => {
-  db.all("SELECT * FROM chamber_items", [], (err, rows) => {
-    if (err) {
-      res.status(400).json({ error: err.message });
-      return;
-    }
-    res.json({ items: rows });
-  });
-});
+// app.get("/chamber_items", (req, res) => {
+//   db.all("SELECT * FROM chamber_items", [], (err, rows) => {
+//     if (err) {
+//       res.status(400).json({ error: err.message });
+//       return;
+//     }
+//     res.json({ items: rows });
+//   });
+// });
 
 app.post("/chamber_items", (req, res) => {
   const { name, quantity, date_added } = req.body;
@@ -295,15 +303,15 @@ app.put("/chamber_items/:id", (req, res) => {
 
 // others items
 
-app.get("/others_items", (req, res) => {
-  db.all("SELECT * FROM others_items", [], (err, rows) => {
-    if (err) {
-      res.status(400).json({ error: err.message });
-      return;
-    }
-    res.json({ items: rows });
-  });
-});
+// app.get("/others_items", (req, res) => {
+//   db.all("SELECT * FROM others_items", [], (err, rows) => {
+//     if (err) {
+//       res.status(400).json({ error: err.message });
+//       return;
+//     }
+//     res.json({ items: rows });
+//   });
+// });
 
 app.post("/others_items", (req, res) => {
   const { name, quantity, date_added } = req.body;
@@ -372,15 +380,15 @@ app.put("/others_items/:id", (req, res) => {
 
 // shopping list items
 
-app.get("/shoppingList_items", (req, res) => {
-  db.all("SELECT * FROM shoppingList_items", [], (err, rows) => {
-    if (err) {
-      res.status(400).json({ error: err.message });
-      return;
-    }
-    res.json({ items: rows });
-  });
-});
+// app.get("/shoppingList_items", (req, res) => {
+//   db.all("SELECT * FROM shoppingList_items", [], (err, rows) => {
+//     if (err) {
+//       res.status(400).json({ error: err.message });
+//       return;
+//     }
+//     res.json({ items: rows });
+//   });
+// });
 
 app.post("/shoppingList_items", (req, res) => {
   const { name, quantity, date_added } = req.body;

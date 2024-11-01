@@ -5,6 +5,7 @@ import axios from "axios";
 export default function Fridge({
   items,
   setItems,
+  fetchItems,
   moveToSL,
   regex,
   regexQtyBreakdown,
@@ -85,16 +86,12 @@ export default function Fridge({
   // Datas from the database
 
   useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const response = await axios.get("http://localhost:5500/fridge_items");
-        setItems(response.data.items);
-      } catch (error) {
-        console.error("Error fetching items: ", error);
-      }
-    };
-    fetchItems();
-  }, [items]);
+    const getDatas = async () => {
+      const data = await fetchItems('fridge_items');
+      setItems(data);
+    }
+    getDatas();
+  }, []);
 
   // functions
 

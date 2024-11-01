@@ -6,6 +6,7 @@ import "./ShoppingList.css";
 export default function ShoppingList({
   itemsSL,
   setItemsSL,
+  fetchItems,
   expenditure,
   setExpenditure,
   regex,
@@ -107,16 +108,12 @@ export default function ShoppingList({
   };
 
   useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const response = await axios.get("http://localhost:5500/shoppingList_items");
-        setItemsSL(response.data.items);
-      } catch (error) {
-        console.error(error);
-      }
+    const getDatas = async () => {
+      const data = await fetchItems('shoppingList_items');
+      setItemsSL(data);
     }
-    fetchItems();
-  }, [itemsSL])
+    getDatas();
+  }, [])
 
   const handleAdd = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {

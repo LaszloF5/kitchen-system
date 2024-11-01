@@ -4,6 +4,7 @@ import axios from "axios";
 export default function Freezer({
   itemsFreezer,
   setItemsFreezer,
+  fetchItems,
   moveToSL,
   regex,
   regexQtyBreakdown,
@@ -42,16 +43,12 @@ export default function Freezer({
   // Data fetching from the database
 
   useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const response = await axios.get("http://localhost:5500/freezer_items");
-        setItemsFreezer(response.data.items);
-      } catch (error) {
-        console.error("Error fetching items: ", error);
-      }
-    };
-    fetchItems();
-  }, [itemsFreezer]);
+    const getDatas = async () => {
+      const data = await fetchItems('freezer_items');
+      setItemsFreezer(data);
+    }
+    getDatas();
+  }, []);
 
   ////////// FUNCTIONS //////////
 
@@ -61,20 +58,6 @@ export default function Freezer({
   };
 
   const SLText = isVisibleTransferForm ? "Close modification" : "Add to SL";
-
-  // const moveToSL = async (itemName, newQuantity, date, sourceTable, targetTable) => {
-  //   try {
-  //     await axios.post("http://localhost:5500/moveto_sl", {
-  //       itemName,
-  //       newQuantity,
-  //       date,
-  //       sourceTable,
-  //       targetTable,
-  //     })
-  //   } catch {
-  //     alert("Error moving to the SL.");
-  //   }
-  // }
 
   const handleTransferItem = () => {
     if (tempQty !== "") {

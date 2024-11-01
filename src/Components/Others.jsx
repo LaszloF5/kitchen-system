@@ -4,6 +4,7 @@ import axios from "axios";
 export default function Others({
   itemsOthers,
   setItemsOthers,
+  fetchItems,
   moveToSL,
   regex,
   regexQtyBreakdown,
@@ -90,16 +91,12 @@ export default function Others({
   // Item modifier functions
 
   useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const response = await axios.get("http://localhost:5500/others_items");
-        setItemsOthers(response.data.items);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchItems();
-  }, [itemsOthers]);
+   const getDatas = async () => {
+    const data = await fetchItems('others_items');
+    setItemsOthers(data)
+   }
+    getDatas();
+  }, []);
 
   const handleAddOthers = async () => {
     if (newItem.length > 0 && newQuantity.length > 0) {

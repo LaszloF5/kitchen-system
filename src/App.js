@@ -51,6 +51,17 @@ export default function App() {
     }
   }, []);
 
+  const fetchItems = async (table) => {
+    try {
+      const response = await axios.get(`http://localhost:5500/${table}/items`);
+      return Array.isArray(response.data.items) ? response.data.items : [];
+    } catch (error) {
+      console.error("Error fetching items: ", error);
+      return [];
+    }
+  };
+  
+
   const moveToSL = async (itemName, newQuantity, date, sourceTable, targetTable) => {
     try {
       await axios.post("http://localhost:5500/moveto_sl", {
@@ -134,6 +145,7 @@ export default function App() {
       <Fridge
         items={fridgeItems}
         setItems={setFridgeItems}
+        fetchItems={fetchItems}
         moveToSL={moveToSL}
         regex = {regex}
         regexQtyBreakdown = {regexQtyBreakdown}
@@ -141,6 +153,7 @@ export default function App() {
       <Freezer
         itemsFreezer={freezerItems}
         setItemsFreezer={setFreezerItems}
+        fetchItems={fetchItems}
         moveToSL={moveToSL}
         regex = {regex}
         regexQtyBreakdown = {regexQtyBreakdown}
@@ -148,6 +161,7 @@ export default function App() {
       <Chamber
         itemsChamber={chamberItems}
         setItemsChamber={setChamberItems}
+        fetchItems={fetchItems}
         moveToSL={moveToSL}
         regex = {regex}
         regexQtyBreakdown = {regexQtyBreakdown}
@@ -155,6 +169,7 @@ export default function App() {
       <Others
         itemsOthers={otherItems}
         setItemsOthers={setOtherItems}
+        fetchItems={fetchItems}
         moveToSL={moveToSL}
         regex = {regex}
         regexQtyBreakdown = {regexQtyBreakdown}
@@ -162,6 +177,7 @@ export default function App() {
       <ShoppingList
         itemsSL={shoppingListItems}
         setItemsSL={setShoppingListItems}
+        fetchItems={fetchItems}
         expenditure={yourAmount}
         setExpenditure={setYourAmount}
         regex = {regex}
