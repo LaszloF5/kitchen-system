@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
 
 export default function Others({
   items,
@@ -7,9 +6,9 @@ export default function Others({
   fetchItems,
   addItem,
   deleteItem,
+  updateItem,
   moveToSL,
   regex,
-  regexQtyBreakdown,
 }) {
   const [newItem, setNewItem] = useState([]);
   const [newQuantity, setNewQuantity] = useState([]);
@@ -29,7 +28,7 @@ export default function Others({
   const setQtyOthersFormRef = useRef(null);
   const updateOthersFormRef = useRef(null);
   const addOthersFormRef = useRef(null);
-  const [updateIdOthers, setUpdateIdOthers] = useState(null);
+  const [updateId, setUpdateId] = useState(null);
 
   // Toggle transfer form
 
@@ -90,8 +89,7 @@ export default function Others({
 
   const toggleModifyQty = (index, id) => {
     setIsVisibleQtyO(!isVisibleQtyO);
-    setUpdateIdOthers(id);
-    console.log(id);
+    setUpdateId(id);
   };
 
   // Item modifier functions
@@ -102,7 +100,7 @@ export default function Others({
       setItems(data);
     };
     getDatas();
-  }, [items]);
+  }, [fetchItems, setItems]);
 
   const handleAddOthers = async () => {
     try {
@@ -124,20 +122,14 @@ export default function Others({
   };
 
   const handleUpdate = async () => {
-    console.log("id ami kell:", updateIdOthers);
     if (modifyQuantity === "") {
       alert("Please enter a quantity.");
       return;
-    } else {
-      await axios.put(`http://localhost:5500/others_items/${updateIdOthers}`, {
-        quantity: modifyQuantity.trim(),
-      });
-      const response = await axios.get("http://localhost:5500/others_items");
-      setItems(response.data.items);
-      setIsVisibleQtyO(false);
-      setModifyQuantity("");
-      setUpdateIdOthers(null);
     }
+    await updateItem("others_items", modifyQuantity, updateId, setItems);
+    setIsVisibleQtyO(false);
+    setModifyQuantity("");
+    setUpdateId(null);
   };
 
   return (

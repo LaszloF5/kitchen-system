@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
 
 export default function Chamber({
   items,
@@ -7,9 +6,9 @@ export default function Chamber({
   fetchItems,
   addItem,
   deleteItem,
+  updateItem,
   moveToSL,
   regex,
-  regexQtyBreakdown,
 }) {
   // Input values
   const [newItem, setNewItem] = useState("");
@@ -20,7 +19,7 @@ export default function Chamber({
   const setQtyChamberFormRef = useRef(null);
   const updateChamberFormRef = useRef(null);
   const addChamberFormRef = useRef(null);
-  const [updateIdChamber, setUpdateIdChamber] = useState(null);
+  const [updateId, setUpdateId] = useState(null);
 
   // Visible transfer form
   const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
@@ -90,7 +89,7 @@ export default function Chamber({
 
   const toggleUpdateForm = (index, id) => {
     setIsVisibleQuantity(!isVisibleQuantity);
-    setUpdateIdChamber(id);
+    setUpdateId(id);
   };
 
   // Item modifier functions
@@ -103,7 +102,7 @@ export default function Chamber({
       setItems(data);
     };
     getDatas();
-  }, [items]);
+  }, [fetchItems, setItems]);
 
   const handleAddChamber = async () => {
     try {
@@ -125,27 +124,14 @@ export default function Chamber({
   };
 
   const handleUpdate = async () => {
-    console.log(updateIdChamber);
     if (modifyQuantity === "") {
       alert("Please enter a quantity.");
       return;
     }
-    try {
-      await axios.put(
-        `http://localhost:5500/chamber_items/${updateIdChamber}`,
-        {
-          quantity: modifyQuantity.trim(),
-        }
-      );
-      const response = await axios.get("http://localhost:5500/chamber_items");
-      setItems(response.data.items);
-      setModifyQuantity("");
-      setIsVisibleQuantity(false);
-      setUpdateIdChamber(null);
-    } catch (error) {
-      console.error("Error updating quantity:", error);
-      alert("Error updating quantity. Please try again.");
-    }
+    await updateItem("chamber_items", modifyQuantity, updateId, setItems);
+    setModifyQuantity("");
+    setIsVisibleQuantity(false);
+    setUpdateId(null);
   };
 
   return (

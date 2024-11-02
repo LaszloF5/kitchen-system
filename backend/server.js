@@ -150,10 +150,22 @@ app.delete("/:table/:id", (req, res) => {
   });
 });
 
-app.put("/fridge_items/:id", (req, res) => {
-  const { id } = req.params;
+app.put("/:table/:id", (req, res) => {
+  const { table, id } = req.params;
+  const validTables = [
+    "fridge_items",
+    "freezer_items",
+    "chamber_items",
+    "others_items",
+    "shoppingList_items",
+  ];
   const { quantity } = req.body;
-  const sql = "UPDATE fridge_items SET quantity = ? WHERE id = ?";
+
+  if (!validTables.includes(table)) {
+    return res.status(400).json({ error: "Invalid table name." });
+  }
+
+  const sql = `UPDATE ${table} SET quantity = ? WHERE id = ?`;
   const regex = /\d+(\.\d+)?/;
   const qty = Number(...quantity.match(regex));
   const unit = quantity.replace(Number.parseFloat(quantity), "");
@@ -166,318 +178,6 @@ app.put("/fridge_items/:id", (req, res) => {
     }
     res.json({ message: "Item quantity updated", id, quantity });
   });
-});
-
-// freezer items
-
-// app.get("/freezer_items", (req, res) => {
-//   db.all("SELECT * FROM freezer_items", [], (err, rows) => {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     res.json({ items: rows });
-//   });
-// });
-
-// app.post("/freezer_items", (req, res) => {
-//   const { name, quantity, date_added } = req.body;
-//   const sql =
-//     "INSERT INTO freezer_items (name, quantity, date_added) VALUES(?, ?, ?)";
-
-//   db.run(sql, [name, quantity, date_added], function (err) {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     res.json({ id: this.lastID, name, quantity, date_added });
-//   });
-// });
-
-// app.delete("/freezer_items/:id", (req, res) => {
-//   const id = req.params.id;
-//   const sql = "DELETE FROM freezer_items WHERE id = ?";
-
-//   db.run(sql, id, function (err) {
-//     if (err) {
-//       res.status(400).json({ err: err.message });
-//       return;
-//     }
-
-//     // Ellenőrizzük, hogy a tábla üres-e
-//     db.get("SELECT COUNT(*) AS count FROM freezer_items", (err, row) => {
-//       if (row.count === 0) {
-//         db.run(
-//           "UPDATE sqlite_sequence SET seq = 0 WHERE name = 'freezer_items'",
-//           (err) => {
-//             if (err) {
-//               res.status(400).json({ err: err.message });
-//               return;
-//             }
-//             // Visszajelzés a törlésről és a reset-ről
-//             res.json({ message: "Item deleted and sequence reset", id });
-//           }
-//         );
-//       } else {
-//         // Ha nem üres, csak a törlés visszajelzése
-//         res.json({ message: "Item deleted", id });
-//       }
-//     });
-//   });
-// });
-
-app.put("/freezer_items/:id", (req, res) => {
-  console.log("PUT request received"); // Ez a lognak meg kell jelennie
-  const { id } = req.params;
-  const { quantity } = req.body;
-  const regex = /\d+(\.\d+)?/;
-  const qty = Number(...quantity.match(regex));
-  const unit = quantity.replace(Number.parseFloat(quantity), "");
-  const validQty = `${qty} ${unit}`;
-
-  // Ellenőrzés: logold az ID-t és a quantity-t
-  console.log(`Updating item with ID: ${id}, new quantity: ${quantity}`);
-
-  const sql = "UPDATE freezer_items SET quantity = ? WHERE id = ?";
-
-  db.run(sql, [validQty, id], function (err) {
-    if (err) {
-      console.log("Error in SQL:", err.message); // Ha hiba történik az SQL futásnál, ez megjelenik
-      res.status(400).json({ error: err.message });
-      return;
-    }
-
-    res.json({ message: "Quantity updated successfully", id, quantity });
-  });
-});
-
-// chamber items
-
-// app.get("/chamber_items", (req, res) => {
-//   db.all("SELECT * FROM chamber_items", [], (err, rows) => {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     res.json({ items: rows });
-//   });
-// });
-
-// app.post("/chamber_items", (req, res) => {
-//   const { name, quantity, date_added } = req.body;
-//   const sql =
-//     "INSERT INTO chamber_items (name, quantity, date_added) VALUES(?, ?, ?)";
-//   db.run(sql, [name, quantity, date_added], function (err) {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     res.json({ id: this.lastID, name, quantity, date_added });
-//   });
-// });
-
-// app.delete("/chamber_items/:id", (req, res) => {
-//   const id = req.params.id;
-//   const sql = "DELETE FROM chamber_items WHERE id = ?";
-
-//   db.run(sql, id, function (err) {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     db.get("SELECT COUNT(*) AS count FROM chamber_items", (err, row) => {
-//       if (row.count === 0) {
-//         db.run(
-//           "UPDATE sqlite_sequence SET seq = 0 WHERE name = 'chamber_items'",
-//           (err) => {
-//             if (err) {
-//               res.status(400).json({ err: err.message });
-//               return;
-//             }
-//             // Visszajelzés a törlésről és a reset-ről
-//             res.json({ message: "Item deleted and sequence reset", id });
-//           }
-//         );
-//       } else {
-//         // Ha nem üres, csak a törlés visszajelzése
-//         res.json({ message: "Item deleted", id });
-//       }
-//     });
-//   });
-// });
-
-app.put("/chamber_items/:id", (req, res) => {
-  const { id } = req.params;
-  console.log("ID param:", id);
-  const { quantity } = req.body;
-  const regex = /\d+(\.\d+)?/;
-  const qty = Number(...quantity.match(regex));
-  const unit = quantity.replace(Number.parseFloat(quantity), "");
-  const validQty = `${qty} ${unit}`;
-
-  // Ellenőrzés: logold az ID-t és a quantity-t
-  console.log(`Updating item with ID: ${id}, new quantity: ${quantity}`);
-
-  const sql = "UPDATE chamber_items SET quantity = ? WHERE id = ?";
-
-  db.run(sql, [validQty, id], function (err) {
-    if (err) {
-      console.log("Error in SQL:", err.message); // Ha hiba történik az SQL futásnál, ez megjelenik
-      res.status(400).json({ error: err.message });
-      return;
-    }
-    res.json({ message: "Quantity updated successfully", id, quantity });
-  });
-});
-
-// others items
-
-// app.get("/others_items", (req, res) => {
-//   db.all("SELECT * FROM others_items", [], (err, rows) => {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     res.json({ items: rows });
-//   });
-// });
-
-// app.post("/others_items", (req, res) => {
-//   const { name, quantity, date_added } = req.body;
-//   const sql =
-//     "INSERT INTO others_items (name, quantity, date_added) VALUES(?, ?, ?)";
-//   db.run(sql, [name, quantity, date_added], function (err) {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     res.json({ id: this.lastID, name, quantity, date_added });
-//   });
-// });
-
-// app.delete("/others_items/:id", (req, res) => {
-//   const { id } = req.params;
-//   const sql = "DELETE FROM others_items WHERE id = ?";
-
-//   db.run(sql, id, function (err) {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     db.get("SELECT COUNT(*) AS count FROM others_items", (err, row) => {
-//       if (row.count === 0) {
-//         db.run(
-//           "UPDATE sqlite_sequence SET seq = 0 WHERE name = 'others_items'",
-//           (err) => {
-//             if (err) {
-//               res.status(400).json({ err: err.message });
-//               return;
-//             }
-//             // Visszajelzés a törlésről és a reset-ről
-//             res.json({ message: "Item deleted and sequence reset", id });
-//           }
-//         );
-//       } else {
-//         // Ha nem üres, csak a törlés visszajelzése
-//         res.json({ message: "Item deleted", id });
-//       }
-//     });
-//   });
-// });
-
-app.put("/others_items/:id", (req, res) => {
-  const { id } = req.params;
-  const { quantity } = req.body;
-  const regex = /\d+(\.\d+)?/;
-  const qty = Number(...quantity.match(regex));
-  const unit = quantity.replace(Number.parseFloat(quantity), "");
-  const validQty = `${qty} ${unit}`;
-
-  console.log(`Updating item with ID: ${id}, new quantity: ${quantity}`);
-
-  const sql = "UPDATE others_items SET quantity = ? WHERE id = ?";
-
-  db.run(sql, [validQty, id], function (err) {
-    if (err) {
-      console.log("Error in SQL:", err.message); // Ha hiba történik az SQL futásnál, ez megjelenik
-      res.status(400).json({ error: err.message });
-      return;
-    }
-    res.json({ message: "Quantity updated successfully", id, quantity });
-  });
-});
-
-// shopping list items
-
-// app.get("/shoppingList_items", (req, res) => {
-//   db.all("SELECT * FROM shoppingList_items", [], (err, rows) => {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     res.json({ items: rows });
-//   });
-// });
-
-// app.post("/shoppingList_items", (req, res) => {
-//   const { name, quantity, date_added } = req.body;
-//   console.log(req.body);
-//   const sql =
-//     "INSERT INTO shoppingList_items (name, quantity, date_added) VALUES(?, ?, ?)";
-//   db.run(sql, [name, quantity, date_added], function (err) {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     res.json({ id: this.lastID, name, quantity, date_added });
-//   });
-// });
-
-// app.delete("/shoppingList_items/:id", (req, res) => {
-//   const id = req.params.id;
-//   const sql = "DELETE FROM shoppingList_items WHERE id = ?";
-
-//   db.run(sql, id, function (err) {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     db.get("SELECT COUNT(*) AS count FROM shoppingList_items", (err, row) => {
-//       if (row.count === 0) {
-//         db.run(
-//           "UPDATE sqlite_sequence SET seq = 0 WHERE name = 'shoppingList_items'",
-//           (err) => {
-//             if (err) {
-//               res.status(400).json({ err: err.message });
-//               return;
-//             }
-//             // Visszajelzés a törlésről és a reset-ről
-//             res.json({ message: "Item deleted and sequence reset", id });
-//           }
-//         );
-//       } else {
-//         // Ha nem üres, csak a törlés visszajelzése
-//         res.json({ message: "Item deleted", id });
-//       }
-//     });
-//   });
-// });
-
-app.put("/shoppingList_items/:id", (req, res) => {
-  const { id } = req.params;
-  const { quantity } = req.body;
-  const regex = /\d+(\.\d+)?/;
-  const qty = Number(...quantity.match(regex));
-  const unit = quantity.replace(Number.parseFloat(quantity), "");
-  const validQty = `${qty} ${unit}`;
-  const sql = "UPDATE shoppinglist_items SET quantity = ? WHERE id = ?";
-
-  db.run(sql, [validQty, id], function (err) {
-    if (err) {
-      return res.status(400).json({ error: err.message });
-    }
-  });
-  res.json({ message: "Quantity updated successfully", quantity, id });
 });
 
 // Elemek mozgatása a shopping list komponensből a többi komponensbe.
@@ -589,6 +289,7 @@ app.post("/move-item", (req, res) => {
     }
   );
 });
+
 
 app.post("/moveto_sl", (req, res) => {
   const { itemName, newQuantity, date, sourceTable, targetTable } = req.body;

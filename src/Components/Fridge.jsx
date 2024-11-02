@@ -1,6 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, {useEffect, useState, useRef } from "react";
 import "./Fridge.css";
-import axios from "axios";
 
 export default function Fridge({
   items,
@@ -8,9 +7,9 @@ export default function Fridge({
   fetchItems,
   addItem,
   deleteItem,
+  updateItem,
   moveToSL,
   regex,
-  regexQtyBreakdown,
 }) {
   //Input values
 
@@ -90,6 +89,7 @@ export default function Fridge({
     setIsVisibleUpdate(!isVisibleUpdate);
   };
 
+
   // Datas from the database
 
   useEffect(() => {
@@ -98,7 +98,7 @@ export default function Fridge({
       setItems(data);
     };
     getDatas();
-  }, [items]);
+  }, [fetchItems, setItems]);
 
   // functions
 
@@ -125,19 +125,12 @@ export default function Fridge({
   const handleUpdate = async () => {
     if (modifyQuantity === "") {
       alert("Please enter a quantity.");
+      return;
     }
-    try {
-      await axios.put(`http://localhost:5500/fridge_items/${updateId}`, {
-        quantity: modifyQuantity.trim(),
-      });
-      const response = await axios.get("http://localhost:5500/fridge_items");
-      setItems(response.data.items);
-      setModifyQuantity("");
-      setIsVisibleUpdate(false);
-      setUpdateId(null);
-    } catch (error) {
-      console.log("error: ", error);
-    }
+    await updateItem("fridge_items", modifyQuantity, updateId, setItems);
+    setModifyQuantity("");
+    setIsVisibleUpdate(false);
+    setUpdateId(null);
   };
 
   const handleSubmit = (e) => {

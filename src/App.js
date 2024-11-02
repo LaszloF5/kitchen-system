@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import Fridge from "./Components/Fridge";
 import Freezer from "./Components/Freezer";
@@ -8,10 +8,6 @@ import ShoppingList from "./Components/ShoppingList";
 import "./App.css";
 
 export default function App() {
-  ///////////////////////////////////////////////////
-  const [newItem, setNewItem] = useState("");
-  const [newQuantity, setNewQuantity] = useState("");
-  ///////////////////////////////////////////////////
   const [fridgeItems, setFridgeItems] = useState([]);
   const [freezerItems, setFreezerItems] = useState([]);
   const [chamberItems, setChamberItems] = useState([]);
@@ -51,6 +47,8 @@ export default function App() {
     localStorage.setItem("toggle", JSON.stringify(isDarkMode));
   }, [isDarkMode]);
 
+
+  // USEMEMO????
   useEffect(() => {
     if (yourAmount[yourAmount.length - 1]?.amount > 0 && currency === "") {
       alert("Enter the currency that you want to use.");
@@ -59,7 +57,7 @@ export default function App() {
 
   // Get items
 
-  const fetchItems = async (table) => {
+  const fetchItems = useCallback(async (table) => {
     try {
       const response = await axios.get(`http://localhost:5500/${table}`);
       return Array.isArray(response.data.items) ? response.data.items : [];
@@ -67,7 +65,7 @@ export default function App() {
       console.error("Error fetching items: ", error);
       return [];
     }
-  };
+  }, []);
 
   // Post items
 
@@ -107,6 +105,16 @@ export default function App() {
       console.error("Error deleting item:", error);
       alert("Error deleting item. Please try again.");
     }
+  };
+
+  // Update item
+
+  const updateItem = async (table, modifyQuantity, updateId, setItems) => {
+    await axios.put(`http://localhost:5500/${table}/${updateId}`, {
+      quantity: modifyQuantity.trim(),
+    });
+    const response = await axios.get(`http://localhost:5500/${table}`);
+    setItems(response.data.items);
   };
 
   const moveToSL = async (
@@ -214,9 +222,9 @@ export default function App() {
         fetchItems={fetchItems}
         addItem={addItem}
         deleteItem={deleteItem}
+        updateItem={updateItem}
         moveToSL={moveToSL}
         regex={regex}
-        regexQtyBreakdown={regexQtyBreakdown}
       />
       <Freezer
         items={freezerItems}
@@ -224,9 +232,9 @@ export default function App() {
         fetchItems={fetchItems}
         addItem={addItem}
         deleteItem={deleteItem}
+        updateItem={updateItem}
         moveToSL={moveToSL}
         regex={regex}
-        regexQtyBreakdown={regexQtyBreakdown}
       />
       <Chamber
         items={chamberItems}
@@ -234,9 +242,9 @@ export default function App() {
         fetchItems={fetchItems}
         addItem={addItem}
         deleteItem={deleteItem}
+        updateItem={updateItem}
         moveToSL={moveToSL}
         regex={regex}
-        regexQtyBreakdown={regexQtyBreakdown}
       />
       <Others
         items={otherItems}
@@ -244,9 +252,9 @@ export default function App() {
         fetchItems={fetchItems}
         addItem={addItem}
         deleteItem={deleteItem}
+        updateItem={updateItem}
         moveToSL={moveToSL}
         regex={regex}
-        regexQtyBreakdown={regexQtyBreakdown}
       />
       <ShoppingList
         items={shoppingListItems}
@@ -254,10 +262,9 @@ export default function App() {
         fetchItems={fetchItems}
         addItem={addItem}
         deleteItem={deleteItem}
+        updateItem={updateItem}
         expenditure={yourAmount}
         setExpenditure={setYourAmount}
-        regex={regex}
-        regexQtyBreakdown={regexQtyBreakdown}
       />
       <footer className="footer">Footer</footer>
     </div>

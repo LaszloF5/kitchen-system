@@ -9,10 +9,9 @@ export default function ShoppingList({
   fetchItems,
   addItem,
   deleteItem,
+  updateItem,
   expenditure,
   setExpenditure,
-  regex,
-  regexQtyBreakdown,
 }) {
   // Input values
 
@@ -24,7 +23,7 @@ export default function ShoppingList({
   const [isVisibleS, setIsVisibleS] = useState(false);
   const [isVisibleQty, setIsVisibleQty] = useState(false);
   const [isVisibleMoveTo, setIsVisibleMoveTo] = useState(false);
-  const [updateIdSL, setUpdateIdSL] = useState(null);
+  const [updateId, setUpdateId] = useState(null);
 
   const updateSLFormRef = useRef(null);
   const addSLFormRef = useRef(null);
@@ -65,7 +64,7 @@ export default function ShoppingList({
   const isTextQty = isVisibleQty ? "Close modification" : "Update item";
   const handleVisibleQty = (index, id) => {
     setIsVisibleQty(!isVisibleQty);
-    setUpdateIdSL(id);
+    setUpdateId(id);
   };
 
   // Visible move to form
@@ -115,7 +114,7 @@ export default function ShoppingList({
       setItems(data);
     };
     getDatas();
-  }, [items]);
+  }, [fetchItems, setItems]);
 
   const handleAdd = async () => {
     try {
@@ -141,21 +140,10 @@ export default function ShoppingList({
       alert("Please enter a quantity.");
       return;
     }
-    try {
-      await axios.put(
-        `http://localhost:5500/shoppingList_items/${updateIdSL}`,
-        { quantity: modifyQuantity }
-      );
-      const response = await axios.get(
-        "http://localhost:5500/shoppingList_items"
-      );
-      setItems(response.data.items);
-      setIsVisibleQty(false);
-      setUpdateIdSL(null);
-      setModifyQuantity("");
-    } catch (error) {
-      console.log(error);
-    }
+    await updateItem("shoppingList_items", modifyQuantity, updateId, setItems);
+    setIsVisibleQty(false);
+    setUpdateId(null);
+    setModifyQuantity("");
   };
 
   // Elemek mozgatása komponensek között //
@@ -170,66 +158,45 @@ export default function ShoppingList({
       });
 
       if (response.status === 200) {
-        const newList = await axios.get(
-          "http://localhost:5500/shoppingList_items"
-        );
+        const newList = await axios.get("http://localhost:5500/shoppingList_items");
         setItems(newList.data.items);
         setIsVisibleMoveTo(false);
         setNewIndex(null);
-        alert("Elem sikeresen áthelyezve.");
+        alert("Elem sikeresen áthelyezve.")
       }
     } catch (error) {
       console.error(error);
       alert("Hiba a mozgatáskor.");
     }
-  };
+  }
+
 
   //Fridge component//
 
   const handleTransfer1 = (index) => {
     const itemToTransfer = items[index];
-    moveItem(
-      itemToTransfer.id,
-      itemToTransfer.name,
-      "shoppingList_items",
-      "fridge_items"
-    );
+    moveItem(itemToTransfer.id, itemToTransfer.name, "shoppingList_items", "fridge_items");
   };
 
   //Freezer component//
 
   const handleTransfer2 = (index) => {
     const itemToTransfer = items[index];
-    moveItem(
-      itemToTransfer.id,
-      itemToTransfer.name,
-      "shoppingList_items",
-      "freezer_items"
-    );
+    moveItem(itemToTransfer.id, itemToTransfer.name,"shoppingList_items", "freezer_items");
   };
 
   //Chamber component//
 
   const handleTransfer3 = (index) => {
     const itemToTransfer = items[index];
-    moveItem(
-      itemToTransfer.id,
-      itemToTransfer.name,
-      "shoppingList_items",
-      "chamber_items"
-    );
+    moveItem(itemToTransfer.id, itemToTransfer.name, "shoppingList_items", "chamber_items");
   };
 
   //Others component//
 
   const handleTransfer4 = (index) => {
     const itemToTransfer = items[index];
-    moveItem(
-      itemToTransfer.id,
-      itemToTransfer.name,
-      "shoppingList_items",
-      "others_items"
-    );
+    moveItem(itemToTransfer.id, itemToTransfer.name,"shoppingList_items", "others_items");
   };
 
   useEffect(() => {
@@ -237,7 +204,7 @@ export default function ShoppingList({
       localStorage.getItem("expenditureLT")
     );
     setExpenditure(updatedExpenditure);
-  }, []);
+  }, [setExpenditure]);
 
   useEffect(() => {
     let hasChangedEx = false;
@@ -248,7 +215,7 @@ export default function ShoppingList({
       localStorage.setItem("expenditureLT", JSON.stringify(expenditure));
       setPrevExpenditure(expenditure);
     }
-  }, [expenditure]);
+  }, [expenditure, prevExpenditure]);
 
   return (
     <>

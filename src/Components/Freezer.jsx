@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
 
 export default function Freezer({
   items,
@@ -7,9 +6,9 @@ export default function Freezer({
   fetchItems,
   addItem,
   deleteItem,
+  updateItem,
   moveToSL,
   regex,
-  regexQtyBreakdown,
 }) {
   // Input values
   const [newItem, setNewItem] = useState("");
@@ -46,11 +45,11 @@ export default function Freezer({
 
   useEffect(() => {
     const getDatas = async () => {
-      const data = await fetchItems('freezer_items');
+      const data = await fetchItems("freezer_items");
       setItems(data);
-    }
+    };
     getDatas();
-  }, [items]);
+  }, [fetchItems, setItems]);
 
   ////////// FUNCTIONS //////////
 
@@ -68,7 +67,13 @@ export default function Freezer({
         quantity: tempQty,
         date: new Date().toISOString().split("T")[0],
       };
-      moveToSL(transferItem.name, transferItem.quantity, transferItem.date, 'freezer_items', 'shoppingList_items');
+      moveToSL(
+        transferItem.name,
+        transferItem.quantity,
+        transferItem.date,
+        "freezer_items",
+        "shoppingList_items"
+      );
       setTempIndex(null);
       setTempQty("");
       setIsVisibleTransferForm(false);
@@ -89,44 +94,34 @@ export default function Freezer({
   // Add item to the database
 
   const handleAddFreezer = async () => {
-      try {
-        await addItem('freezer_items', newItem, newQuantity, setItems);
-        setNewItem("");
-        setNewQuantity("");
-        setIsVisibleF(false);
-      } catch (error) {
-        console.error("Error adding item to freezer:", error);
-        alert("An error occurred while adding the item.");
-      }
+    try {
+      await addItem("freezer_items", newItem, newQuantity, setItems);
+      setNewItem("");
+      setNewQuantity("");
+      setIsVisibleF(false);
+    } catch (error) {
+      console.error("Error adding item to freezer:", error);
+      alert("An error occurred while adding the item.");
+    }
   };
 
   const handleDeleteF = async (index) => {
     const itemToDelete = items[index];
-    await deleteItem('freezer_items', itemToDelete, setItems);
+    await deleteItem("freezer_items", itemToDelete, setItems);
     setIsVisibleUpdateF(false);
     setModifyQuantity("");
     setIsVisibleTransferForm(false);
   };
 
   const handleUpdate = async () => {
-    console.log("frissített id: ", updateId);
     if (modifyQuantity === "") {
       alert("Please enter a quantity.");
       return;
     }
-    try {
-      await axios.put(`http://localhost:5500/freezer_items/${updateId}`, {
-        quantity: modifyQuantity.trim(),
-      });
-      const response = await axios.get("http://localhost:5500/freezer_items");
-      setItems(response.data.items);
-      setIsVisibleUpdateF(false);
-      setUpdateId(null);
-      setModifyQuantity("");
-    } catch (error) {
-      console.error("Error updating quantity:", error);
-      alert("Error updating quantity. Please try again.");
-    }
+    await updateItem("freezer_items", modifyQuantity, updateId, setItems);
+    setIsVisibleUpdateF(false);
+    setUpdateId(null);
+    setModifyQuantity("");
   };
 
   const handleSubmit = (e) => {
