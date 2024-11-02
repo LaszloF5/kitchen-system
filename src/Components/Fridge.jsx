@@ -6,6 +6,8 @@ export default function Fridge({
   items,
   setItems,
   fetchItems,
+  addItem,
+  deleteItem,
   moveToSL,
   regex,
   regexQtyBreakdown,
@@ -49,10 +51,15 @@ export default function Fridge({
       const transferItem = {
         ...items[tempIndex],
         quantity: tempQty,
-        date:
-          new Date().toISOString().split("T")[0]
+        date: new Date().toISOString().split("T")[0],
       };
-      moveToSL(transferItem.name, transferItem.quantity, transferItem.date, "fridge_items", "shoppingList_items");
+      moveToSL(
+        transferItem.name,
+        transferItem.quantity,
+        transferItem.date,
+        "fridge_items",
+        "shoppingList_items"
+      );
       setTempQty("");
       setIsVisibleTransferForm(false);
       setTempIndex(null);
@@ -87,53 +94,32 @@ export default function Fridge({
 
   useEffect(() => {
     const getDatas = async () => {
-      const data = await fetchItems('fridge_items');
+      const data = await fetchItems("fridge_items");
       setItems(data);
-    }
+    };
     getDatas();
-  }, []);
+  }, [items]);
 
   // functions
 
   const handleAddFridge = async () => {
-    if (newItem.length > 0 && newQuantity.length > 0) {
-        const validQty = Number(...newQuantity.match(regexQtyBreakdown));
-        const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
-        var newFridgeItem = {
-          name: newItem.trim(),
-          quantity: `${validQty} ${unit}`,
-          date_added: new Date().toISOString().split("T")[0],
-      }
-      try {
-        await axios.post("http://localhost:5500/fridge_items", newFridgeItem);
-        const response = await axios.get("http://localhost:5500/fridge_items");
-        setItems(response.data.items);
-        setNewItem("");
-        setNewQuantity("");
-        setIsVisible(false);
-      } catch {
-        alert("The name and quantity fields mustn't be empty.");
-      }
-    } else {
-      alert("The name and quantity fields mustn't be empty.");
+    try {
+      await addItem("fridge_items", newItem, newQuantity, setItems);
+      setNewItem("");
+      setNewQuantity("");
+      setIsVisible(false);
+    } catch (error) {
+      console.error("Error adding item:", error);
+      alert("An error occurred while adding the item.");
     }
   };
 
   const handleDelete = async (index) => {
     const itemToDelete = items[index];
-    try {
-      await axios.delete(
-        `http://localhost:5500/fridge_items/${itemToDelete.id}`
-      );
-      const response = await axios.get("http://localhost:5500/fridge_items");
-      setItems(response.data.items);
-      setIsVisibleUpdate(false);
-      setModifyQuantity("");
-      setIsVisibleTransferForm(false);
-    } catch (error) {
-      console.error("Error deleting item:", error);
-      alert("Error deleting item. Please try again.");
-    }
+    await deleteItem("fridge_items", itemToDelete, setItems);
+    setIsVisibleUpdate(false);
+    setModifyQuantity("");
+    setIsVisibleTransferForm(false);
   };
 
   const handleUpdate = async () => {

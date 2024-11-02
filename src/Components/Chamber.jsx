@@ -2,14 +2,15 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 
 export default function Chamber({
-  itemsChamber,
-  setItemsChamber,
+  items,
+  setItems,
   fetchItems,
+  addItem,
+  deleteItem,
   moveToSL,
   regex,
   regexQtyBreakdown,
 }) {
-
   // Input values
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
@@ -46,12 +47,17 @@ export default function Chamber({
   const handleTransferItem = () => {
     if (tempQty !== "") {
       const transferItem = {
-        ...itemsChamber[tempIndex],
+        ...items[tempIndex],
         quantity: tempQty,
-        date:
-          new Date().toISOString().split('T')[0],
+        date: new Date().toISOString().split("T")[0],
       };
-      moveToSL(transferItem.name, transferItem.quantity, transferItem.date, 'chamber_items', 'shoppingList_items')
+      moveToSL(
+        transferItem.name,
+        transferItem.quantity,
+        transferItem.date,
+        "chamber_items",
+        "shoppingList_items"
+      );
       setTempQty("");
       setTempIndex(null);
       setIsVisibleTransferForm(false);
@@ -93,51 +99,29 @@ export default function Chamber({
 
   useEffect(() => {
     const getDatas = async () => {
-      const data = await fetchItems('chamber_items');
-        setItemsChamber(data);
+      const data = await fetchItems("chamber_items");
+      setItems(data);
     };
     getDatas();
-  }, []);
+  }, [items]);
 
   const handleAddChamber = async () => {
-    if (newItem.length > 0 && newQuantity.length > 0) {
-      const vaildQty = Number(...newQuantity.match(regexQtyBreakdown));
-      const unit = newQuantity.replace(Number.parseFloat(newQuantity), '');
-      const newChamberItem = {
-        name: newItem.trim(),
-        quantity: `${vaildQty} ${unit}`,
-        date_added: new Date().toISOString().split("T")[0],
-      };
-      try {
-        await axios.post("http://localhost:5500/chamber_items", newChamberItem);
-        const response = await axios.get("http://localhost:5500/chamber_items");
-        setItemsChamber(response.data.items);
-        setNewItem("");
-        setNewQuantity("");
-        setIsVisible(false);
-      } catch {
-        alert("An error occurred while saving the data.");
-      }
-    } else {
-      alert("The name and quantity fields mustn't be empty.");
+    try {
+      await addItem("chamber_items", newItem, newQuantity, setItems);
+      setNewItem("");
+      setNewQuantity("");
+      setIsVisible(false);
+    } catch {
+      alert("An error occurred while saving the data.");
     }
   };
 
   const handleDelete = async (index) => {
-    const itemToDelete = itemsChamber[index];
-    try {
-      await axios.delete(
-        `http://localhost:5500/chamber_items/${itemToDelete.id}`
-      );
-      const response = await axios.get("http://localhost:5500/chamber_items");
-      setItemsChamber(response.data.items);
-      setIsVisibleQuantity(false);
-      setModifyQuantity("");
-      setIsVisibleTransferForm(false);
-    } catch (error) {
-      console.error("Error deleting item:", error);
-      alert("Error deleting item. Please try again.");
-    }
+    const itemToDelete = items[index];
+    await deleteItem("chamber_items", itemToDelete, setItems);
+    setIsVisibleQuantity(false);
+    setModifyQuantity("");
+    setIsVisibleTransferForm(false);
   };
 
   const handleUpdate = async () => {
@@ -147,17 +131,18 @@ export default function Chamber({
       return;
     }
     try {
-     await axios.put(`http://localhost:5500/chamber_items/${updateIdChamber}`, {
-        quantity: modifyQuantity.trim(),
-      });
+      await axios.put(
+        `http://localhost:5500/chamber_items/${updateIdChamber}`,
+        {
+          quantity: modifyQuantity.trim(),
+        }
+      );
       const response = await axios.get("http://localhost:5500/chamber_items");
-      setItemsChamber(response.data.items);
+      setItems(response.data.items);
       setModifyQuantity("");
       setIsVisibleQuantity(false);
       setUpdateIdChamber(null);
-    } 
-    
-    catch (error) {
+    } catch (error) {
       console.error("Error updating quantity:", error);
       alert("Error updating quantity. Please try again.");
     }
@@ -167,10 +152,10 @@ export default function Chamber({
     <>
       <h2>Chamber items</h2>
       <ul className="fridge-ul main-item-style">
-        {itemsChamber.length === 0 ? (
+        {items.length === 0 ? (
           <p>Your chamber is empty.</p>
         ) : (
-          itemsChamber.map((item, index) => (
+          items.map((item, index) => (
             <li
               className={`fridge-li-element ${
                 regex.test(item.quantity) ? "alert-color" : "default-color"

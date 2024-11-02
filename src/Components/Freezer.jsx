@@ -2,9 +2,11 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 
 export default function Freezer({
-  itemsFreezer,
-  setItemsFreezer,
+  items,
+  setItems,
   fetchItems,
+  addItem,
+  deleteItem,
   moveToSL,
   regex,
   regexQtyBreakdown,
@@ -45,10 +47,10 @@ export default function Freezer({
   useEffect(() => {
     const getDatas = async () => {
       const data = await fetchItems('freezer_items');
-      setItemsFreezer(data);
+      setItems(data);
     }
     getDatas();
-  }, []);
+  }, [items]);
 
   ////////// FUNCTIONS //////////
 
@@ -62,7 +64,7 @@ export default function Freezer({
   const handleTransferItem = () => {
     if (tempQty !== "") {
       const transferItem = {
-        ...itemsFreezer[tempIndex],
+        ...items[tempIndex],
         quantity: tempQty,
         date: new Date().toISOString().split("T")[0],
       };
@@ -87,44 +89,23 @@ export default function Freezer({
   // Add item to the database
 
   const handleAddFreezer = async () => {
-    if (newItem.length > 0 && newQuantity.length > 0) {
-      const validQty = Number(...newQuantity.match(regexQtyBreakdown)); // A visszatérési értéke 1 tömb, ezért bontani kell, és számmá alakítani.
-      const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
-      const newItemData = {
-        name: newItem.trim(),
-        quantity: `${validQty} ${unit}`,
-        date_added: new Date().toISOString().split("T")[0],
-      };
       try {
-        await axios.post("http://localhost:5500/freezer_items", newItemData);
-        const response = await axios.get("http://localhost:5500/freezer_items");
-        setItemsFreezer(response.data.items);
+        await addItem('freezer_items', newItem, newQuantity, setItems);
         setNewItem("");
         setNewQuantity("");
         setIsVisibleF(false);
       } catch (error) {
         console.error("Error adding item to freezer:", error);
+        alert("An error occurred while adding the item.");
       }
-    } else {
-      alert("The name and quantity fields mustn't be empty.");
-    }
   };
 
   const handleDeleteF = async (index) => {
-    const itemToDelete = itemsFreezer[index];
-    try {
-      await axios.delete(
-        `http://localhost:5500/freezer_items/${itemToDelete.id}`
-      );
-      const response = await axios.get("http://localhost:5500/freezer_items");
-      setItemsFreezer(response.data.items);
-      setIsVisibleUpdateF(false);
-      setModifyQuantity("");
-      setIsVisibleTransferForm(false);
-    } catch (error) {
-      console.error("Error deleting item:", error);
-      alert("Error deleting item. Please try again.");
-    }
+    const itemToDelete = items[index];
+    await deleteItem('freezer_items', itemToDelete, setItems);
+    setIsVisibleUpdateF(false);
+    setModifyQuantity("");
+    setIsVisibleTransferForm(false);
   };
 
   const handleUpdate = async () => {
@@ -138,7 +119,7 @@ export default function Freezer({
         quantity: modifyQuantity.trim(),
       });
       const response = await axios.get("http://localhost:5500/freezer_items");
-      setItemsFreezer(response.data.items);
+      setItems(response.data.items);
       setIsVisibleUpdateF(false);
       setUpdateId(null);
       setModifyQuantity("");
@@ -156,10 +137,10 @@ export default function Freezer({
     <>
       <h2>Freezer items</h2>
       <ul className="fridge-ul main-item-style">
-        {itemsFreezer.length === 0 ? (
+        {items.length === 0 ? (
           <p>Your freezer is empty.</p>
         ) : (
-          itemsFreezer.map((item, index) => {
+          items.map((item, index) => {
             return (
               <li
                 className={`fridge-li-element ${

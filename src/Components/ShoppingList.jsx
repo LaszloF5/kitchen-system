@@ -4,9 +4,11 @@ import axios from "axios";
 import "./ShoppingList.css";
 
 export default function ShoppingList({
-  itemsSL,
-  setItemsSL,
+  items,
+  setItems,
   fetchItems,
+  addItem,
+  deleteItem,
   expenditure,
   setExpenditure,
   regex,
@@ -109,47 +111,29 @@ export default function ShoppingList({
 
   useEffect(() => {
     const getDatas = async () => {
-      const data = await fetchItems('shoppingList_items');
-      setItemsSL(data);
-    }
+      const data = await fetchItems("shoppingList_items");
+      setItems(data);
+    };
     getDatas();
-  }, [])
+  }, [items]);
 
   const handleAdd = async () => {
-    if (newItem.length > 0 && newQuantity.length > 0) {
-      const validQty = Number(...newQuantity.match(regexQtyBreakdown));
-      const unit = newQuantity.replace(Number.parseFloat(newQuantity), '');
-      const newItemSL = {
-        name: newItem.trim(),
-        quantity: `${validQty} ${unit}`,
-        date_added: new Date().toISOString().split("T")[0],
-      };
-      try {
-        await axios.post("http://localhost:5500/shoppingList_items", newItemSL);
-        const response = await axios.get("http://localhost:5500/shoppingList_items");
-        setItemsSL(response.data.items);
-        setNewItem("");
-        setNewQuantity("");
-        setIsVisibleS(false);
-      } catch (error) {
-        console.error(error);
-      }
-    } else {
-      alert("The name and quantity fields mustn't be empty.");
+    try {
+      await addItem("shoppingList_items", newItem, newQuantity, setItems);
+      setNewItem("");
+      setNewQuantity("");
+      setIsVisibleS(false);
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred while adding the item.");
     }
   };
 
   const handleDelete = async (index) => {
-    try {
-      const itemToDelete = itemsSL[index];
-      await axios.delete(`http://localhost:5500/shoppingList_items/${itemToDelete.id}`);
-      const response = await axios.get("http://localhost:5500/shoppingList_items");
-      setItemsSL(response.data.items);
-      setIsVisibleQty(false);
-      setModifyQuantity("");
-    } catch {
-      alert("An error occurred while deleting the item.");
-    }
+    const itemToDelete = items[index];
+    await deleteItem("shoppingList_items", itemToDelete, setItems);
+    setIsVisibleQty(false);
+    setModifyQuantity("");
   };
 
   const handleUpdate = async () => {
@@ -158,13 +142,18 @@ export default function ShoppingList({
       return;
     }
     try {
-      await axios.put(`http://localhost:5500/shoppingList_items/${updateIdSL}`, {quantity: modifyQuantity});
-      const response = await axios.get("http://localhost:5500/shoppingList_items");
-      setItemsSL(response.data.items);
+      await axios.put(
+        `http://localhost:5500/shoppingList_items/${updateIdSL}`,
+        { quantity: modifyQuantity }
+      );
+      const response = await axios.get(
+        "http://localhost:5500/shoppingList_items"
+      );
+      setItems(response.data.items);
       setIsVisibleQty(false);
       setUpdateIdSL(null);
       setModifyQuantity("");
-    } catch (error){
+    } catch (error) {
       console.log(error);
     }
   };
@@ -179,47 +168,68 @@ export default function ShoppingList({
         sourceTable,
         targetTable,
       });
-  
+
       if (response.status === 200) {
-        const newList = await axios.get("http://localhost:5500/shoppingList_items");
-        setItemsSL(newList.data.items);
+        const newList = await axios.get(
+          "http://localhost:5500/shoppingList_items"
+        );
+        setItems(newList.data.items);
         setIsVisibleMoveTo(false);
         setNewIndex(null);
-        alert("Elem sikeresen áthelyezve.")
+        alert("Elem sikeresen áthelyezve.");
       }
     } catch (error) {
       console.error(error);
       alert("Hiba a mozgatáskor.");
     }
-  }
-
+  };
 
   //Fridge component//
 
   const handleTransfer1 = (index) => {
-    const itemToTransfer = itemsSL[index];
-    moveItem(itemToTransfer.id, itemToTransfer.name, "shoppingList_items", "fridge_items");
+    const itemToTransfer = items[index];
+    moveItem(
+      itemToTransfer.id,
+      itemToTransfer.name,
+      "shoppingList_items",
+      "fridge_items"
+    );
   };
 
   //Freezer component//
 
   const handleTransfer2 = (index) => {
-    const itemToTransfer = itemsSL[index];
-    moveItem(itemToTransfer.id, itemToTransfer.name,"shoppingList_items", "freezer_items");
+    const itemToTransfer = items[index];
+    moveItem(
+      itemToTransfer.id,
+      itemToTransfer.name,
+      "shoppingList_items",
+      "freezer_items"
+    );
   };
 
   //Chamber component//
 
   const handleTransfer3 = (index) => {
-    const itemToTransfer = itemsSL[index];
-    moveItem(itemToTransfer.id, itemToTransfer.name, "shoppingList_items", "chamber_items");
+    const itemToTransfer = items[index];
+    moveItem(
+      itemToTransfer.id,
+      itemToTransfer.name,
+      "shoppingList_items",
+      "chamber_items"
+    );
   };
 
   //Others component//
 
   const handleTransfer4 = (index) => {
-    const itemToTransfer = itemsSL[index];
-    moveItem(itemToTransfer.id, itemToTransfer.name,"shoppingList_items", "others_items");
+    const itemToTransfer = items[index];
+    moveItem(
+      itemToTransfer.id,
+      itemToTransfer.name,
+      "shoppingList_items",
+      "others_items"
+    );
   };
 
   useEffect(() => {
@@ -244,10 +254,10 @@ export default function ShoppingList({
     <>
       <h2>Shopping list</h2>
       <ul className="fridge-ul main-item-style unique-style">
-        {itemsSL.length === 0 ? (
+        {items.length === 0 ? (
           <p>Your shopping list is empty.</p>
         ) : (
-          itemsSL.map((item, index) => (
+          items.map((item, index) => (
             <li className="fridge-li-element" key={index}>
               {item.name} - {item.quantity}
               <p className="date">{item.date_added}</p>

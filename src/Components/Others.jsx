@@ -2,14 +2,15 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 
 export default function Others({
-  itemsOthers,
-  setItemsOthers,
+  items,
+  setItems,
   fetchItems,
+  addItem,
+  deleteItem,
   moveToSL,
   regex,
   regexQtyBreakdown,
 }) {
-
   const [newItem, setNewItem] = useState([]);
   const [newQuantity, setNewQuantity] = useState([]);
 
@@ -46,12 +47,17 @@ export default function Others({
   const handleTransferItem = () => {
     if (tempQty !== "") {
       const transferItem = {
-        ...itemsOthers[tempIndex],
+        ...items[tempIndex],
         quantity: tempQty,
-        date:
-          new Date().toISOString().split('T')[0],
+        date: new Date().toISOString().split("T")[0],
       };
-      moveToSL(transferItem.name, transferItem.quantity, transferItem.date, 'others_items', 'shoppingList_items');
+      moveToSL(
+        transferItem.name,
+        transferItem.quantity,
+        transferItem.date,
+        "others_items",
+        "shoppingList_items"
+      );
       setTempQty("");
       setTempIndex(null);
       setIsVisibleTransferForm(false);
@@ -85,57 +91,36 @@ export default function Others({
   const toggleModifyQty = (index, id) => {
     setIsVisibleQtyO(!isVisibleQtyO);
     setUpdateIdOthers(id);
-    console.log(id)
+    console.log(id);
   };
 
   // Item modifier functions
 
   useEffect(() => {
-   const getDatas = async () => {
-    const data = await fetchItems('others_items');
-    setItemsOthers(data)
-   }
+    const getDatas = async () => {
+      const data = await fetchItems("others_items");
+      setItems(data);
+    };
     getDatas();
-  }, []);
+  }, [items]);
 
   const handleAddOthers = async () => {
-    if (newItem.length > 0 && newQuantity.length > 0) {
-      const validQty = Number(...newQuantity.match(regexQtyBreakdown));
-      const unit = newQuantity.replace(Number.parseFloat(newQuantity), '');
-      const newOthersItem = {
-        name: newItem.trim(),
-        quantity: `${validQty} ${unit}`,
-        date_added: new Date().toISOString().split("T")[0],
-      };
-      try {
-        await axios.post("http://localhost:5500/others_items", newOthersItem);
-        const response = await axios.get("http://localhost:5500/others_items");
-        setItemsOthers(response.data.items);
-        setNewItem("");
-        setNewQuantity("");
-        setIsVisibleO(false);
-      } catch (error) {
-        console.error(error);
-      }
-    } else {
-      alert("The name and quantity fields mustn't be empty.");
+    try {
+      await addItem("others_items", newItem, newQuantity, setItems);
+      setNewItem("");
+      setNewQuantity("");
+      setIsVisibleO(false);
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred while adding the item.");
     }
   };
 
   const handleDelete = async (index) => {
-    const itemToDelete = itemsOthers[index];
-    try {
-      await axios.delete(
-        `http://localhost:5500/others_items/${itemToDelete.id}`
-      );
-      const response = await axios.get("http://localhost:5500/others_items");
-      setItemsOthers(response.data.items);
-      setIsVisibleQtyO(false);
-      setModifyQuantity("");
-    } catch (error) {
-      console.error("Error deleting item:", error);
-      alert("Error deleting item. Please try again.");
-    }
+    const itemToDelete = items[index];
+    await deleteItem("others_items", itemToDelete, setItems);
+    setIsVisibleQtyO(false);
+    setModifyQuantity("");
   };
 
   const handleUpdate = async () => {
@@ -148,7 +133,7 @@ export default function Others({
         quantity: modifyQuantity.trim(),
       });
       const response = await axios.get("http://localhost:5500/others_items");
-      setItemsOthers(response.data.items);
+      setItems(response.data.items);
       setIsVisibleQtyO(false);
       setModifyQuantity("");
       setUpdateIdOthers(null);
@@ -159,10 +144,10 @@ export default function Others({
     <>
       <h2>Other kitchen items</h2>
       <ul className="fridge-ul main-item-style">
-        {itemsOthers.length === 0 ? (
+        {items.length === 0 ? (
           <p>This container is empty.</p>
         ) : (
-          itemsOthers.map((item, index) => {
+          items.map((item, index) => {
             return (
               <li
                 className={`fridge-li-element ${

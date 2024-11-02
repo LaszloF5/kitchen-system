@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from 'axios';
+import axios from "axios";
 import Fridge from "./Components/Fridge";
 import Freezer from "./Components/Freezer";
 import Chamber from "./Components/Chamber";
@@ -8,6 +8,10 @@ import ShoppingList from "./Components/ShoppingList";
 import "./App.css";
 
 export default function App() {
+  ///////////////////////////////////////////////////
+  const [newItem, setNewItem] = useState("");
+  const [newQuantity, setNewQuantity] = useState("");
+  ///////////////////////////////////////////////////
   const [fridgeItems, setFridgeItems] = useState([]);
   const [freezerItems, setFreezerItems] = useState([]);
   const [chamberItems, setChamberItems] = useState([]);
@@ -18,13 +22,15 @@ export default function App() {
   const [currency, setCurrency] = useState("");
   const [prevCurrency, setPrevCurrency] = useState("");
 
-    // Validate qty with regex
+  // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
   const regexQtyBreakdown = /\d+(\.\d+)?/;
-  
+
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isVisibleCurrencyForm, setIsVisibleCurrencyForm] = useState(false);
-  const currencyText = isVisibleCurrencyForm ? 'Close currency form' : 'Set your currency';
+  const currencyText = isVisibleCurrencyForm
+    ? "Close currency form"
+    : "Set your currency";
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -32,7 +38,7 @@ export default function App() {
 
   const toggleCurrencyForm = () => {
     setIsVisibleCurrencyForm(!isVisibleCurrencyForm);
-  }
+  };
 
   useEffect(() => {
     const savedState = JSON.parse(localStorage.getItem("toggle"));
@@ -47,22 +53,69 @@ export default function App() {
 
   useEffect(() => {
     if (yourAmount[yourAmount.length - 1]?.amount > 0 && currency === "") {
-        alert("Enter the currency that you want to use.");
+      alert("Enter the currency that you want to use.");
     }
   }, []);
 
+  // Get items
+
   const fetchItems = async (table) => {
     try {
-      const response = await axios.get(`http://localhost:5500/${table}/items`);
+      const response = await axios.get(`http://localhost:5500/${table}`);
       return Array.isArray(response.data.items) ? response.data.items : [];
     } catch (error) {
       console.error("Error fetching items: ", error);
       return [];
     }
   };
-  
 
-  const moveToSL = async (itemName, newQuantity, date, sourceTable, targetTable) => {
+  // Post items
+
+  const addItem = async (table, newItem, newQuantity, setItems) => {
+    if (newItem.length > 0 && newQuantity.length > 0) {
+      const validQty = Number(...newQuantity.match(regexQtyBreakdown));
+      const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
+      const newItemData = {
+        name: newItem.trim(),
+        quantity: `${validQty} ${unit}`,
+        date_added: new Date().toISOString().split("T")[0],
+      };
+      try {
+        const response = await axios.post(
+          `http://localhost:5500/${table}`,
+          newItemData
+        );
+        setItems((prevItems) => [...prevItems, response.data]);
+        return response.data;
+      } catch (error) {
+        console.error("Error adding item:", error);
+        alert("An error occurred while adding the item.");
+      }
+    } else {
+      alert("The name and quantity fields mustn't be empty.");
+    }
+  };
+
+  // Delete item
+
+  const deleteItem = async (table, itemToDelete, setItems) => {
+    try {
+      await axios.delete(`http://localhost:5500/${table}/${itemToDelete.id}`);
+      const response = await axios.get(`http://localhost:5500/${table}`);
+      setItems(response.data.items);
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      alert("Error deleting item. Please try again.");
+    }
+  };
+
+  const moveToSL = async (
+    itemName,
+    newQuantity,
+    date,
+    sourceTable,
+    targetTable
+  ) => {
     try {
       await axios.post("http://localhost:5500/moveto_sl", {
         itemName,
@@ -70,57 +123,70 @@ export default function App() {
         date,
         sourceTable,
         targetTable,
-      })
+      });
     } catch {
       alert("Error moving to the SL.");
     }
-  }
+  };
 
   const handleCurrency = (e) => {
     e.preventDefault();
     if (e.target.currency.value.length === 0) {
-      alert('This input field must be filled.');
+      alert("This input field must be filled.");
     } else {
       setCurrency(e.target.currency.value.toUpperCase());
-      e.target.currency.value = '';
+      e.target.currency.value = "";
       setIsVisibleCurrencyForm(false);
     }
-  }
+  };
 
   // Load
 
   useEffect(() => {
-    const currentCurrency = JSON.parse(localStorage.getItem('currency'));
+    const currentCurrency = JSON.parse(localStorage.getItem("currency"));
     setCurrency(currentCurrency);
-  }, [])
+  }, []);
 
   // Save
 
   useEffect(() => {
     if (prevCurrency !== currency) {
-      localStorage.setItem('currency', JSON.stringify(currency));
+      localStorage.setItem("currency", JSON.stringify(currency));
       setPrevCurrency(currency);
     }
-  }, [currency])
+  }, [currency]);
 
   return (
     <div className={`${isDarkMode ? "getDark" : "getLight"} App`}>
       <header className="header">
-        <button className="btn btn-update" onClick={toggleCurrencyForm}>{currencyText}</button>
+        <button className="btn btn-update" onClick={toggleCurrencyForm}>
+          {currencyText}
+        </button>
         <div>
-        {headerText}
-        {yourAmount.length > 0 && (
-          <span>
-            {yourAmount[yourAmount.length - 1].amount} {currency}
-          </span>
-        )}
+          {headerText}
+          {yourAmount.length > 0 && (
+            <span>
+              {yourAmount[yourAmount.length - 1].amount} {currency}
+            </span>
+          )}
         </div>
       </header>
 
-      {isVisibleCurrencyForm ? (<form className="currencyForm" onSubmit={handleCurrency}>
-        <input className="currencyForm_input" type="text" name="currency" placeholder="ex. USD" autoComplete="off" autoFocus/>
-        <button className="btn btn-others" type="submit">Currency</button>
-      </form>) : null}
+      {isVisibleCurrencyForm ? (
+        <form className="currencyForm" onSubmit={handleCurrency}>
+          <input
+            className="currencyForm_input"
+            type="text"
+            name="currency"
+            placeholder="ex. USD"
+            autoComplete="off"
+            autoFocus
+          />
+          <button className="btn btn-others" type="submit">
+            Currency
+          </button>
+        </form>
+      ) : null}
 
       <h1>Kitchen system</h1>
       {isDarkMode ? (
@@ -146,42 +212,52 @@ export default function App() {
         items={fridgeItems}
         setItems={setFridgeItems}
         fetchItems={fetchItems}
+        addItem={addItem}
+        deleteItem={deleteItem}
         moveToSL={moveToSL}
-        regex = {regex}
-        regexQtyBreakdown = {regexQtyBreakdown}
+        regex={regex}
+        regexQtyBreakdown={regexQtyBreakdown}
       />
       <Freezer
-        itemsFreezer={freezerItems}
-        setItemsFreezer={setFreezerItems}
+        items={freezerItems}
+        setItems={setFreezerItems}
         fetchItems={fetchItems}
+        addItem={addItem}
+        deleteItem={deleteItem}
         moveToSL={moveToSL}
-        regex = {regex}
-        regexQtyBreakdown = {regexQtyBreakdown}
+        regex={regex}
+        regexQtyBreakdown={regexQtyBreakdown}
       />
       <Chamber
-        itemsChamber={chamberItems}
-        setItemsChamber={setChamberItems}
+        items={chamberItems}
+        setItems={setChamberItems}
         fetchItems={fetchItems}
+        addItem={addItem}
+        deleteItem={deleteItem}
         moveToSL={moveToSL}
-        regex = {regex}
-        regexQtyBreakdown = {regexQtyBreakdown}
+        regex={regex}
+        regexQtyBreakdown={regexQtyBreakdown}
       />
       <Others
-        itemsOthers={otherItems}
-        setItemsOthers={setOtherItems}
+        items={otherItems}
+        setItems={setOtherItems}
         fetchItems={fetchItems}
+        addItem={addItem}
+        deleteItem={deleteItem}
         moveToSL={moveToSL}
-        regex = {regex}
-        regexQtyBreakdown = {regexQtyBreakdown}
+        regex={regex}
+        regexQtyBreakdown={regexQtyBreakdown}
       />
       <ShoppingList
-        itemsSL={shoppingListItems}
-        setItemsSL={setShoppingListItems}
+        items={shoppingListItems}
+        setItems={setShoppingListItems}
         fetchItems={fetchItems}
+        addItem={addItem}
+        deleteItem={deleteItem}
         expenditure={yourAmount}
         setExpenditure={setYourAmount}
-        regex = {regex}
-        regexQtyBreakdown = {regexQtyBreakdown}
+        regex={regex}
+        regexQtyBreakdown={regexQtyBreakdown}
       />
       <footer className="footer">Footer</footer>
     </div>
