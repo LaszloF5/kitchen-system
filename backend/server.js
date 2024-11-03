@@ -181,7 +181,7 @@ app.post("/move_item", (req, res) => {
 // Elemek mozgatása a shoppingList komponensbe.
 
 app.post("/moveto_sl", (req, res) => {
-  const { itemName, sourceTable, targetTable } = req.body;
+  const { itemName, newQuantity, date, sourceTable, targetTable } = req.body;
   const validTables = [
     "fridge_items",
     "freezer_items",
@@ -207,7 +207,7 @@ app.post("/moveto_sl", (req, res) => {
     if (!transferItem) {
       return res
         .status(400)
-        .json({ error: "Item not found in the fridge_items." });
+        .json({ error: `Item not found in the ${sourceTable}` });
     }
     const sql2 = `SELECT * FROM ${targetTable} WHERE name = ?`;
     db.get(sql2, [itemName], function (err, targetItem) {

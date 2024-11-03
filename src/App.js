@@ -5,6 +5,7 @@ import Freezer from "./Components/Freezer";
 import Chamber from "./Components/Chamber";
 import Others from "./Components/Others";
 import ShoppingList from "./Components/ShoppingList";
+import Login from "./Components/Login";
 import "./App.css";
 
 export default function App() {
@@ -46,7 +47,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("toggle", JSON.stringify(isDarkMode));
   }, [isDarkMode]);
-
 
   // USEMEMO????
   useEffect(() => {
@@ -215,6 +215,7 @@ export default function App() {
           onClick={toggleDarkMode}
         />
       )}
+      <Login />
 
       <Fridge
         items={fridgeItems}

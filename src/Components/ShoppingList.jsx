@@ -114,7 +114,7 @@ export default function ShoppingList({
       setItems(data);
     };
     getDatas();
-  }, [fetchItems, setItems]);
+  }, [fetchItems, items, setItems]);
 
   const handleAdd = async () => {
     try {
