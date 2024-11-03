@@ -49,7 +49,7 @@ export default function Freezer({
       setItems(data);
     };
     getDatas();
-  }, [fetchItems, setItems]);
+  }, [fetchItems, items, setItems]);
 
   ////////// FUNCTIONS //////////
 

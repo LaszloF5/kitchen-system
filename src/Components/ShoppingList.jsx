@@ -157,18 +157,12 @@ export default function ShoppingList({
       'shoppingList_items',
     ];
   
-    // Log the received parameters
-    console.log("Received itemName:", itemName);
-    console.log("Received sourceTable:", sourceTable);
-    console.log("Received targetTable:", targetTable);
-  
-    // Trim whitespace from the tables to prevent issues with spaces
     const trimmedSourceTable = sourceTable.trim();
     const trimmedTargetTable = targetTable.trim();
   
     if (!validTables.includes(trimmedSourceTable) || !validTables.includes(trimmedTargetTable)) {
-      console.log("Hiba van a tábláknál.");
-      return; // Early return if tables are invalid
+      console.log("Invalid table name.");
+      return;
     }
   
     try {

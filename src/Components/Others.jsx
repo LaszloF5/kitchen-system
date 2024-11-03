@@ -100,7 +100,7 @@ export default function Others({
       setItems(data);
     };
     getDatas();
-  }, [fetchItems, setItems]);
+  }, [fetchItems, items,setItems]);
 
   const handleAddOthers = async () => {
     try {

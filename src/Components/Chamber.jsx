@@ -102,7 +102,7 @@ export default function Chamber({
       setItems(data);
     };
     getDatas();
-  }, [fetchItems, setItems]);
+  }, [fetchItems, items, setItems]);
 
   const handleAddChamber = async () => {
     try {

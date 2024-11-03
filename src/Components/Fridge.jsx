@@ -98,7 +98,7 @@ export default function Fridge({
       setItems(data);
     };
     getDatas();
-  }, [fetchItems, setItems]);
+  }, [fetchItems, items, setItems]);
 
   // functions
 

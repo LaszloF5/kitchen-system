@@ -60,6 +60,204 @@ app.get("/", (req, res) => {
   res.send("The server is running.");
 });
 
+// Elemek mozgatása a shoppingList komponensből a többi komponensbe.
+
+app.post("/move_item", (req, res) => {
+  const { itemName, sourceTable, targetTable } = req.body;
+  console.log("Received request body:", req.body);
+
+  const validTables = [
+    "fridge_items",
+    "freezer_items",
+    "chamber_items",
+    "others_items",
+    "shoppingList_items",
+  ];
+
+  if (!validTables.includes(sourceTable)) {
+    console.log("Invalid source table name received:", sourceTable);
+    return res
+      .status(400)
+      .json({ error: `Invalid source table name: ${sourceTable}` });
+  }
+  if (!validTables.includes(targetTable)) {
+    console.log("Invalid target table name received:", targetTable);
+    return res
+      .status(400)
+      .json({ error: `Invalid target table name: ${targetTable}` });
+  }
+
+  db.get(
+    `SELECT * FROM ${sourceTable} WHERE name = ?`,
+    [itemName],
+    (err, sourceRow) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!sourceRow) return res.status(404).json({ error: "Item not found." });
+
+      // Forrás mennyiség és mértékegység bontása
+      const cleanedSourceQuantity = sourceRow.quantity
+        .replace(/\s+/, " ")
+        .trim();
+      const [sourceQuantity, sourceUnit] = cleanedSourceQuantity.split(" ");
+      const sourceQuantityValue = parseFloat(sourceQuantity);
+
+      // Cél tábla lekérdezése az itemName alapján
+      db.get(
+        `SELECT * FROM ${targetTable} WHERE name = ?`,
+        [itemName],
+        (err, targetRow) => {
+          if (err) return res.status(500).json({ error: err.message });
+
+          if (targetRow) {
+            // Cél mennyiség és mértékegység bontása
+            const cleanedTargetQuantity = targetRow.quantity
+              .replace(/\s+/, " ")
+              .trim();
+            const [targetQuantity, targetUnit] =
+              cleanedTargetQuantity.split(" ");
+            const targetQuantityValue = parseFloat(targetQuantity);
+
+            // Ellenőrzi, hogy a mértékegységek egyeznek-e
+            if (sourceUnit === targetUnit) {
+              const newQuantity = sourceQuantityValue + targetQuantityValue;
+              const updatedQuantity = `${newQuantity} ${targetUnit}`;
+
+              db.run(
+                `UPDATE ${targetTable} SET quantity = ? WHERE name = ?`,
+                [updatedQuantity, itemName],
+                function (err) {
+                  if (err) return res.status(500).json({ error: err.message });
+
+                  // Sikeres UPDATE után törli a forrástáblából
+                  db.run(
+                    `DELETE FROM ${sourceTable} WHERE name = ?`,
+                    [itemName],
+                    function (err) {
+                      if (err)
+                        return res.status(500).json({ error: err.message });
+                      res.json({
+                        message: "Item moved successfully.",
+                        id: sourceRow.id,
+                      });
+                    }
+                  );
+                }
+              );
+            } else {
+              res
+                .status(400)
+                .json({ error: "Unit mismatch between source and target." });
+            }
+          } else {
+            // Ha nincs cél tábla sor, akkor beszúrja az új elemet
+            db.run(
+              `INSERT INTO ${targetTable} (name, quantity, date_added) VALUES (?, ?, ?)`,
+              [sourceRow.name, sourceRow.quantity, sourceRow.date_added],
+              function (err) {
+                if (err) return res.status(500).json({ error: err.message });
+
+                // Sikeres INSERT után törli a forrástáblából
+                db.run(
+                  `DELETE FROM ${sourceTable} WHERE name = ?`,
+                  [itemName],
+                  function (err) {
+                    if (err)
+                      return res.status(500).json({ error: err.message });
+                    res.json({
+                      message: "Item moved successfully.",
+                      id: sourceRow.id,
+                    });
+                  }
+                );
+              }
+            );
+          }
+        }
+      );
+    }
+  );
+});
+
+// Elemek mozgatása a shoppingList komponensbe.
+
+app.post("/moveto_sl", (req, res) => {
+  const { itemName, sourceTable, targetTable } = req.body;
+  const validTables = [
+    "fridge_items",
+    "freezer_items",
+    "chamber_items",
+    "others_items",
+    "shoppingList_items",
+  ];
+
+  if (
+    !validTables.includes(sourceTable) &&
+    !validTables.includes(targetTable)
+  ) {
+    return res.status(400).json({ error: "Invalid source or target table." });
+  }
+
+  const sql = `SELECT * FROM ${sourceTable} WHERE name = ?`;
+
+  db.get(sql, [itemName], function (err, transferItem) {
+    if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+
+    if (!transferItem) {
+      return res
+        .status(400)
+        .json({ error: "Item not found in the fridge_items." });
+    }
+    const sql2 = `SELECT * FROM ${targetTable} WHERE name = ?`;
+    db.get(sql2, [itemName], function (err, targetItem) {
+      if (err) {
+        return res.status(400).json({ error: err.message });
+      }
+      // Ha az elem megtalálható az SL-ben.
+      if (targetItem) {
+        // Mennyiség kivonása és ellenőrzés, hogy ne legyen hiba, ha nincs találat
+        const numReg = /\d+(\.\d+)?/;
+        const tempQty = newQuantity.match(numReg);
+
+        if (!tempQty) {
+          return res.status(400).json({ error: "Invalid quantity format." });
+        }
+
+        const qtyToAdd = Number(tempQty[0]);
+        const currentQtyMatch = targetItem.quantity.match(numReg);
+        const currentQty = currentQtyMatch ? Number(currentQtyMatch[0]) : 0;
+        const newTotalQty = currentQty + qtyToAdd;
+        const unit = newQuantity.replace(numReg, "").trim();
+
+        const validQty = `${newTotalQty} ${unit}`;
+
+        const sql3 = `UPDATE ${targetTable} SET quantity = ?, date_added = ? WHERE name = ?`;
+        db.run(sql3, [validQty, date, itemName], function (err) {
+          if (err) {
+            return res.status(400).json({ error: err.message });
+          }
+          res.json({ message: "Item quantity updated successfully." });
+        });
+      } else {
+        // Ha nem, létrehozzuk az elemet.
+        const numRegex = /\d+(\.\d+)?/; // Egy tömböt ad vissza.
+        const qty = newQuantity.match(numRegex)[0];
+        const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
+        const validQty = `${qty} ${unit}`;
+        console.log("QTY ami eddig nem jelent meg: ", validQty);
+        const sql4 = `INSERT INTO ${targetTable} (name, quantity, date_added) VALUES (?, ?, ?)`;
+        db.run(sql4, [transferItem.name, validQty, date], function (err) {
+          if (err) {
+            return res.status(400).json({ error: err.message });
+          }
+          res.json({ message: "Item moved to shopping list successfully." });
+        });
+      }
+    });
+  });
+});
+
 // fridge items
 
 app.get("/:table", (req, res) => {
@@ -180,205 +378,6 @@ app.put("/:table/:id", (req, res) => {
   });
 });
 
-// Elemek mozgatása a shopping list komponensből a többi komponensbe.
-
-app.post("/move_item", (req, res) => {
-  console.log("hívás megkezdődött.");
-  const { itemName, sourceTable, targetTable } = req.body;
-  console.log("Received request body:", req.body);
-
-  const validTables = [
-    "fridge_items",
-    "freezer_items",
-    "chamber_items",
-    "others_items",
-    "shoppingList_items",
-  ];
-
-  console.log("Received sourceTable:", JSON.stringify(sourceTable));
-  console.log("Received targetTable:", JSON.stringify(targetTable));
-
-  if (!validTables.includes(sourceTable)) {
-    console.log("Invalid source table name received:", sourceTable);
-    return res
-      .status(400)
-      .json({ error: `Invalid source table name: ${sourceTable}` });
-  }
-  if (!validTables.includes(targetTable)) {
-    console.log("Invalid target table name received:", targetTable);
-    return res
-      .status(400)
-      .json({ error: `Invalid target table name: ${targetTable}` });
-  }
-
-  db.get(
-    `SELECT * FROM ${sourceTable} WHERE name = ?`,
-    [itemName],
-    (err, sourceRow) => {
-      if (err) return res.status(500).json({ error: err.message });
-      if (!sourceRow) return res.status(404).json({ error: "Item not found." });
-
-      // Forrás mennyiség és mértékegység bontása
-      const cleanedSourceQuantity = sourceRow.quantity
-        .replace(/\s+/, " ")
-        .trim();
-      const [sourceQuantity, sourceUnit] = cleanedSourceQuantity.split(" ");
-      const sourceQuantityValue = parseFloat(sourceQuantity);
-
-      // Cél tábla lekérdezése az itemName alapján
-      db.get(
-        `SELECT * FROM ${targetTable} WHERE name = ?`,
-        [itemName],
-        (err, targetRow) => {
-          if (err) return res.status(500).json({ error: err.message });
-
-          if (targetRow) {
-            // Cél mennyiség és mértékegység bontása
-            const cleanedTargetQuantity = targetRow.quantity
-              .replace(/\s+/, " ")
-              .trim();
-            const [targetQuantity, targetUnit] =
-              cleanedTargetQuantity.split(" ");
-            const targetQuantityValue = parseFloat(targetQuantity);
-
-            // Ellenőrzi, hogy a mértékegységek egyeznek-e
-            if (sourceUnit === targetUnit) {
-              const newQuantity = sourceQuantityValue + targetQuantityValue;
-              const updatedQuantity = `${newQuantity} ${targetUnit}`;
-
-              db.run(
-                `UPDATE ${targetTable} SET quantity = ? WHERE name = ?`,
-                [updatedQuantity, itemName],
-                function (err) {
-                  if (err) return res.status(500).json({ error: err.message });
-
-                  // Sikeres UPDATE után törli a forrástáblából
-                  db.run(
-                    `DELETE FROM ${sourceTable} WHERE name = ?`,
-                    [itemName],
-                    function (err) {
-                      if (err)
-                        return res.status(500).json({ error: err.message });
-                      res.json({
-                        message: "Item moved successfully.",
-                        id: sourceRow.id,
-                      });
-                    }
-                  );
-                }
-              );
-            } else {
-              res
-                .status(400)
-                .json({ error: "Unit mismatch between source and target." });
-            }
-          } else {
-            // Ha nincs cél tábla sor, akkor beszúrja az új elemet
-            db.run(
-              `INSERT INTO ${targetTable} (name, quantity, date_added) VALUES (?, ?, ?)`,
-              [sourceRow.name, sourceRow.quantity, sourceRow.date_added],
-              function (err) {
-                if (err) return res.status(500).json({ error: err.message });
-
-                // Sikeres INSERT után törli a forrástáblából
-                db.run(
-                  `DELETE FROM ${sourceTable} WHERE name = ?`,
-                  [itemName],
-                  function (err) {
-                    if (err)
-                      return res.status(500).json({ error: err.message });
-                    res.json({
-                      message: "Item moved successfully.",
-                      id: sourceRow.id,
-                    });
-                  }
-                );
-              }
-            );
-          }
-        }
-      );
-    }
-  );
-});
-
-app.post("/moveto_sl", (req, res) => {
-  const { itemName, sourceTable, targetTable } = req.body;
-  const validTables = [
-    "fridge_items",
-    "freezer_items",
-    "chamber_items",
-    "others_items",
-    "shoppingList_items",
-  ];
-
-  if (
-    !validTables.includes(sourceTable) &&
-    !validTables.includes(targetTable)
-  ) {
-    return res.status(400).json({ error: "Invalid source or target table." });
-  }
-
-  const sql = `SELECT * FROM ${sourceTable} WHERE name = ?`;
-
-  db.get(sql, [itemName], function (err, transferItem) {
-    if (err) {
-      return res.status(400).json({ error: err.message });
-    }
-
-    if (!transferItem) {
-      return res
-        .status(400)
-        .json({ error: "Item not found in the fridge_items." });
-    }
-    const sql2 = `SELECT * FROM ${targetTable} WHERE name = ?`;
-    db.get(sql2, [itemName], function (err, targetItem) {
-      if (err) {
-        return res.status(400).json({ error: err.message });
-      }
-      // Ha az elem megtalálható az SL-ben.
-      if (targetItem) {
-        // Mennyiség kivonása és ellenőrzés, hogy ne legyen hiba, ha nincs találat
-        const numReg = /\d+(\.\d+)?/;
-        const tempQty = newQuantity.match(numReg);
-
-        if (!tempQty) {
-          return res.status(400).json({ error: "Invalid quantity format." });
-        }
-
-        const qtyToAdd = Number(tempQty[0]);
-        const currentQtyMatch = targetItem.quantity.match(numReg);
-        const currentQty = currentQtyMatch ? Number(currentQtyMatch[0]) : 0;
-        const newTotalQty = currentQty + qtyToAdd;
-        const unit = newQuantity.replace(numReg, "").trim();
-
-        const validQty = `${newTotalQty} ${unit}`;
-
-        const sql3 = `UPDATE ${targetTable} SET quantity = ?, date_added = ? WHERE name = ?`;
-        db.run(sql3, [validQty, date, itemName], function (err) {
-          if (err) {
-            return res.status(400).json({ error: err.message });
-          }
-          res.json({ message: "Item quantity updated successfully." });
-        });
-      } else {
-        // Ha nem, létrehozzuk az elemet.
-        const numRegex = /\d+(\.\d+)?/; // Egy tömböt ad vissza.
-        const qty = newQuantity.match(numRegex)[0];
-        const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
-        const validQty = `${qty} ${unit}`;
-        console.log("QTY ami eddig nem jelent meg: ", validQty);
-        const sql4 = `INSERT INTO ${targetTable} (name, quantity, date_added) VALUES (?, ?, ?)`;
-        db.run(sql4, [transferItem.name, validQty, date], function (err) {
-          if (err) {
-            return res.status(400).json({ error: err.message });
-          }
-          res.json({ message: "Item moved to shopping list successfully." });
-        });
-      }
-    });
-  });
-});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
