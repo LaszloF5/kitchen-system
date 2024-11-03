@@ -182,8 +182,10 @@ app.put("/:table/:id", (req, res) => {
 
 // Elemek mozgatása a shopping list komponensből a többi komponensbe.
 
-app.post("/move-item", (req, res) => {
-  const { id, itemName, sourceTable, targetTable } = req.body;
+app.post("/move_item", (req, res) => {
+  console.log("hívás megkezdődött.");
+  const { itemName, sourceTable, targetTable } = req.body;
+  console.log("Received request body:", req.body);
 
   const validTables = [
     "fridge_items",
@@ -192,11 +194,21 @@ app.post("/move-item", (req, res) => {
     "others_items",
     "shoppingList_items",
   ];
-  if (
-    !validTables.includes(sourceTable) ||
-    !validTables.includes(targetTable)
-  ) {
-    return res.status(400).json({ error: "Invalid table name." });
+
+  console.log("Received sourceTable:", JSON.stringify(sourceTable));
+  console.log("Received targetTable:", JSON.stringify(targetTable));
+
+  if (!validTables.includes(sourceTable)) {
+    console.log("Invalid source table name received:", sourceTable);
+    return res
+      .status(400)
+      .json({ error: `Invalid source table name: ${sourceTable}` });
+  }
+  if (!validTables.includes(targetTable)) {
+    console.log("Invalid target table name received:", targetTable);
+    return res
+      .status(400)
+      .json({ error: `Invalid target table name: ${targetTable}` });
   }
 
   db.get(
@@ -290,9 +302,8 @@ app.post("/move-item", (req, res) => {
   );
 });
 
-
 app.post("/moveto_sl", (req, res) => {
-  const { itemName, newQuantity, date, sourceTable, targetTable } = req.body;
+  const { itemName, sourceTable, targetTable } = req.body;
   const validTables = [
     "fridge_items",
     "freezer_items",

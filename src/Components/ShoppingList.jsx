@@ -148,55 +148,81 @@ export default function ShoppingList({
 
   // Elemek mozgatása komponensek között //
 
-  const moveItem = async (itemId, itemName, sourceTable, targetTable) => {
+  const moveItem = async (itemName, sourceTable, targetTable) => {
+    const validTables = [
+      'fridge_items',
+      'freezer_items',
+      'chamber_items',
+      'others_items',
+      'shoppingList_items',
+    ];
+  
+    // Log the received parameters
+    console.log("Received itemName:", itemName);
+    console.log("Received sourceTable:", sourceTable);
+    console.log("Received targetTable:", targetTable);
+  
+    // Trim whitespace from the tables to prevent issues with spaces
+    const trimmedSourceTable = sourceTable.trim();
+    const trimmedTargetTable = targetTable.trim();
+  
+    if (!validTables.includes(trimmedSourceTable) || !validTables.includes(trimmedTargetTable)) {
+      console.log("Hiba van a tábláknál.");
+      return; // Early return if tables are invalid
+    }
+  
     try {
-      const response = await axios.post("http://localhost:5500/move-item", {
-        id: itemId,
+      const response = await axios.post("http://localhost:5500/move_item", {
         itemName,
-        sourceTable,
-        targetTable,
+        sourceTable: trimmedSourceTable,
+        targetTable: trimmedTargetTable,
       });
-
+  
       if (response.status === 200) {
         const newList = await axios.get("http://localhost:5500/shoppingList_items");
         setItems(newList.data.items);
         setIsVisibleMoveTo(false);
         setNewIndex(null);
-        alert("Elem sikeresen áthelyezve.")
+        alert("Elem sikeresen áthelyezve.");
       }
     } catch (error) {
-      console.error(error);
-      alert("Hiba a mozgatáskor.");
+      console.error("Error during moving item:", error);
+      if (error.response) {
+        console.log("Server response:", error.response.data);
+        alert("Hiba a mozgatáskor: " + error.response.data.error);
+      } else {
+        alert("Hiba a mozgatáskor: " + error.message);
+      }
     }
-  }
-
+  };
+  
 
   //Fridge component//
 
   const handleTransfer1 = (index) => {
     const itemToTransfer = items[index];
-    moveItem(itemToTransfer.id, itemToTransfer.name, "shoppingList_items", "fridge_items");
+    moveItem(itemToTransfer.name, "shoppingList_items", "fridge_items");
   };
 
   //Freezer component//
 
   const handleTransfer2 = (index) => {
     const itemToTransfer = items[index];
-    moveItem(itemToTransfer.id, itemToTransfer.name,"shoppingList_items", "freezer_items");
+    moveItem(itemToTransfer.name, "shoppingList_items", "freezer_items");
   };
 
   //Chamber component//
 
   const handleTransfer3 = (index) => {
     const itemToTransfer = items[index];
-    moveItem(itemToTransfer.id, itemToTransfer.name, "shoppingList_items", "chamber_items");
+    moveItem(itemToTransfer.name, "shoppingList_items", "chamber_items");
   };
 
   //Others component//
 
   const handleTransfer4 = (index) => {
     const itemToTransfer = items[index];
-    moveItem(itemToTransfer.id, itemToTransfer.name,"shoppingList_items", "others_items");
+    moveItem(itemToTransfer.name, "shoppingList_items", "others_items");
   };
 
   useEffect(() => {
