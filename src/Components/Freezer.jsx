@@ -181,11 +181,11 @@ export default function Freezer({
         }`}
         onSubmit={handleSubmit}
       >
-        <label htmlFor="setQty">Set the quantity:</label>
+        <label htmlFor="setQtyFreezer">Set the quantity:</label>
         <input
           type="text"
           name="setQuantity"
-          id="setQty"
+          id="setQtyFreezer"
           value={tempQty}
           placeholder="ex. 1 kg"
           ref={setQtyFreezerFormRef}
@@ -251,13 +251,13 @@ export default function Freezer({
           />
         </div>
         <div className="input-container">
-          <label className="form-label" htmlFor="newItemQuantityIdF">
+          <label className="form-label" htmlFor="newItemQtyFreezer">
             New item quantity:
           </label>
           <input
             type="text"
             name="newItemQuantity"
-            id="newItemQuantityIdF"
+            id="newItemQtyFreezer"
             placeholder="ex. 1 package"
             value={newQuantity}
             onChange={(e) => {

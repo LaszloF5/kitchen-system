@@ -5,6 +5,7 @@ import Freezer from "./Components/Freezer";
 import Chamber from "./Components/Chamber";
 import Others from "./Components/Others";
 import ShoppingList from "./Components/ShoppingList";
+import Register from "./Components/Register";
 import Login from "./Components/Login";
 import "./App.css";
 
@@ -215,6 +216,7 @@ export default function App() {
           onClick={toggleDarkMode}
         />
       )}
+      <Register />
       <Login />
 
       <Fridge

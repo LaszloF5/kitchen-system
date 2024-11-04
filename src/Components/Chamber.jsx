@@ -189,7 +189,7 @@ export default function Chamber({
         <input
           type="text"
           name="setQuantity"
-          id="setQty"
+          id="setQtyChamber"
           value={tempQty}
           placeholder="ex. 1 kg"
           ref={setQtyChamberFormRef}

@@ -189,7 +189,7 @@ export default function Others({
         <input
           type="text"
           name="setQuantity"
-          id="setQty"
+          id="setQtyOthers"
           value={tempQty}
           placeholder="ex. 1 kg"
           ref={setQtyOthersFormRef}

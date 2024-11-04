@@ -188,11 +188,11 @@ export default function Fridge({
           isVisibleTransferForm ? "visibleTransferForm" : "hiddenTransferForm"
         }`}
       >
-        <label htmlFor="setQty">Set the quantity:</label>
+        <label htmlFor="setQtyFridge">Set the quantity:</label>
         <input
           type="text"
           name="setQuantity"
-          id="setQty"
+          id="setQtyFridge"
           value={tempQty}
           placeholder="ex. 1 kg"
           ref={setQtyFridgeFormRef}
@@ -221,6 +221,7 @@ export default function Fridge({
           <input
             type="text"
             name="newItemQuantity"
+            id="newItemQtyFridge"
             placeholder="ex. 1 kg"
             value={modifyQuantity}
             ref={updateFridgeFormRef}
@@ -260,7 +261,7 @@ export default function Fridge({
           />
         </div>
         <div className="input-container">
-          <label className="form-label" htmlFor="newItemQuantityIdF">
+          <label className="form-label" htmlFor="newItemQuantityF">
             New item quantity:{" "}
           </label>
           <input
