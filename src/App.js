@@ -7,6 +7,7 @@ import Others from "./Components/Others";
 import ShoppingList from "./Components/ShoppingList";
 import Register from "./Components/Register";
 import Login from "./Components/Login";
+import DeleteUser from "./Components/DeleteUser";
 import "./App.css";
 
 export default function App() {
@@ -218,6 +219,7 @@ export default function App() {
       )}
       <Register />
       <Login />
+      <DeleteUser />
 
       <Fridge
         items={fridgeItems}
