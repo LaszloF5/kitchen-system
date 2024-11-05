@@ -9,6 +9,7 @@ export default function Freezer({
   updateItem,
   moveToSL,
   regex,
+  renderToken,
 }) {
   // Input values
   const [newItem, setNewItem] = useState("");
@@ -45,11 +46,19 @@ export default function Freezer({
 
   useEffect(() => {
     const getDatas = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('You need to be logged in to perform this action.');
+        return;
+      }
       const data = await fetchItems("freezer_items");
-      setItems(data);
+      if (data) { // Ellenőrizzük, hogy a data érvényes-e
+        setItems(data);
+      }
     };
     getDatas();
-  }, [fetchItems, items, setItems]);
+  }, []); // Csak az üres dependency array, így egyszer fut le
+  
 
   ////////// FUNCTIONS //////////
 

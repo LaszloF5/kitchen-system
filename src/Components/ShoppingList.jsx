@@ -12,6 +12,7 @@ export default function ShoppingList({
   updateItem,
   expenditure,
   setExpenditure,
+  renderToken,
 }) {
   // Input values
 
@@ -110,11 +111,19 @@ export default function ShoppingList({
 
   useEffect(() => {
     const getDatas = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('You need to be logged in to perform this action.');
+        return;
+      }
       const data = await fetchItems("shoppingList_items");
-      setItems(data);
+      if (data) { // Ellenőrizzük, hogy a data érvényes-e
+        setItems(data);
+      }
     };
     getDatas();
-  }, [fetchItems, items, setItems]);
+  }, []); // Csak az üres dependency array, így egyszer fut le
+  
 
   const handleAdd = async () => {
     try {

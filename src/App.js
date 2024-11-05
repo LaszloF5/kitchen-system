@@ -20,6 +20,7 @@ export default function App() {
   const headerText = "Weekly expenses: ";
   const [currency, setCurrency] = useState("");
   const [prevCurrency, setPrevCurrency] = useState("");
+  const [renderToken, setRenderToken] = useState(localStorage.getItem('token'));
 
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
@@ -30,6 +31,13 @@ export default function App() {
   const currencyText = isVisibleCurrencyForm
     ? "Close currency form"
     : "Set your currency";
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    }
+  }, [])
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -60,8 +68,17 @@ export default function App() {
   // Get items
 
   const fetchItems = useCallback(async (table) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error("You need to be logged in to perform this action.");
+      return [];
+    }
     try {
-      const response = await axios.get(`http://localhost:5500/${table}`);
+      const response = await axios.get(`http://localhost:5500/${table}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return Array.isArray(response.data.items) ? response.data.items : [];
     } catch (error) {
       console.error("Error fetching items: ", error);
@@ -72,29 +89,32 @@ export default function App() {
   // Post items
 
   const addItem = async (table, newItem, newQuantity, setItems) => {
+    const token = localStorage.getItem('token');
     if (newItem.length > 0 && newQuantity.length > 0) {
-      const validQty = Number(...newQuantity.match(regexQtyBreakdown));
-      const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
-      const newItemData = {
-        name: newItem.trim(),
-        quantity: `${validQty} ${unit}`,
-        date_added: new Date().toISOString().split("T")[0],
-      };
-      try {
-        const response = await axios.post(
-          `http://localhost:5500/${table}`,
-          newItemData
-        );
-        setItems((prevItems) => [...prevItems, response.data]);
-        return response.data;
-      } catch (error) {
-        console.error("Error adding item:", error);
-        alert("An error occurred while adding the item.");
-      }
+        const validQty = Number(...newQuantity.match(regexQtyBreakdown));
+        const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
+        const newItemData = {
+            name: newItem.trim(),
+            quantity: `${validQty} ${unit}`,
+            date_added: new Date().toISOString().split("T")[0],
+        };
+        try {
+            const response = await axios.post(
+                `http://localhost:5500/${table}`,
+                newItemData,
+                { headers: { Authorization: `Bearer ${token}` } } // Győződj meg róla, hogy itt meg van adva a token
+            );
+            setItems((prevItems) => [...prevItems, response.data]);
+            return response.data;
+        } catch (error) {
+            console.error("Error adding item:", error);
+            alert("An error occurred while adding the item.");
+        }
     } else {
-      alert("The name and quantity fields mustn't be empty.");
+        alert("The name and quantity fields mustn't be empty.");
     }
-  };
+};
+
 
   // Delete item
 
@@ -218,7 +238,7 @@ export default function App() {
         />
       )}
       <Register />
-      <Login />
+      <Login setRenderToken={setRenderToken}/>
       <DeleteUser />
 
       <Fridge
@@ -230,6 +250,7 @@ export default function App() {
         updateItem={updateItem}
         moveToSL={moveToSL}
         regex={regex}
+        renderToken={renderToken}
       />
       <Freezer
         items={freezerItems}
@@ -240,6 +261,7 @@ export default function App() {
         updateItem={updateItem}
         moveToSL={moveToSL}
         regex={regex}
+        renderToken={renderToken}
       />
       <Chamber
         items={chamberItems}
@@ -250,6 +272,7 @@ export default function App() {
         updateItem={updateItem}
         moveToSL={moveToSL}
         regex={regex}
+        renderToken={renderToken}
       />
       <Others
         items={otherItems}
@@ -260,6 +283,7 @@ export default function App() {
         updateItem={updateItem}
         moveToSL={moveToSL}
         regex={regex}
+        renderToken={renderToken}
       />
       <ShoppingList
         items={shoppingListItems}
@@ -270,6 +294,7 @@ export default function App() {
         updateItem={updateItem}
         expenditure={yourAmount}
         setExpenditure={setYourAmount}
+        renderToken={renderToken}
       />
       <footer className="footer">Footer</footer>
     </div>

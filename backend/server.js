@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require("express");
 const sqlite3 = require("sqlite3");
 const bcrypt = require("bcrypt");
@@ -6,6 +5,8 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const app = express();
 const PORT = 5500;
+
+require('dotenv').config();
 
 app.use(cors());
 app.use(express.json());
@@ -112,8 +113,10 @@ app.post("/register", async (req, res) => {
 
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
+  console.log('req.body: ', req.body);
   const sql = 'SELECT * FROM  users WHERE username = ?';
   db.get(sql, [username], function (err, user) {
+    console.log('inside the db: ', {username});
     if (err) {
       console.error('Database error: ', err.message);
       return res.status(500).json({error: 'Login failed. Please try again later.'});
@@ -169,6 +172,28 @@ db.all('SELECT * FROM users', [], function(err, row) {
   console.log('Registered users: ', row);
 })
 
+// Tokenellenörző middleware
+
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  console.log('A belső .env file-ban lévő secret: ', process.env.JWT_SECRET_KEY)
+  if (!authHeader) {
+    console.error('Authorization header missing');
+    return res.sendStatus(401); // Unauthorized
+  }
+
+  const token = authHeader.split(' ')[1];
+  // Token validálása (pl. jwt)
+  console.log('token amit validálni kell: ', token);
+  jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
+    if (err) {
+      console.error('Token validation error: ', err.message);
+      return res.sendStatus(403); // Forbidden
+    }
+    req.user = user; // Ha a token validálása sikeres, a felhasználó információt tárolunk a kérésben
+    next(); // Tovább lépünk a következő middleware-re vagy végpontra
+  });
+};
 
 
 
@@ -372,7 +397,7 @@ app.post("/moveto_sl", (req, res) => {
 
 // fridge items
 
-app.get("/:table", (req, res) => {
+app.get("/:table", verifyToken, (req, res) => {
   const { table } = req.params;
   const validTables = [
     "fridge_items",
@@ -396,7 +421,7 @@ app.get("/:table", (req, res) => {
   });
 });
 
-app.post("/:table", (req, res) => {
+app.post("/:table", verifyToken, (req, res) => {
   const { table } = req.params;
   const { name, quantity, date_added } = req.body;
   const validTables = [
@@ -419,7 +444,7 @@ app.post("/:table", (req, res) => {
   });
 });
 
-app.delete("/:table/:id", (req, res) => {
+app.delete("/:table/:id", verifyToken, (req, res) => {
   const { table, id } = req.params;
   const validTables = [
     "fridge_items",
@@ -460,7 +485,7 @@ app.delete("/:table/:id", (req, res) => {
   });
 });
 
-app.put("/:table/:id", (req, res) => {
+app.put("/:table/:id", verifyToken, (req, res) => {
   const { table, id } = req.params;
   const validTables = [
     "fridge_items",

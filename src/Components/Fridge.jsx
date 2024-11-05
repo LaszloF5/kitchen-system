@@ -10,6 +10,7 @@ export default function Fridge({
   updateItem,
   moveToSL,
   regex,
+  renderToken,
 }) {
   //Input values
 
@@ -94,11 +95,19 @@ export default function Fridge({
 
   useEffect(() => {
     const getDatas = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('You need to be logged in to perform this action.');
+        return;
+      }
       const data = await fetchItems("fridge_items");
-      setItems(data);
+      if (data) {
+        setItems(data);
+      }
     };
     getDatas();
-  }, [fetchItems, items, setItems]);
+  }, []);
+  
 
   // functions
 

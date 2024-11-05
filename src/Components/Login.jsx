@@ -1,24 +1,35 @@
 import React, { useState } from "react";
 import axios from 'axios';
 
-export default function Login() {
+export default function Login({setRenderToken}) {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-        const response = await axios.post('http://localhost:5500/login', {userName, password});
-        setToken(response.data.token);
-        alert('Login successful.');
+        const response = await axios.post('http://localhost:5500/login', {username: userName, password});
+        const receivedToken = response.data.token;
+        const receivedUserName = response.data.username;
+        setToken(receivedToken);
+        setRenderToken(receivedToken);
+        setUserName(receivedUserName);
+        localStorage.setItem("token", receivedToken);
     } catch (error) {
         console.error("Error:", error.message);
     }
   }
 
+  const handleLogout = () => {
+    setToken(null);
+    localStorage.removeItem("token");
+    alert('Logout successful.');
+  }
+
   return (
-    <form onSubmit={handleLogin}>
+    <>
+    {!token ? (<form onSubmit={handleLogin}>
       <input
         type="text"
         placeholder="userName"
@@ -32,6 +43,12 @@ export default function Login() {
         onChange={(e) => setPassword(e.target.value)}
       />
       <button>Login</button>
-    </form>
+    </form>) : (
+      <>
+      <h2>Welcome, {userName}!</h2>
+      <button onClick={handleLogout}>Logout</button>
+      </>
+    )}
+    </>
   );
 }

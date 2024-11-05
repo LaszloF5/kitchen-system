@@ -9,6 +9,7 @@ export default function Chamber({
   updateItem,
   moveToSL,
   regex,
+  renderToken,
 }) {
   // Input values
   const [newItem, setNewItem] = useState("");
@@ -98,11 +99,19 @@ export default function Chamber({
 
   useEffect(() => {
     const getDatas = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('You need to be logged in to perform this action.');
+        return;
+      }
       const data = await fetchItems("chamber_items");
-      setItems(data);
+      if (data) { // Ellenőrizzük, hogy a data érvényes-e
+        setItems(data);
+      }
     };
     getDatas();
-  }, [fetchItems, items, setItems]);
+  }, []); // Csak az üres dependency array, így egyszer fut le
+  
 
   const handleAddChamber = async () => {
     try {
