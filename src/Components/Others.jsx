@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
 
 export default function Others({
@@ -100,7 +101,7 @@ export default function Others({
       const token = localStorage.getItem('token');
       if (!token) {
         console.error('You need to be logged in to perform this action.');
-        return;
+        return setItems([]);
       }
       const data = await fetchItems("others_items");
       if (data) { // Ellenőrizzük, hogy a data érvényes-e
@@ -108,8 +109,7 @@ export default function Others({
       }
     };
     getDatas();
-  }, []); // Csak az üres dependency array, így egyszer fut le
-  
+  }, [renderToken, setItems]);
 
   const handleAddOthers = async () => {
     try {

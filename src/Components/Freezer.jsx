@@ -49,7 +49,7 @@ export default function Freezer({
       const token = localStorage.getItem('token');
       if (!token) {
         console.error('You need to be logged in to perform this action.');
-        return;
+        return setItems([]);
       }
       const data = await fetchItems("freezer_items");
       if (data) { // Ellenőrizzük, hogy a data érvényes-e
@@ -57,7 +57,7 @@ export default function Freezer({
       }
     };
     getDatas();
-  }, []); // Csak az üres dependency array, így egyszer fut le
+  }, [renderToken, setItems]);
   
 
   ////////// FUNCTIONS //////////

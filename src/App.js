@@ -20,7 +20,7 @@ export default function App() {
   const headerText = "Weekly expenses: ";
   const [currency, setCurrency] = useState("");
   const [prevCurrency, setPrevCurrency] = useState("");
-  const [renderToken, setRenderToken] = useState(localStorage.getItem('token'));
+  const [renderToken, setRenderToken] = useState('');
 
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
@@ -64,6 +64,13 @@ export default function App() {
       alert("Enter the currency that you want to use.");
     }
   }, []);
+/*
+useEffect(() => {
+    alert('A token tartalma megváltozott!');
+  }, [renderToken])
+
+  Be és kijelentkezésnél a renderToken tartalma megváltozik. Ez az useEffect bizonyítja.
+*/  
 
   // Get items
 

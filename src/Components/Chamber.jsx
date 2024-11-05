@@ -102,7 +102,7 @@ export default function Chamber({
       const token = localStorage.getItem('token');
       if (!token) {
         console.error('You need to be logged in to perform this action.');
-        return;
+        return setItems([]);
       }
       const data = await fetchItems("chamber_items");
       if (data) { // Ellenőrizzük, hogy a data érvényes-e
@@ -110,7 +110,7 @@ export default function Chamber({
       }
     };
     getDatas();
-  }, []); // Csak az üres dependency array, így egyszer fut le
+  }, [renderToken, setItems]);
   
 
   const handleAddChamber = async () => {

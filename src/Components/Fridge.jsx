@@ -98,7 +98,7 @@ export default function Fridge({
       const token = localStorage.getItem('token');
       if (!token) {
         console.error('You need to be logged in to perform this action.');
-        return;
+        return setItems([]);
       }
       const data = await fetchItems("fridge_items");
       if (data) {
@@ -106,7 +106,7 @@ export default function Fridge({
       }
     };
     getDatas();
-  }, []);
+  }, [renderToken, setItems]);
   
 
   // functions

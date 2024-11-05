@@ -24,6 +24,7 @@ export default function Login({setRenderToken}) {
   const handleLogout = () => {
     setToken(null);
     localStorage.removeItem("token");
+    setRenderToken('');
     alert('Logout successful.');
   }
 
