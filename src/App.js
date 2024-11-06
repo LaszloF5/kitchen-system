@@ -7,7 +7,6 @@ import Others from "./Components/Others";
 import ShoppingList from "./Components/ShoppingList";
 import Register from "./Components/Register";
 import Login from "./Components/Login";
-import DeleteUser from "./Components/DeleteUser";
 import "./App.css";
 
 export default function App() {
@@ -29,8 +28,23 @@ export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isVisibleCurrencyForm, setIsVisibleCurrencyForm] = useState(false);
   const currencyText = isVisibleCurrencyForm
-    ? "Close currency form"
-    : "Set your currency";
+  ? "Close currency form"
+  : "Set your currency";
+  
+  const [isVisibleRegisterForm, setIsVisibleRegisterForm] = useState(false);
+  const handleVisibilityRegisterForm = () => {
+    setIsVisibleRegisterForm(!isVisibleRegisterForm);
+  }
+
+  const [isVisibleLoginForm, setIsVisibleLoginForm] = useState(false);
+  const handleVisibilityLoginForm = () => {
+    setIsVisibleLoginForm(!isVisibleLoginForm);
+  };
+
+  const alreadyHaveAcc = () => {
+    setIsVisibleRegisterForm(false);
+    setIsVisibleLoginForm(true);
+  }
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -196,6 +210,8 @@ useEffect(() => {
   return (
     <div className={`${isDarkMode ? "getDark" : "getLight"} App`}>
       <header className="header">
+      <button className="btn btn-update" onClick={handleVisibilityRegisterForm}>Register</button>
+      <button className="btn btn-update" onClick={handleVisibilityLoginForm}>Log in</button>
         <button className="btn btn-update" onClick={toggleCurrencyForm}>
           {currencyText}
         </button>
@@ -208,7 +224,9 @@ useEffect(() => {
           )}
         </div>
       </header>
-
+      {isVisibleRegisterForm ? (<Register 
+      setIsVisibleRegisterForm={setIsVisibleRegisterForm}
+      alreadyHaveAcc={alreadyHaveAcc}/>) : null}
       {isVisibleCurrencyForm ? (
         <form className="currencyForm" onSubmit={handleCurrency}>
           <input
@@ -224,6 +242,7 @@ useEffect(() => {
           </button>
         </form>
       ) : null}
+      {isVisibleLoginForm ? (<Login setRenderToken={setRenderToken} setIsVisibleLoginForm={setIsVisibleLoginForm}/>) : null}
 
       <h1>Kitchen system</h1>
       {isDarkMode ? (
@@ -244,10 +263,6 @@ useEffect(() => {
           onClick={toggleDarkMode}
         />
       )}
-      <Register />
-      <Login setRenderToken={setRenderToken}/>
-      <DeleteUser />
-
       <Fridge
         items={fridgeItems}
         setItems={setFridgeItems}
