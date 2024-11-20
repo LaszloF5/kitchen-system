@@ -19,7 +19,7 @@ export default function App() {
   const headerText = "Weekly expenses: ";
   const [currency, setCurrency] = useState("");
   const [prevCurrency, setPrevCurrency] = useState("");
-  const [renderToken, setRenderToken] = useState('');
+  const [renderToken, setRenderToken] = useState("");
 
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
@@ -28,30 +28,32 @@ export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isVisibleCurrencyForm, setIsVisibleCurrencyForm] = useState(false);
   const currencyText = isVisibleCurrencyForm
-  ? "Close currency form"
-  : "Set your currency";
-  
+    ? "Close currency form"
+    : "Set your currency";
+
   const [isVisibleRegisterForm, setIsVisibleRegisterForm] = useState(false);
   const handleVisibilityRegisterForm = () => {
     setIsVisibleRegisterForm(!isVisibleRegisterForm);
-  }
+    setIsVisibleLoginForm(false);
+  };
 
   const [isVisibleLoginForm, setIsVisibleLoginForm] = useState(false);
   const handleVisibilityLoginForm = () => {
     setIsVisibleLoginForm(!isVisibleLoginForm);
+    setIsVisibleRegisterForm(false);
   };
 
   const alreadyHaveAcc = () => {
     setIsVisibleRegisterForm(false);
     setIsVisibleLoginForm(true);
-  }
+  };
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     }
-  }, [])
+  }, []);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -78,18 +80,18 @@ export default function App() {
       alert("Enter the currency that you want to use.");
     }
   }, []);
-/*
+  /*
 useEffect(() => {
     alert('A token tartalma megváltozott!');
   }, [renderToken])
 
   Be és kijelentkezésnél a renderToken tartalma megváltozik. Ez az useEffect bizonyítja.
-*/  
+*/
 
   // Get items
 
   const fetchItems = useCallback(async (table) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
       console.error("You need to be logged in to perform this action.");
       return [];
@@ -110,32 +112,31 @@ useEffect(() => {
   // Post items
 
   const addItem = async (table, newItem, newQuantity, setItems) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (newItem.length > 0 && newQuantity.length > 0) {
-        const validQty = Number(...newQuantity.match(regexQtyBreakdown));
-        const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
-        const newItemData = {
-            name: newItem.trim(),
-            quantity: `${validQty} ${unit}`,
-            date_added: new Date().toISOString().split("T")[0],
-        };
-        try {
-            const response = await axios.post(
-                `http://localhost:5500/${table}`,
-                newItemData,
-                { headers: { Authorization: `Bearer ${token}` } } // Győződj meg róla, hogy itt meg van adva a token
-            );
-            setItems((prevItems) => [...prevItems, response.data]);
-            return response.data;
-        } catch (error) {
-            console.error("Error adding item:", error);
-            alert("An error occurred while adding the item.");
-        }
+      const validQty = Number(...newQuantity.match(regexQtyBreakdown));
+      const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
+      const newItemData = {
+        name: newItem.trim(),
+        quantity: `${validQty} ${unit}`,
+        date_added: new Date().toISOString().split("T")[0],
+      };
+      try {
+        const response = await axios.post(
+          `http://localhost:5500/${table}`,
+          newItemData,
+          { headers: { Authorization: `Bearer ${token}` } } // Győződj meg róla, hogy itt meg van adva a token
+        );
+        setItems((prevItems) => [...prevItems, response.data]);
+        return response.data;
+      } catch (error) {
+        console.error("Error adding item:", error);
+        alert("An error occurred while adding the item.");
+      }
     } else {
-        alert("The name and quantity fields mustn't be empty.");
+      alert("The name and quantity fields mustn't be empty.");
     }
-};
-
+  };
 
   // Delete item
 
@@ -210,8 +211,15 @@ useEffect(() => {
   return (
     <div className={`${isDarkMode ? "getDark" : "getLight"} App`}>
       <header className="header">
-      <button className="btn btn-update" onClick={handleVisibilityRegisterForm}>Register</button>
-      <button className="btn btn-update" onClick={handleVisibilityLoginForm}>Log in</button>
+        <button
+          className="btn btn-update"
+          onClick={handleVisibilityRegisterForm}
+        >
+          Register
+        </button>
+        <button className="btn btn-update" onClick={handleVisibilityLoginForm}>
+          Log in
+        </button>
         <button className="btn btn-update" onClick={toggleCurrencyForm}>
           {currencyText}
         </button>
@@ -224,9 +232,12 @@ useEffect(() => {
           )}
         </div>
       </header>
-      {isVisibleRegisterForm ? (<Register 
-      setIsVisibleRegisterForm={setIsVisibleRegisterForm}
-      alreadyHaveAcc={alreadyHaveAcc}/>) : null}
+      {isVisibleRegisterForm ? (
+        <Register
+          setIsVisibleRegisterForm={setIsVisibleRegisterForm}
+          alreadyHaveAcc={alreadyHaveAcc}
+        />
+      ) : null}
       {isVisibleCurrencyForm ? (
         <form className="currencyForm" onSubmit={handleCurrency}>
           <input
@@ -242,7 +253,12 @@ useEffect(() => {
           </button>
         </form>
       ) : null}
-      {isVisibleLoginForm ? (<Login setRenderToken={setRenderToken} setIsVisibleLoginForm={setIsVisibleLoginForm}/>) : null}
+      {isVisibleLoginForm ? (
+        <Login
+          setRenderToken={setRenderToken}
+          setIsVisibleLoginForm={setIsVisibleLoginForm}
+        />
+      ) : null}
 
       <h1>Kitchen system</h1>
       {isDarkMode ? (
