@@ -14,6 +14,7 @@ export default function Others({
   setTransferState,
   transferFromSL,
   setTransferFromSL,
+  token,
 }) {
   const [newItem, setNewItem] = useState([]);
   const [newQuantity, setNewQuantity] = useState([]);
@@ -121,7 +122,7 @@ export default function Others({
     };
     getDatas();
     setTransferFromSL(false);
-  }, [renderToken, setItems, transferFromSL]);
+  }, [renderToken, setItems, transferFromSL, token]);
 
   const handleAddOthers = async () => {
     try {

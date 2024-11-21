@@ -24,6 +24,10 @@
   justify-content: space-evenly;
 }
 
+.expenditure, .expenditure span {
+  color: white;
+}
+
 .currencyForm {
   display: flex;
   flex-direction: column;

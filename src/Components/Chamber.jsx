@@ -13,6 +13,7 @@ export default function Chamber({
   setTransferState,
   transferFromSL,
   setTransferFromSL,
+  token,
 }) {
   // Input values
   const [newItem, setNewItem] = useState("");
@@ -110,20 +111,20 @@ export default function Chamber({
 
   useEffect(() => {
     const getDatas = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        console.error('You need to be logged in to perform this action.');
+        console.error("You need to be logged in to perform this action.");
         return setItems([]);
       }
       const data = await fetchItems("chamber_items");
-      if (data) { // Ellenőrizzük, hogy a data érvényes-e
+      if (data) {
+        // Ellenőrizzük, hogy a data érvényes-e
         setItems(data);
       }
     };
     getDatas();
     setTransferFromSL(false);
-  }, [renderToken, setItems, transferFromSL]);
-  
+  }, [renderToken, setItems, transferFromSL, token]);
 
   const handleAddChamber = async () => {
     try {

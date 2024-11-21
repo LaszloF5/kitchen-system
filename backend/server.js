@@ -21,6 +21,12 @@ const db = new sqlite3.Database("./database.sqlite", (err) => {
 
 db.serialize(() => {
   db.run(
+    `CREATE TABLE IF NOT EXISTS expenses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    amount INTEGER NOT NULL,
+    date TEXT NOT NULL)`
+  )
+  db.run(
     `CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,

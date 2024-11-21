@@ -10,12 +10,11 @@ export default function ShoppingList({
   addItem,
   deleteItem,
   updateItem,
-  expenditure,
-  setExpenditure,
   renderToken,
   transferState,
   setTransferState,
   setTransferFromSL,
+  token,
 }) {
   // Input values
 
@@ -23,7 +22,7 @@ export default function ShoppingList({
   const [newQuantity, setNewQuantity] = useState("");
   const [modifyQuantity, setModifyQuantity] = useState("");
   const [newIndex, setNewIndex] = useState(null);
-  const [isVisibleAmount, setIsvisibleAmount] = useState(false);
+  // const [isVisibleAmount, setIsvisibleAmount] = useState(false);
   const [isVisibleS, setIsVisibleS] = useState(false);
   const [isVisibleQty, setIsVisibleQty] = useState(false);
   const [isVisibleMoveTo, setIsVisibleMoveTo] = useState(false);
@@ -34,10 +33,6 @@ export default function ShoppingList({
   const expenditureFormRef = useRef(null);
 
   useEffect(() => {
-    if (isVisibleAmount) {
-      expenditureFormRef.current.focus();
-    }
-
     if (isVisibleQty) {
       updateSLFormRef.current.focus();
     }
@@ -45,16 +40,7 @@ export default function ShoppingList({
     if (isVisibleS) {
       addSLFormRef.current.focus();
     }
-  }, [isVisibleAmount, isVisibleQty, isVisibleS]);
-
-  // Visible amount form
-
-  const isTextAmount = isVisibleAmount
-    ? "Close expenditure form"
-    : "Expenditure recording";
-  const handleVisibleAmount = () => {
-    setIsvisibleAmount(!isVisibleAmount);
-  };
+  }, [isVisibleQty, isVisibleS]);
 
   // Visible Add form
 
@@ -88,32 +74,6 @@ export default function ShoppingList({
 
   // Functions
 
-  const addExpenditure = (e) => {
-    e.preventDefault();
-    let amount = Number(e.target.amount.value);
-    if (!isNaN(amount)) {
-      const now = new Date();
-      const currentWeek = getWeek(now);
-      setExpenditure((prevExpenditure) => {
-        const existingWeekIndex = prevExpenditure.findIndex(
-          (exp) => exp.week === currentWeek
-        );
-        if (existingWeekIndex !== -1) {
-          const updatedExpenditure = [...prevExpenditure];
-          updatedExpenditure[existingWeekIndex] = {
-            ...updatedExpenditure[existingWeekIndex],
-            amount: updatedExpenditure[existingWeekIndex].amount + amount,
-          };
-          return updatedExpenditure;
-        } else {
-          return [...prevExpenditure, { week: currentWeek, amount }];
-        }
-      });
-    }
-    e.target.amount.value = "";
-    setIsvisibleAmount(false);
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
   };
@@ -133,7 +93,7 @@ export default function ShoppingList({
     };
     getDatas();
     setTransferState(false);
-  }, [renderToken, setItems, transferState]);
+  }, [renderToken, setItems, transferState, token]);
 
   const handleAdd = async () => {
     try {
@@ -245,27 +205,10 @@ export default function ShoppingList({
     moveItem(itemToTransfer.name, "shoppingList_items", "others_items");
   };
 
-  useEffect(() => {
-    const updatedExpenditure = JSON.parse(
-      localStorage.getItem("expenditureLT")
-    );
-    setExpenditure(updatedExpenditure);
-  }, [setExpenditure]);
-
-  useEffect(() => {
-    let hasChangedEx = false;
-    if (JSON.stringify(prevExpenditure) !== JSON.stringify(expenditure)) {
-      hasChangedEx = true;
-    }
-    if (hasChangedEx) {
-      localStorage.setItem("expenditureLT", JSON.stringify(expenditure));
-      setPrevExpenditure(expenditure);
-    }
-  }, [expenditure, prevExpenditure]);
-
   return (
     <>
       <h2>Shopping list</h2>
+      {/* <button onClick={deleteNums}>Delete nums</button> */}
       <ul className="fridge-ul main-item-style unique-style">
         {items.length === 0 ? (
           <p>Your shopping list is empty.</p>
@@ -301,30 +244,6 @@ export default function ShoppingList({
       <button className="btn btn-others center" onClick={handleVisibleAdd}>
         {isTextS}
       </button>
-      <button className="btn btn-others center" onClick={handleVisibleAmount}>
-        {isTextAmount}
-      </button>
-      <form
-        className={`amount-form ${
-          isVisibleAmount ? "visibleAmountForm" : "hiddenAmountForm"
-        }`}
-        onSubmit={addExpenditure}
-      >
-        <input
-          className="amount-form_input"
-          type="number"
-          name="amount"
-          id="amountId"
-          required
-          min="0"
-          placeholder="500"
-          step="0.01"
-          ref={expenditureFormRef}
-        />
-        <button type="submit" className="btn btn-others">
-          Add
-        </button>
-      </form>
       <form
         action="#"
         method="GET"

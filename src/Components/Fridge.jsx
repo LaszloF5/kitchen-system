@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./Fridge.css";
 
 export default function Fridge({
@@ -14,6 +14,7 @@ export default function Fridge({
   setTransferState,
   transferFromSL,
   setTransferFromSL,
+  token,
 }) {
   //Input values
 
@@ -100,14 +101,13 @@ export default function Fridge({
     setIsVisible(false);
   };
 
-
   // Datas from the database
 
   useEffect(() => {
     const getDatas = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        console.error('You need to be logged in to perform this action.');
+        console.error("You need to be logged in to perform this action.");
         return setItems([]);
       }
       const data = await fetchItems("fridge_items");
@@ -117,8 +117,7 @@ export default function Fridge({
     };
     getDatas();
     setTransferFromSL(false);
-  }, [renderToken, setItems, transferFromSL]);
-  
+  }, [renderToken, setItems, transferFromSL, token]);
 
   // functions
 

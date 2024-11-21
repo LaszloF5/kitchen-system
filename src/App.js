@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import axios from "axios";
+import { getWeek } from "date-fns";
 import Fridge from "./Components/Fridge";
 import Freezer from "./Components/Freezer";
 import Chamber from "./Components/Chamber";
@@ -16,12 +17,19 @@ export default function App() {
   const [otherItems, setOtherItems] = useState([]);
   const [shoppingListItems, setShoppingListItems] = useState([]);
   const [yourAmount, setYourAmount] = useState([]);
+  const [expenditure, setExpenditure] = useState([]);
   const headerText = "Weekly expenses: ";
   const [currency, setCurrency] = useState("");
   const [prevCurrency, setPrevCurrency] = useState("");
   const [renderToken, setRenderToken] = useState("");
   const [transferState, setTransferState] = useState(false);
   const [transferFromSL, setTransferFromSL] = useState(false);
+
+  //// KIADÁSOK /////
+  const [isVisibleAmount, setIsvisibleAmount] = useState(false);
+  const expenditureFormRef = useRef(null);
+  ///////////////////
+
   ///////////////////
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const handleLogout = () => {
@@ -75,6 +83,19 @@ export default function App() {
   };
 
   useEffect(() => {
+    if (isVisibleAmount) {
+      expenditureFormRef.current.focus();
+    }
+  }, [isVisibleAmount]);
+
+  const isTextAmount = isVisibleAmount
+    ? "Close expenditure form"
+    : "Expenditure recording";
+  const handleVisibleAmount = () => {
+    setIsvisibleAmount(!isVisibleAmount);
+  };
+
+  useEffect(() => {
     const savedState = JSON.parse(localStorage.getItem("toggle"));
     if (savedState) {
       setIsDarkMode(savedState);
@@ -98,6 +119,38 @@ useEffect(() => {
 
   Be és kijelentkezésnél a renderToken tartalma megváltozik. Ez az useEffect bizonyítja.
 */
+
+  const addExpenditure = (e) => {
+    e.preventDefault();
+    let amount = Number(e.target.amount.value);
+    console.log("amount: ", amount);
+    if (!isNaN(amount)) {
+      const now = new Date();
+      const currentWeek = getWeek(now);
+      setExpenditure((prevExpenditure) => {
+        const existingWeekIndex = prevExpenditure.findIndex(
+          (exp) => exp.week === currentWeek
+        );
+        let updatedExpenditure;
+        if (existingWeekIndex !== -1) {
+          updatedExpenditure = [...prevExpenditure];
+          updatedExpenditure[existingWeekIndex] = {
+            ...updatedExpenditure[existingWeekIndex],
+            amount: updatedExpenditure[existingWeekIndex].amount + amount,
+          };
+        } else {
+          updatedExpenditure = [
+            ...prevExpenditure,
+            { week: currentWeek, amount },
+          ];
+        }
+        console.log("Updated expenditure in callback: ", updatedExpenditure);
+        return updatedExpenditure;
+      });
+    }
+    e.target.amount.value = "";
+    setIsvisibleAmount(false);
+  };
 
   // Get items
 
@@ -203,14 +256,14 @@ useEffect(() => {
     }
   };
 
-  // Load
+  // Load currency
 
   useEffect(() => {
     const currentCurrency = JSON.parse(localStorage.getItem("currency"));
     setCurrency(currentCurrency);
   }, []);
 
-  // Save
+  // Save currency
 
   useEffect(() => {
     if (prevCurrency !== currency) {
@@ -223,26 +276,41 @@ useEffect(() => {
     <div className={`${isDarkMode ? "getDark" : "getLight"} App`}>
       <header className="header">
         <button
-          className={`btn btn-update ${token === null ? '' : 'hideRegister'}`}
+          className={`btn btn-update ${token === null ? "" : "hideRegister"}`}
           onClick={handleVisibilityRegisterForm}
         >
           Register
         </button>
-        <button className={`btn btn-update ${token === null ? '' : 'hideLogIn'}`} onClick={handleVisibilityLoginForm}>
+        <button
+          className={`btn btn-update ${token === null ? "" : "hideLogIn"}`}
+          onClick={handleVisibilityLoginForm}
+        >
           Log in
         </button>
-        <button className={`btn btn-update ${token === null ? 'hideLogOut' : ''}`} onClick={handleLogout}>
+        <button
+          className={`btn btn-update ${token === null ? "hideLogOut" : ""}`}
+          onClick={handleLogout}
+        >
           Log out
+        </button>
+        <button className="btn btn-others" onClick={handleVisibleAmount}>
+          {isTextAmount}
         </button>
         <button className="btn btn-update" onClick={toggleCurrencyForm}>
           {currencyText}
         </button>
         <div>
           {headerText}
-          {yourAmount.length > 0 && (
-            <span>
-              {yourAmount[yourAmount.length - 1].amount} {currency}
-            </span>
+          {expenditure.length === 0 && token?.length > 0 ? (
+            <span className="expenditure">No expenditures yet</span>
+          ) : (
+            expenditure.map((item, index) => (
+              <div className="expenditure" key={index}>
+                <span>
+                  Week: {item.week}. Amount: {item.amount} {currency}
+                </span>
+              </div>
+            ))
           )}
         </div>
       </header>
@@ -276,6 +344,27 @@ useEffect(() => {
           handleLogout={handleLogout}
         />
       ) : null}
+      <form
+        className={`amount-form ${
+          isVisibleAmount ? "visibleAmountForm" : "hiddenAmountForm"
+        }`}
+        onSubmit={addExpenditure}
+      >
+        <input
+          className="amount-form_input"
+          type="number"
+          name="amount"
+          id="amountId"
+          required
+          min="0"
+          placeholder="500"
+          step="0.01"
+          ref={expenditureFormRef}
+        />
+        <button type="submit" className="btn btn-others">
+          Add
+        </button>
+      </form>
 
       <h1>Kitchen system</h1>
       {isDarkMode ? (
@@ -310,6 +399,8 @@ useEffect(() => {
         setTransferState={setTransferState}
         transferFromSL={transferFromSL}
         setTransferFromSL={setTransferFromSL}
+        token={token}
+        setToken={setToken}
       />
       <Freezer
         items={freezerItems}
@@ -325,6 +416,8 @@ useEffect(() => {
         setTransferState={setTransferState}
         transferFromSL={transferFromSL}
         setTransferFromSL={setTransferFromSL}
+        token={token}
+        setToken={setToken}
       />
       <Chamber
         items={chamberItems}
@@ -340,6 +433,8 @@ useEffect(() => {
         setTransferState={setTransferState}
         transferFromSL={transferFromSL}
         setTransferFromSL={setTransferFromSL}
+        token={token}
+        setToken={setToken}
       />
       <Others
         items={otherItems}
@@ -355,6 +450,8 @@ useEffect(() => {
         setTransferState={setTransferState}
         transferFromSL={transferFromSL}
         setTransferFromSL={setTransferFromSL}
+        token={token}
+        setToken={setToken}
       />
       <ShoppingList
         items={shoppingListItems}
@@ -369,6 +466,8 @@ useEffect(() => {
         transferState={transferState}
         setTransferState={setTransferState}
         setTransferFromSL={setTransferFromSL}
+        token={token}
+        setToken={setToken}
       />
       <footer className="footer">Footer</footer>
     </div>
