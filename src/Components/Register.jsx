@@ -33,23 +33,23 @@ export default function Register({ alreadyHaveAcc, setIsVisibleRegisterForm }) {
   return (
     <form className="register-form" onSubmit={handleRegister}>
       <h2 className="registerH2">New account?</h2>
-      <label htmlFor="userNameId">
+      <label htmlFor="newUserName">
         Username:
         <input
           type="text"
-          name="userName"
-          id="userNameId"
+          name="newUserName"
+          id="newUserName"
           placeholder="Username"
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
         />
       </label>
-      <label htmlFor="passwordId">
+      <label htmlFor="newPassword">
         Password:
         <input
           type="password"
-          name="password"
-          id="passwordId"
+          name="newPassword"
+          id="newPassword"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}

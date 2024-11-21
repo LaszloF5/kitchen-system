@@ -11,6 +11,9 @@ export default function Fridge({
   moveToSL,
   regex,
   renderToken,
+  setTransferState,
+  transferFromSL,
+  setTransferFromSL,
 }) {
   //Input values
 
@@ -40,6 +43,8 @@ export default function Fridge({
   const toggleVisibleTransferForm = (index) => {
     setTempIndex(index);
     setIsVisibleTransferForm(!isVisibleTransferForm);
+    setIsVisibleUpdate(false);
+    setIsVisible(false);
   };
 
   const SLText = isVisibleTransferForm ? "Close modification" : "Add to SL";
@@ -60,6 +65,7 @@ export default function Fridge({
         "fridge_items",
         "shoppingList_items"
       );
+      setTransferState(true);
       setTempQty("");
       setIsVisibleTransferForm(false);
       setTempIndex(null);
@@ -83,11 +89,15 @@ export default function Fridge({
 
   const toggleVisibilityAdd = () => {
     setIsVisible(!isVisible);
+    setIsVisibleUpdate(false);
+    setIsVisibleTransferForm(false);
   };
 
   const toggleVisibilityUpdate = (index, id) => {
     setUpdateId(id);
     setIsVisibleUpdate(!isVisibleUpdate);
+    setIsVisibleTransferForm(false);
+    setIsVisible(false);
   };
 
 
@@ -106,7 +116,8 @@ export default function Fridge({
       }
     };
     getDatas();
-  }, [renderToken, setItems]);
+    setTransferFromSL(false);
+  }, [renderToken, setItems, transferFromSL]);
   
 
   // functions
@@ -129,6 +140,7 @@ export default function Fridge({
     setIsVisibleUpdate(false);
     setModifyQuantity("");
     setIsVisibleTransferForm(false);
+    setIsVisible(false);
   };
 
   const handleUpdate = async () => {
@@ -197,11 +209,11 @@ export default function Fridge({
           isVisibleTransferForm ? "visibleTransferForm" : "hiddenTransferForm"
         }`}
       >
-        <label htmlFor="setQtyFridge">Set the quantity:</label>
+        <label htmlFor="setQuantityFridge">Set the quantity:</label>
         <input
           type="text"
-          name="setQuantity"
-          id="setQtyFridge"
+          name="setQuantityFridge"
+          id="setQuantityFridge"
           value={tempQty}
           placeholder="ex. 1 kg"
           ref={setQtyFridgeFormRef}
@@ -254,15 +266,15 @@ export default function Fridge({
         onSubmit={handleSubmit}
       >
         <div className="input-container">
-          <label className="form-label" htmlFor="newItemNameIdFidge">
+          <label className="form-label" htmlFor="newItemNameFidge">
             New item name:
           </label>
           <input
             type="text"
-            name="newItemName"
+            name="newItemNameFidge"
             value={newItem}
             placeholder="ex. banana"
-            id="newItemNameIdFidge"
+            id="newItemNameFidge"
             ref={addFridgeFormRef}
             onChange={(e) => {
               setNewItem(e.target.value);
@@ -270,15 +282,15 @@ export default function Fridge({
           />
         </div>
         <div className="input-container">
-          <label className="form-label" htmlFor="newItemQuantityF">
+          <label className="form-label" htmlFor="newItemQuantityFridge">
             New item quantity:{" "}
           </label>
           <input
             type="text"
-            name="newItemQuantityF"
+            name="newItemQuantityFridge"
             placeholder="ex. 1 kg"
             value={newQuantity}
-            id="newItemQuantityIdF"
+            id="newItemQuantityFridge"
             onChange={(e) => {
               setNewQuantity(e.target.value);
             }}

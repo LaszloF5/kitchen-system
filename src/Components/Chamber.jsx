@@ -10,6 +10,9 @@ export default function Chamber({
   moveToSL,
   regex,
   renderToken,
+  setTransferState,
+  transferFromSL,
+  setTransferFromSL,
 }) {
   // Input values
   const [newItem, setNewItem] = useState("");
@@ -27,6 +30,8 @@ export default function Chamber({
   const toggleVisibleTransferForm = (index) => {
     setIsVisibleTransferForm(!isVisibleTransferForm);
     setTempIndex(index);
+    setIsVisibleQuantity(false);
+    setIsVisible(false);
   };
 
   const SLText = isVisibleTransferForm ? "Close modification" : "Add to SL";
@@ -58,6 +63,7 @@ export default function Chamber({
         "chamber_items",
         "shoppingList_items"
       );
+      setTransferState(true);
       setTempQty("");
       setTempIndex(null);
       setIsVisibleTransferForm(false);
@@ -86,11 +92,16 @@ export default function Chamber({
 
   const toggleAddForm = () => {
     setIsVisible(!isVisible);
+    setIsVisibleQuantity(false);
+    setIsVisibleTransferForm(false);
   };
 
   const toggleUpdateForm = (index, id) => {
     setIsVisibleQuantity(!isVisibleQuantity);
     setUpdateId(id);
+    setIsVisible(false);
+    setIsVisibleTransferForm(false);
+    setIsVisible(false);
   };
 
   // Item modifier functions
@@ -110,7 +121,8 @@ export default function Chamber({
       }
     };
     getDatas();
-  }, [renderToken, setItems]);
+    setTransferFromSL(false);
+  }, [renderToken, setItems, transferFromSL]);
   
 
   const handleAddChamber = async () => {
@@ -130,6 +142,7 @@ export default function Chamber({
     setIsVisibleQuantity(false);
     setModifyQuantity("");
     setIsVisibleTransferForm(false);
+    setIsVisible(false);
   };
 
   const handleUpdate = async () => {
@@ -194,11 +207,11 @@ export default function Chamber({
           isVisibleTransferForm ? "visibleTransferForm" : "hiddenTransferForm"
         }`}
       >
-        <label htmlFor="setQty">Set the quantity</label>
+        <label htmlFor="setQuantityChamber">Set the quantity</label>
         <input
           type="text"
-          name="setQuantity"
-          id="setQtyChamber"
+          name="setQuantityChamber"
+          id="setQuantityChamber"
           value={tempQty}
           placeholder="ex. 1 kg"
           ref={setQtyChamberFormRef}

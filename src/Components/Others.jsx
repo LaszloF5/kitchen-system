@@ -11,6 +11,9 @@ export default function Others({
   moveToSL,
   regex,
   renderToken,
+  setTransferState,
+  transferFromSL,
+  setTransferFromSL,
 }) {
   const [newItem, setNewItem] = useState([]);
   const [newQuantity, setNewQuantity] = useState([]);
@@ -39,6 +42,8 @@ export default function Others({
   const toggleVisibleTransferForm = (index) => {
     setTempIndex(index);
     setIsVisibleTransferForm(!isVisibleTransferForm);
+    setIsVisibleQtyO(false);
+    setIsVisibleO(false);
   };
 
   // Functions
@@ -59,6 +64,7 @@ export default function Others({
         "others_items",
         "shoppingList_items"
       );
+      setTransferState(true);
       setTempQty("");
       setTempIndex(null);
       setIsVisibleTransferForm(false);
@@ -87,29 +93,35 @@ export default function Others({
 
   const toggleAddElement = () => {
     setIsVisibleO(!isVisibleO);
+    setIsVisibleQtyO(false);
+    setIsVisibleTransferForm(false);
   };
 
   const toggleModifyQty = (index, id) => {
     setIsVisibleQtyO(!isVisibleQtyO);
     setUpdateId(id);
+    setIsVisibleTransferForm(false);
+    setIsVisibleO(false);
   };
 
   // Item modifier functions
 
   useEffect(() => {
     const getDatas = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        console.error('You need to be logged in to perform this action.');
+        console.error("You need to be logged in to perform this action.");
         return setItems([]);
       }
       const data = await fetchItems("others_items");
-      if (data) { // Ellenőrizzük, hogy a data érvényes-e
+      if (data) {
+        // Ellenőrizzük, hogy a data érvényes-e
         setItems(data);
       }
     };
     getDatas();
-  }, [renderToken, setItems]);
+    setTransferFromSL(false);
+  }, [renderToken, setItems, transferFromSL]);
 
   const handleAddOthers = async () => {
     try {
@@ -128,6 +140,8 @@ export default function Others({
     await deleteItem("others_items", itemToDelete, setItems);
     setIsVisibleQtyO(false);
     setModifyQuantity("");
+    setIsVisibleTransferForm(false);
+    setIsVisibleO(false);
   };
 
   const handleUpdate = async () => {
@@ -194,11 +208,11 @@ export default function Others({
           isVisibleTransferForm ? "visibleTransferForm" : "hiddenTransferForm"
         }`}
       >
-        <label htmlFor="setQty">Set the quantity</label>
+        <label htmlFor="setQuantityOthers">Set the quantity</label>
         <input
           type="text"
-          name="setQuantity"
-          id="setQtyOthers"
+          name="setQuantityOthers"
+          id="setQuantityOthers"
           value={tempQty}
           placeholder="ex. 1 kg"
           ref={setQtyOthersFormRef}
@@ -246,13 +260,13 @@ export default function Others({
         onSubmit={handleSubmit}
       >
         <div className="input-container">
-          <label className="form-label" htmlFor="othersNameId">
+          <label className="form-label" htmlFor="othersName">
             New item:
           </label>
           <input
             type="text"
             name="othersName"
-            id="othersNameId"
+            id="othersName"
             placeholder="ex. chips"
             value={newItem}
             ref={addOthersFormRef}
@@ -260,13 +274,13 @@ export default function Others({
           />
         </div>
         <div className="input-container">
-          <label className="form-label" htmlFor="othersQuantityId">
+          <label className="form-label" htmlFor="othersQuantity">
             New quantity:
           </label>
           <input
             type="text"
             name="othersQuantity"
-            id="othersQuantityId"
+            id="othersQuantity"
             placeholder="ex. 1pcs"
             value={newQuantity}
             onChange={(e) => setNewQuantity(e.target.value)}

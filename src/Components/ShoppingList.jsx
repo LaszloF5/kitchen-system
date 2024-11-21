@@ -13,6 +13,9 @@ export default function ShoppingList({
   expenditure,
   setExpenditure,
   renderToken,
+  transferState,
+  setTransferState,
+  setTransferFromSL,
 }) {
   // Input values
 
@@ -58,6 +61,8 @@ export default function ShoppingList({
   const isTextS = isVisibleS ? "Close add form" : "Add item";
   const handleVisibleAdd = () => {
     setIsVisibleS(!isVisibleS);
+    setIsVisibleQty(false);
+    setIsVisibleMoveTo(false);
   };
 
   // Visible new qty form
@@ -66,6 +71,8 @@ export default function ShoppingList({
   const handleVisibleQty = (index, id) => {
     setIsVisibleQty(!isVisibleQty);
     setUpdateId(id);
+    setIsVisibleMoveTo(false);
+    setIsVisibleS(false);
   };
 
   // Visible move to form
@@ -73,6 +80,8 @@ export default function ShoppingList({
   const toggleVisibleMoveTo = (index) => {
     setIsVisibleMoveTo(!isVisibleMoveTo);
     setNewIndex(index);
+    setIsVisibleQty(false);
+    setIsVisibleS(false);
   };
 
   const [prevExpenditure, setPrevExpenditure] = useState([]);
@@ -111,19 +120,20 @@ export default function ShoppingList({
 
   useEffect(() => {
     const getDatas = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        console.error('You need to be logged in to perform this action.');
+        console.error("You need to be logged in to perform this action.");
         return setItems([]);
       }
       const data = await fetchItems("shoppingList_items");
-      if (data) { // Ellenőrizzük, hogy a data érvényes-e
+      if (data) {
+        // Ellenőrizzük, hogy a data érvényes-e
         setItems(data);
       }
     };
     getDatas();
-  }, [renderToken, setItems]);
-  
+    setTransferState(false);
+  }, [renderToken, setItems, transferState]);
 
   const handleAdd = async () => {
     try {
@@ -142,6 +152,8 @@ export default function ShoppingList({
     await deleteItem("shoppingList_items", itemToDelete, setItems);
     setIsVisibleQty(false);
     setModifyQuantity("");
+    setIsVisibleMoveTo(false);
+    setIsVisibleS(false);
   };
 
   const handleUpdate = async () => {
@@ -159,33 +171,39 @@ export default function ShoppingList({
 
   const moveItem = async (itemName, sourceTable, targetTable) => {
     const validTables = [
-      'fridge_items',
-      'freezer_items',
-      'chamber_items',
-      'others_items',
-      'shoppingList_items',
+      "fridge_items",
+      "freezer_items",
+      "chamber_items",
+      "others_items",
+      "shoppingList_items",
     ];
-  
+
     const trimmedSourceTable = sourceTable.trim();
     const trimmedTargetTable = targetTable.trim();
-  
-    if (!validTables.includes(trimmedSourceTable) || !validTables.includes(trimmedTargetTable)) {
+
+    if (
+      !validTables.includes(trimmedSourceTable) ||
+      !validTables.includes(trimmedTargetTable)
+    ) {
       console.log("Invalid table name.");
       return;
     }
-  
+
     try {
       const response = await axios.post("http://localhost:5500/move_item", {
         itemName,
         sourceTable: trimmedSourceTable,
         targetTable: trimmedTargetTable,
       });
-  
+
       if (response.status === 200) {
-        const newList = await axios.get("http://localhost:5500/shoppingList_items");
+        const newList = await axios.get(
+          "http://localhost:5500/shoppingList_items"
+        );
         setItems(newList.data.items);
         setIsVisibleMoveTo(false);
         setNewIndex(null);
+        setTransferFromSL(true);
         alert("Elem sikeresen áthelyezve.");
       }
     } catch (error) {
@@ -198,7 +216,6 @@ export default function ShoppingList({
       }
     }
   };
-  
 
   //Fridge component//
 
@@ -375,13 +392,13 @@ export default function ShoppingList({
         onSubmit={handleSubmit}
       >
         <div className="input-container">
-          <label className="form-label" htmlFor="newShoppingItemId">
+          <label className="form-label" htmlFor="newShoppingItem">
             New item:
           </label>
           <input
             type="text"
             name="newShoppingItem"
-            id="newShoppingItemId"
+            id="newShoppingItem"
             placeholder="ex. carrot"
             value={newItem}
             ref={addSLFormRef}
@@ -389,13 +406,13 @@ export default function ShoppingList({
           />
         </div>
         <div className="input-container">
-          <label className="form-label" htmlFor="newShoppingQuantityId">
+          <label className="form-label" htmlFor="newShoppingQuantity">
             New quantity:
           </label>
           <input
             type="text"
             name="newShoppingQuantity"
-            id="newShoppingQuantityId"
+            id="newShoppingQuantity"
             placeholder="ex. 0.5 kg"
             value={newQuantity}
             onChange={(e) => setNewQuantity(e.target.value)}

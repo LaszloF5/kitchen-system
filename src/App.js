@@ -20,6 +20,17 @@ export default function App() {
   const [currency, setCurrency] = useState("");
   const [prevCurrency, setPrevCurrency] = useState("");
   const [renderToken, setRenderToken] = useState("");
+  const [transferState, setTransferState] = useState(false);
+  const [transferFromSL, setTransferFromSL] = useState(false);
+  ///////////////////
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const handleLogout = () => {
+    setToken(null);
+    localStorage.removeItem("token");
+    setRenderToken("");
+    alert("Logout successful.");
+  };
+  ///////////////////
 
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
@@ -212,13 +223,16 @@ useEffect(() => {
     <div className={`${isDarkMode ? "getDark" : "getLight"} App`}>
       <header className="header">
         <button
-          className="btn btn-update"
+          className={`btn btn-update ${token === null ? '' : 'hideRegister'}`}
           onClick={handleVisibilityRegisterForm}
         >
           Register
         </button>
-        <button className="btn btn-update" onClick={handleVisibilityLoginForm}>
+        <button className={`btn btn-update ${token === null ? '' : 'hideLogIn'}`} onClick={handleVisibilityLoginForm}>
           Log in
+        </button>
+        <button className={`btn btn-update ${token === null ? 'hideLogOut' : ''}`} onClick={handleLogout}>
+          Log out
         </button>
         <button className="btn btn-update" onClick={toggleCurrencyForm}>
           {currencyText}
@@ -255,8 +269,11 @@ useEffect(() => {
       ) : null}
       {isVisibleLoginForm ? (
         <Login
+          token={token}
+          setToken={setToken}
           setRenderToken={setRenderToken}
           setIsVisibleLoginForm={setIsVisibleLoginForm}
+          handleLogout={handleLogout}
         />
       ) : null}
 
@@ -289,6 +306,10 @@ useEffect(() => {
         moveToSL={moveToSL}
         regex={regex}
         renderToken={renderToken}
+        transferState={transferState}
+        setTransferState={setTransferState}
+        transferFromSL={transferFromSL}
+        setTransferFromSL={setTransferFromSL}
       />
       <Freezer
         items={freezerItems}
@@ -300,6 +321,10 @@ useEffect(() => {
         moveToSL={moveToSL}
         regex={regex}
         renderToken={renderToken}
+        transferState={transferState}
+        setTransferState={setTransferState}
+        transferFromSL={transferFromSL}
+        setTransferFromSL={setTransferFromSL}
       />
       <Chamber
         items={chamberItems}
@@ -311,6 +336,10 @@ useEffect(() => {
         moveToSL={moveToSL}
         regex={regex}
         renderToken={renderToken}
+        transferState={transferState}
+        setTransferState={setTransferState}
+        transferFromSL={transferFromSL}
+        setTransferFromSL={setTransferFromSL}
       />
       <Others
         items={otherItems}
@@ -322,6 +351,10 @@ useEffect(() => {
         moveToSL={moveToSL}
         regex={regex}
         renderToken={renderToken}
+        transferState={transferState}
+        setTransferState={setTransferState}
+        transferFromSL={transferFromSL}
+        setTransferFromSL={setTransferFromSL}
       />
       <ShoppingList
         items={shoppingListItems}
@@ -333,6 +366,9 @@ useEffect(() => {
         expenditure={yourAmount}
         setExpenditure={setYourAmount}
         renderToken={renderToken}
+        transferState={transferState}
+        setTransferState={setTransferState}
+        setTransferFromSL={setTransferFromSL}
       />
       <footer className="footer">Footer</footer>
     </div>

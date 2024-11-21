@@ -10,6 +10,9 @@ export default function Freezer({
   moveToSL,
   regex,
   renderToken,
+  setTransferState,
+  transferFromSL,
+  setTransferFromSL,
 }) {
   // Input values
   const [newItem, setNewItem] = useState("");
@@ -57,7 +60,8 @@ export default function Freezer({
       }
     };
     getDatas();
-  }, [renderToken, setItems]);
+    setTransferFromSL(false);
+  }, [renderToken, setItems, transferFromSL]);
   
 
   ////////// FUNCTIONS //////////
@@ -65,6 +69,8 @@ export default function Freezer({
   const toggleTransferForm = (index) => {
     setTempIndex(index);
     setIsVisibleTransferForm(!isVisibleTransferForm);
+    setIsVisibleUpdateF(false);
+    setIsVisibleF(false);
   };
 
   const SLText = isVisibleTransferForm ? "Close modification" : "Add to SL";
@@ -83,6 +89,7 @@ export default function Freezer({
         "freezer_items",
         "shoppingList_items"
       );
+      setTransferState(true);
       setTempIndex(null);
       setTempQty("");
       setIsVisibleTransferForm(false);
@@ -93,11 +100,15 @@ export default function Freezer({
 
   const toggleVisibilityAddFr = () => {
     setIsVisibleF(!isVisibleF);
+    setIsVisibleUpdateF(false);
+    setIsVisibleTransferForm(false);
   };
 
   const toggleVisibilityUpdateF = (index, id) => {
     setIsVisibleUpdateF(!isVisibleUpdateF);
     setUpdateId(id);
+    setIsVisibleTransferForm(false);
+    setIsVisibleF(false);
   };
 
   // Add item to the database
@@ -120,6 +131,7 @@ export default function Freezer({
     setIsVisibleUpdateF(false);
     setModifyQuantity("");
     setIsVisibleTransferForm(false);
+    setIsVisibleF(false);
   };
 
   const handleUpdate = async () => {
@@ -190,11 +202,11 @@ export default function Freezer({
         }`}
         onSubmit={handleSubmit}
       >
-        <label htmlFor="setQtyFreezer">Set the quantity:</label>
+        <label htmlFor="setQuantityFreezer">Set the quantity:</label>
         <input
           type="text"
-          name="setQuantity"
-          id="setQtyFreezer"
+          name="setQuantityFreezer"
+          id="setQuantityFreezer"
           value={tempQty}
           placeholder="ex. 1 kg"
           ref={setQtyFreezerFormRef}
@@ -218,11 +230,11 @@ export default function Freezer({
           handleUpdate(updateId);
         }}
       >
-        <label htmlFor="updateQuantityIdF"> New quantity: </label>
+        <label htmlFor="updateQuantityFreezer"> New quantity: </label>
         <input
           type="text"
-          name="updateQuantity"
-          id="updateQuantityIdF"
+          name="updateQuantityFreezer"
+          id="updateQuantityFreezer"
           placeholder="ex. 1 kg"
           value={modifyQuantity}
           ref={updateFreezerFormRef}
@@ -244,13 +256,13 @@ export default function Freezer({
         onSubmit={handleSubmit}
       >
         <div className="input-container">
-          <label className="form-label" htmlFor="newItemNameIdF">
+          <label className="form-label" htmlFor="newItemNameFreezer">
             New item name:
           </label>
           <input
             type="text"
-            name="newItemName"
-            id="newItemNameIdF"
+            name="newItemNameFreezer"
+            id="newItemNameFreezer"
             placeholder="ex. froozen fish"
             value={newItem}
             ref={addFreezerFormRef}
@@ -260,13 +272,13 @@ export default function Freezer({
           />
         </div>
         <div className="input-container">
-          <label className="form-label" htmlFor="newItemQtyFreezer">
+          <label className="form-label" htmlFor="newItemQuantityFreezer">
             New item quantity:
           </label>
           <input
             type="text"
-            name="newItemQuantity"
-            id="newItemQtyFreezer"
+            name="newItemQuantityFreezer"
+            id="newItemQuantityFreezer"
             placeholder="ex. 1 package"
             value={newQuantity}
             onChange={(e) => {

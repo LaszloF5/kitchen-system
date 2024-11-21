@@ -3,10 +3,10 @@ import DeleteUser from "./DeleteUser";
 import axios from "axios";
 import './Login.css'
 
-export default function Login({ setRenderToken, setIsVisibleLoginForm }) {
+export default function Login({ token, setToken, setRenderToken, setIsVisibleLoginForm, handleLogout }) {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [token, setToken] = useState(localStorage.getItem("token") || null);
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -27,35 +27,28 @@ export default function Login({ setRenderToken, setIsVisibleLoginForm }) {
     }
   };
 
-  const handleLogout = () => {
-    setToken(null);
-    localStorage.removeItem("token");
-    setRenderToken("");
-    alert("Logout successful.");
-  };
-
   return (
     <>
       {!token ? (
         <form className="login-form" onSubmit={handleLogin}>
           <h2 className="loginH2">Log in!</h2>
-          <label htmlFor="LoginuserNameId">
+          <label htmlFor="LoginuserName">
             Username:
             <input
               type="text"
               name="LoginuserName"
-              id="LoginuserNameId"
+              id="LoginuserName"
               placeholder="userName"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
             />
           </label>
-          <label htmlFor="LoginPasswordId">
+          <label htmlFor="LoginPassword">
             Password:
             <input
               type="password"
-              name="password"
-              id="LoginPasswordId"
+              name="LoginPassword"
+              id="LoginPassword"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
