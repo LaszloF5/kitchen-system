@@ -120,6 +120,56 @@ useEffect(() => {
   Be és kijelentkezésnél a renderToken tartalma megváltozik. Ez az useEffect bizonyítja.
 */
 
+//Később ez majd kell, csak most ne zavarjon.
+
+useEffect(() => {
+  const getExpenses = async () => {
+    try {
+      const response = await fetch('http://localhost:5500/expenses', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setExpenditure(data.expenses);
+      console.log('data. ', data.expenses);
+    } catch (error) {
+      console.error('Failed to fetch expenses: ', error);
+      alert('Nem sikerült lekérni a kiadásokat.');
+    }
+  };
+  if (token) {
+    getExpenses();
+  }
+}, []);
+
+const deleteExpenses = async () => {
+  try {
+    const response = await fetch("http://localhost:5500/expenses", {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log("Backend response: ", data);
+
+  } catch (error) {
+    console.error("Failed to delete expenses: ", error);
+    alert("Nem sikerült törölni a kiadásokat.");
+  }
+}
+
+
 const addExpenditure = async (e) => {
   e.preventDefault();
   const amount = Number(e.target.amount.value);
@@ -130,16 +180,15 @@ const addExpenditure = async (e) => {
     const currentWeek = getWeek(now);
 
     try {
-      // Backend hívás az adatok mentéséhez
       const response = await fetch("http://localhost:5500/expenses", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Ha token szükséges
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           amount,
-          date: now.toISOString().split("T")[0], // Dátum YYYY-MM-DD formátumban
+          date: currentWeek, // Dátum YYYY-MM-DD formátumban
         }),
       });
 
@@ -151,26 +200,26 @@ const addExpenditure = async (e) => {
       console.log("Backend response: ", data);
 
       // Helyi állapot frissítése
-      setExpenditure((prevExpenditure) => {
-        const existingWeekIndex = prevExpenditure.findIndex(
-          (exp) => exp.week === currentWeek
-        );
-        let updatedExpenditure;
-        if (existingWeekIndex !== -1) {
-          updatedExpenditure = [...prevExpenditure];
-          updatedExpenditure[existingWeekIndex] = {
-            ...updatedExpenditure[existingWeekIndex],
-            amount: updatedExpenditure[existingWeekIndex].amount + amount,
-          };
-        } else {
-          updatedExpenditure = [
-            ...prevExpenditure,
-            { week: currentWeek, amount },
-          ];
-        }
-        console.log("Updated expenditure in callback: ", updatedExpenditure);
-        return updatedExpenditure;
-      });
+      // setExpenditure((prevExpenditure) => {
+      //   const existingWeekIndex = prevExpenditure.findIndex(
+      //     (exp) => exp.week === currentWeek
+      //   );
+      //   let updatedExpenditure;
+      //   if (existingWeekIndex !== -1) {
+      //     updatedExpenditure = [...prevExpenditure];
+      //     updatedExpenditure[existingWeekIndex] = {
+      //       ...updatedExpenditure[existingWeekIndex],
+      //       amount: updatedExpenditure[existingWeekIndex].amount + amount,
+      //     };
+      //   } else {
+      //     updatedExpenditure = [
+      //       ...prevExpenditure,
+      //       { week: currentWeek, amount },
+      //     ];
+      //   }
+      //   console.log("Updated expenditure in callback: ", updatedExpenditure);
+      //   return updatedExpenditure;
+      // });
 
     } catch (error) {
       console.error("Failed to add expenditure: ", error.message);
@@ -178,7 +227,6 @@ const addExpenditure = async (e) => {
     }
   }
 
-  // Űrlap alaphelyzetbe állítása
   e.target.amount.value = "";
   setIsvisibleAmount(false);
 };
@@ -325,6 +373,7 @@ const addExpenditure = async (e) => {
         >
           Log out
         </button>
+        <button onClick={deleteExpenses}>Delete amount (test)</button>
         <button className="btn btn-others" onClick={handleVisibleAmount}>
           {isTextAmount}
         </button>
@@ -336,13 +385,11 @@ const addExpenditure = async (e) => {
           {expenditure.length === 0 && token?.length > 0 ? (
             <span className="expenditure">No expenditures yet</span>
           ) : (
-            expenditure.map((item, index) => (
-              <div className="expenditure" key={index}>
+              <div className="expenditure">
                 <span>
-                  Week: {item.week}. Amount: {item.amount} {currency}
+                  Week: {expenditure[0]?.date}. Amount: {expenditure[0]?.amount} {currency}
                 </span>
               </div>
-            ))
           )}
         </div>
       </header>

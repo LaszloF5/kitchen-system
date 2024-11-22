@@ -20,13 +20,13 @@ const db = new sqlite3.Database("./database.sqlite", (err) => {
 });
 
 db.serialize(() => {
-  // db.run(
-  //   `CREATE TABLE IF NOT EXISTS expenses (
-  //   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  //   amount INTEGER NOT NULL,
-  //   date TEXT NOT NULL,
-  //   user_id INTEGER NOT NULL)`
-  // );
+  db.run(
+    `CREATE TABLE IF NOT EXISTS expenses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    amount INTEGER NOT NULL,
+    date TEXT NOT NULL,
+    user_id INTEGER NOT NULL)`
+  );
   db.run(
     `CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -326,60 +326,60 @@ app.post("/move_item", (req, res) => {
 
 // Kiadások kezelése
 
-// app.get("/expenses", verifyToken, (req, res) => {
-//   const userId = req.user.id;
-//   const sql = `SELECT * FROM expenses WHERE user_id = ?`;
+app.get("/expenses", verifyToken, (req, res) => {
+  const userId = req.user.id;
+  const sql = `SELECT * FROM expenses WHERE user_id = ?`;
 
-//   db.all(sql, [userId], (err, rows) => {
-//     if (err) {
-//       console.error(
-//         `[${new Date().toISOString()}] Error retrieving expenses:`,
-//         err.message
-//       );
-//       return res.status(500).json({ error: "Failed to retrieve expenses." });
-//     }
+  db.all(sql, [userId], (err, rows) => {
+    if (err) {
+      console.error(
+        `[${new Date().toISOString()}] Error retrieving expenses:`,
+        err.message
+      );
+      return res.status(500).json({ error: "Failed to retrieve expenses." });
+    }
 
-//     if (rows.length === 0) {
-//       return res
-//         .status(404)
-//         .json({ message: "No expenses found for the user." });
-//     }
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No expenses found for the user." });
+    }
 
-//     res.json({ expenses: rows });
-//   });
-// });
+    res.json({ expenses: rows });
+  });
+});
 
-// app.post("/expenses", verifyToken, (req, res) => {
-//   const userId = req.user.id;
-//   const { amount, date } = req.body;
-//   console.log("Request body: ", req.body);
-//   console.log("User ID: ", req.user.id);
+app.post("/expenses", verifyToken, (req, res) => {
+  const userId = req.user.id;
+  const { amount, date } = req.body;
+  console.log("Request body: ", req.body);
+  console.log("User ID: ", req.user.id);
 
-//   if (!amount || !date || !userId) {
-//     return res.status(400).json({ error: "Missing required fields." });
-//   }
+  if (!amount || !date || !userId) {
+    return res.status(400).json({ error: "Missing required fields." });
+  }
 
-//   const sql = `INSERT INTO expenses (amount, date, user_id) VALUES (?, ?, ?)`;
+  const sql = `INSERT INTO expenses (amount, date, user_id) VALUES (?, ?, ?)`;
 
-//   db.run(sql, [amount, date, userId], function (err) {
-//     if (err) {
-//       return res.status(500).json({ error: err.message });
-//     }
-//     res.json({ message: "Expense added successfully.", id: this.lastID });
-//   });
-// });
+  db.run(sql, [amount, date, userId], function (err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ message: "Expense added successfully.", id: this.lastID });
+  });
+});
 
-// app.delete("/expenses", verifyToken, function (req, res) {
-//   const userId = req.user.id;
-//   const sql = `DELETE FROM expenses WHERE user_id = ?`;
+app.delete("/expenses", verifyToken, function (req, res) {
+  const userId = req.user.id;
+  const sql = `DELETE FROM expenses WHERE user_id = ?`;
 
-//   db.run(sql, [userId], function (err) {
-//     if (err) {
-//       return res.status(500).json({ error: err.message });
-//     }
-//     res.json({ message: "All expenses deleted successfully." });
-//   });
-// });
+  db.run(sql, [userId], function (err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ message: "All expenses deleted successfully." });
+  });
+});
 
 // Elemek mozgatása a shoppingList komponensbe.
 
