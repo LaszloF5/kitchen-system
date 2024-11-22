@@ -120,13 +120,37 @@ useEffect(() => {
   Be és kijelentkezésnél a renderToken tartalma megváltozik. Ez az useEffect bizonyítja.
 */
 
-  const addExpenditure = (e) => {
-    e.preventDefault();
-    let amount = Number(e.target.amount.value);
-    console.log("amount: ", amount);
-    if (!isNaN(amount)) {
-      const now = new Date();
-      const currentWeek = getWeek(now);
+const addExpenditure = async (e) => {
+  e.preventDefault();
+  const amount = Number(e.target.amount.value);
+  console.log("amount: ", amount);
+
+  if (!isNaN(amount)) {
+    const now = new Date();
+    const currentWeek = getWeek(now);
+
+    try {
+      // Backend hívás az adatok mentéséhez
+      const response = await fetch("http://localhost:5500/expenses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Ha token szükséges
+        },
+        body: JSON.stringify({
+          amount,
+          date: now.toISOString().split("T")[0], // Dátum YYYY-MM-DD formátumban
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log("Backend response: ", data);
+
+      // Helyi állapot frissítése
       setExpenditure((prevExpenditure) => {
         const existingWeekIndex = prevExpenditure.findIndex(
           (exp) => exp.week === currentWeek
@@ -147,10 +171,18 @@ useEffect(() => {
         console.log("Updated expenditure in callback: ", updatedExpenditure);
         return updatedExpenditure;
       });
+
+    } catch (error) {
+      console.error("Failed to add expenditure: ", error.message);
+      alert("Nem sikerült a kiadást rögzíteni.");
     }
-    e.target.amount.value = "";
-    setIsvisibleAmount(false);
-  };
+  }
+
+  // Űrlap alaphelyzetbe állítása
+  e.target.amount.value = "";
+  setIsvisibleAmount(false);
+};
+
 
   // Get items
 
