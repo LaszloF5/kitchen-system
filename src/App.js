@@ -10,6 +10,7 @@ import Others from "./Components/Others";
 import ShoppingList from "./Components/ShoppingList";
 import Register from "./Components/Register";
 import Login from "./Components/Login";
+import DeleteUser from "./Components/DeleteUser";
 import "./App.css";
 
 export default function App() {
@@ -35,10 +36,12 @@ export default function App() {
   ///////////////////
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const handleLogout = () => {
-    setToken(null);
-    localStorage.removeItem("token");
-    setRenderToken("");
-    alert("Logout successful.");
+    if (loginText === "Log out") {
+      setToken(null);
+      localStorage.removeItem("token");
+      setRenderToken("");
+      alert("Logout successful.");
+    }
   };
   ///////////////////
 
@@ -64,9 +67,11 @@ export default function App() {
     setIsVisibleRegisterForm(false);
   };
 
+  const [goToLogin, setGoToLogin] = useState(false);
+  const loginText = token === null ? "Log in" : "Log out";
+
   const alreadyHaveAcc = () => {
-    setIsVisibleRegisterForm(false);
-    setIsVisibleLoginForm(true);
+    setGoToLogin(true);
   };
 
   useEffect(() => {
@@ -332,36 +337,18 @@ useEffect(() => {
     <div className={`${isDarkMode ? "getDark" : "getLight"} App`}>
       <HashRouter>
         <header className="header">
-          <Link className="chart" to="/">
+          <Link className="chart btn btn-others" to="/">
             Home
           </Link>
-          <Link className="chart" to="/Register">
+          <Link className="chart btn btn-update" to="/Register">
             Register
           </Link>
-          <Link className="chart" to="/Login">
-            Login
+          <Link className="chart btn btn-update" to="/Login" onClick={handleLogout}>
+            {loginText}
           </Link>
-          <Link className="chart" to="/Chart">
+          {token !== null ? <Link className="chart btn btn-update" to="/Chart">
             Chart
-          </Link>
-          <button
-            className={`btn btn-update ${token === null ? "" : "hideRegister"}`}
-            onClick={handleVisibilityRegisterForm}
-          >
-            Register
-          </button>
-          <button
-            className={`btn btn-update ${token === null ? "" : "hideLogIn"}`}
-            onClick={handleVisibilityLoginForm}
-          >
-            Log in
-          </button>
-          <button
-            className={`btn btn-update ${token === null ? "hideLogOut" : ""}`}
-            onClick={handleLogout}
-          >
-            Log out
-          </button>
+          </Link> : ''}
           <button onClick={deleteExpenses}>Delete amount (test)</button>
           <button className="btn btn-others" onClick={handleVisibleAmount}>
             {isTextAmount}
@@ -383,12 +370,6 @@ useEffect(() => {
             )}
           </div>
         </header>
-        {isVisibleRegisterForm ? (
-          <Register
-            setIsVisibleRegisterForm={setIsVisibleRegisterForm}
-            alreadyHaveAcc={alreadyHaveAcc}
-          />
-        ) : null}
         {isVisibleCurrencyForm ? (
           <form className="currencyForm" onSubmit={handleCurrency}>
             <input
@@ -403,15 +384,6 @@ useEffect(() => {
               Currency
             </button>
           </form>
-        ) : null}
-        {isVisibleLoginForm ? (
-          <Login
-            token={token}
-            setToken={setToken}
-            setRenderToken={setRenderToken}
-            setIsVisibleLoginForm={setIsVisibleLoginForm}
-            handleLogout={handleLogout}
-          />
         ) : null}
         <form
           className={`amount-form ${
@@ -436,17 +408,27 @@ useEffect(() => {
         </form>
         <Routes>
           <Route path="/chart" element={<Chart />} />
-          <Route path='register' element={<Register
-            setIsVisibleRegisterForm={setIsVisibleRegisterForm}
-            alreadyHaveAcc={alreadyHaveAcc}
-          />}/>
-          <Route path='login' element={<Login
-            token={token}
-            setToken={setToken}
-            setRenderToken={setRenderToken}
-            setIsVisibleLoginForm={setIsVisibleLoginForm}
-            handleLogout={handleLogout}
-          />}/>
+          <Route
+            path="register"
+            element={
+              <Register
+                setIsVisibleRegisterForm={setIsVisibleRegisterForm}
+                alreadyHaveAcc={alreadyHaveAcc}
+                goToLogin={goToLogin}
+              />
+            }
+          />
+          <Route
+            path="login"
+            element={
+              <Login
+                token={token}
+                setToken={setToken}
+                setRenderToken={setRenderToken}
+                setIsVisibleLoginForm={setIsVisibleLoginForm}
+              />
+            }
+          />
           <Route
             path="*"
             element={
@@ -558,7 +540,10 @@ useEffect(() => {
             }
           />
         </Routes>
-        <footer className="footer">Footer</footer>
+        <footer className="footer">
+          <h1>Footer</h1>
+          {token !== null ? <DeleteUser/> : ''}
+        </footer>
       </HashRouter>
     </div>
   );

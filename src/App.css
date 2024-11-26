@@ -4,6 +4,8 @@
 
 .chart {
   color: whitesmoke;
+  text-decoration: none;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .hideRegister {

@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import DeleteUser from "./DeleteUser";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import './Login.css'
 
-export default function Login({ token, setToken, setRenderToken, setIsVisibleLoginForm, handleLogout }) {
+export default function Login({ token, setToken, setRenderToken, setIsVisibleLoginForm }) {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -27,9 +27,14 @@ export default function Login({ token, setToken, setRenderToken, setIsVisibleLog
     }
   };
 
+  useEffect(() => {
+    if (token) {
+      navigate("/home");
+    }
+  }, [token])
+
   return (
     <>
-      {!token ? (
         <form className="login-form" onSubmit={handleLogin}>
           <h2 className="loginH2">Log in!</h2>
           <label htmlFor="LoginuserName">
@@ -56,13 +61,6 @@ export default function Login({ token, setToken, setRenderToken, setIsVisibleLog
           </label>
           <button type="submit">Login</button>
         </form>
-      ) : (
-        <>
-          <h2>Welcome, {userName}!</h2>
-          <DeleteUser />
-          <button onClick={handleLogout}>Logout</button>
-        </>
-      )}
     </>
   );
 }

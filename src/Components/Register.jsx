@@ -1,18 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Register.css";
 
-export default function Register({ alreadyHaveAcc, setIsVisibleRegisterForm }) {
+export default function Register({
+  alreadyHaveAcc,
+  setIsVisibleRegisterForm,
+  goToLogin,
+}) {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (goToLogin) {
+      navigate("/login");
+    }
+  }, [goToLogin, navigate]);
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
-    if (userName === undefined || userName === null) {
+    if (
+      userName === undefined ||
+      userName === null ||
+      userName.trim().length <= 2
+    ) {
+      console.log("A felhasználónévnek minimum 3 karakternek kell lennie.");
       return;
     }
+
+    if (password.length < 6) {
+      console.log("A jelszónak minimum 6 karakter hosszúnak kell lennie.");
+      return;
+    }
+
     console.log(userName);
     try {
       await axios.post("http://localhost:5500/register", {
