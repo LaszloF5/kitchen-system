@@ -352,6 +352,7 @@ app.get("/expenses", verifyToken, (req, res) => {
 app.post("/expenses", verifyToken, (req, res) => {
   const userId = req.user.id;
   const { amount, date } = req.body;
+
   console.log("Request body: ", req.body);
   console.log("User ID: ", req.user.id);
 
@@ -359,15 +360,38 @@ app.post("/expenses", verifyToken, (req, res) => {
     return res.status(400).json({ error: "Missing required fields." });
   }
 
-  const sql = `INSERT INTO expenses (amount, date, user_id) VALUES (?, ?, ?)`;
-
-  db.run(sql, [amount, date, userId], function (err) {
+  // Ellenőrizzük, hogy van-e már azonos dátummal rekord
+  const checkSql = `SELECT amount FROM expenses WHERE date = ? AND user_id = ?`;
+  db.get(checkSql, [date, userId], (err, row) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    res.json({ message: "Expense added successfully.", id: this.lastID });
+
+    if (row) {
+      // Ha van egyezés, frissítjük az amount értéket
+      const updatedAmount = row.amount + amount;
+      const updateSql = `UPDATE expenses SET amount = ? WHERE date = ? AND user_id = ?`;
+
+      db.run(updateSql, [updatedAmount, date, userId], function (err) {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        return res.json({ message: "Expense updated successfully." });
+      });
+    } else {
+      // Ha nincs egyezés, beszúrunk egy új rekordot
+      const insertSql = `INSERT INTO expenses (amount, date, user_id) VALUES (?, ?, ?)`;
+
+      db.run(insertSql, [amount, date, userId], function (err) {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        return res.json({ message: "Expense added successfully.", id: this.lastID });
+      });
+    }
   });
 });
+
 
 app.delete("/expenses", verifyToken, function (req, res) {
   const userId = req.user.id;
