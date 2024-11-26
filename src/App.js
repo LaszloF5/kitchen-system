@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { getWeek } from "date-fns";
+import { HashRouter, Link, Route, Routes } from "react-router-dom";
+import Chart from "./Components/Chart";
 import Fridge from "./Components/Fridge";
 import Freezer from "./Components/Freezer";
 import Chamber from "./Components/Chamber";
@@ -120,76 +122,40 @@ useEffect(() => {
   Be és kijelentkezésnél a renderToken tartalma megváltozik. Ez az useEffect bizonyítja.
 */
 
-//Később ez majd kell, csak most ne zavarjon.
+  //Később ez majd kell, csak most ne zavarjon.
 
-useEffect(() => {
-  const getExpenses = async () => {
-    try {
-      const response = await fetch('http://localhost:5500/expenses', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+  useEffect(() => {
+    const getExpenses = async () => {
+      try {
+        const response = await fetch("http://localhost:5500/expenses", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.statusText}`);
         }
-      });
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.statusText}`);
+
+        const data = await response.json();
+        setExpenditure(data.expenses);
+        console.log("data. ", data.expenses);
+      } catch (error) {
+        console.error("Failed to fetch expenses: ", error);
+        alert("Nem sikerült lekérni a kiadásokat.");
       }
-
-      const data = await response.json();
-      setExpenditure(data.expenses);
-      console.log('data. ', data.expenses);
-    } catch (error) {
-      console.error('Failed to fetch expenses: ', error);
-      alert('Nem sikerült lekérni a kiadásokat.');
+    };
+    if (token) {
+      getExpenses();
     }
-  };
-  if (token) {
-    getExpenses();
-  }
-}, []);
+  }, []);
 
-const deleteExpenses = async () => {
-  try {
-    const response = await fetch("http://localhost:5500/expenses", {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Server error: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    console.log("Backend response: ", data);
-
-  } catch (error) {
-    console.error("Failed to delete expenses: ", error);
-    alert("Nem sikerült törölni a kiadásokat.");
-  }
-}
-
-
-const addExpenditure = async (e) => {
-  e.preventDefault();
-  const amount = Number(e.target.amount.value);
-  console.log("amount: ", amount);
-
-  if (!isNaN(amount)) {
-    const now = new Date();
-    const currentWeek = getWeek(now);
-
+  const deleteExpenses = async () => {
     try {
       const response = await fetch("http://localhost:5500/expenses", {
-        method: "POST",
+        method: "DELETE",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({
-          amount,
-          date: currentWeek, // Dátum YYYY-MM-DD formátumban
-        }),
       });
 
       if (!response.ok) {
@@ -198,39 +164,49 @@ const addExpenditure = async (e) => {
 
       const data = await response.json();
       console.log("Backend response: ", data);
-
-      // Helyi állapot frissítése
-      // setExpenditure((prevExpenditure) => {
-      //   const existingWeekIndex = prevExpenditure.findIndex(
-      //     (exp) => exp.week === currentWeek
-      //   );
-      //   let updatedExpenditure;
-      //   if (existingWeekIndex !== -1) {
-      //     updatedExpenditure = [...prevExpenditure];
-      //     updatedExpenditure[existingWeekIndex] = {
-      //       ...updatedExpenditure[existingWeekIndex],
-      //       amount: updatedExpenditure[existingWeekIndex].amount + amount,
-      //     };
-      //   } else {
-      //     updatedExpenditure = [
-      //       ...prevExpenditure,
-      //       { week: currentWeek, amount },
-      //     ];
-      //   }
-      //   console.log("Updated expenditure in callback: ", updatedExpenditure);
-      //   return updatedExpenditure;
-      // });
-
     } catch (error) {
-      console.error("Failed to add expenditure: ", error.message);
-      alert("Nem sikerült a kiadást rögzíteni.");
+      console.error("Failed to delete expenses: ", error);
+      alert("Nem sikerült törölni a kiadásokat.");
     }
-  }
+  };
 
-  e.target.amount.value = "";
-  setIsvisibleAmount(false);
-};
+  const addExpenditure = async (e) => {
+    e.preventDefault();
+    const amount = Number(e.target.amount.value);
+    console.log("amount: ", amount);
 
+    if (!isNaN(amount)) {
+      const now = new Date();
+      const currentWeek = getWeek(now);
+
+      try {
+        const response = await fetch("http://localhost:5500/expenses", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            amount,
+            date: currentWeek, // Dátum YYYY-MM-DD formátumban
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log("Backend response: ", data);
+      } catch (error) {
+        console.error("Failed to add expenditure: ", error.message);
+        alert("Nem sikerült a kiadást rögzíteni.");
+      }
+    }
+
+    e.target.amount.value = "";
+    setIsvisibleAmount(false);
+  };
 
   // Get items
 
@@ -269,7 +245,7 @@ const addExpenditure = async (e) => {
         const response = await axios.post(
           `http://localhost:5500/${table}`,
           newItemData,
-          { headers: { Authorization: `Bearer ${token}` } } // Győződj meg róla, hogy itt meg van adva a token
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         setItems((prevItems) => [...prevItems, response.data]);
         return response.data;
@@ -354,201 +330,236 @@ const addExpenditure = async (e) => {
 
   return (
     <div className={`${isDarkMode ? "getDark" : "getLight"} App`}>
-      <header className="header">
-        <button
-          className={`btn btn-update ${token === null ? "" : "hideRegister"}`}
-          onClick={handleVisibilityRegisterForm}
-        >
-          Register
-        </button>
-        <button
-          className={`btn btn-update ${token === null ? "" : "hideLogIn"}`}
-          onClick={handleVisibilityLoginForm}
-        >
-          Log in
-        </button>
-        <button
-          className={`btn btn-update ${token === null ? "hideLogOut" : ""}`}
-          onClick={handleLogout}
-        >
-          Log out
-        </button>
-        <button onClick={deleteExpenses}>Delete amount (test)</button>
-        <button className="btn btn-others" onClick={handleVisibleAmount}>
-          {isTextAmount}
-        </button>
-        <button className="btn btn-update" onClick={toggleCurrencyForm}>
-          {currencyText}
-        </button>
-        <div>
-          {headerText}
-          {expenditure.length === 0 && token?.length > 0 ? (
-            <span className="expenditure">No expenditures yet</span>
-          ) : (
+      <HashRouter>
+        <header className="header">
+          <Link className="chart" to="/">
+            Home
+          </Link>
+          <Link className="chart" to="/Register">
+            Register
+          </Link>
+          <Link className="chart" to="/Login">
+            Login
+          </Link>
+          <Link className="chart" to="/Chart">
+            Chart
+          </Link>
+          <button
+            className={`btn btn-update ${token === null ? "" : "hideRegister"}`}
+            onClick={handleVisibilityRegisterForm}
+          >
+            Register
+          </button>
+          <button
+            className={`btn btn-update ${token === null ? "" : "hideLogIn"}`}
+            onClick={handleVisibilityLoginForm}
+          >
+            Log in
+          </button>
+          <button
+            className={`btn btn-update ${token === null ? "hideLogOut" : ""}`}
+            onClick={handleLogout}
+          >
+            Log out
+          </button>
+          <button onClick={deleteExpenses}>Delete amount (test)</button>
+          <button className="btn btn-others" onClick={handleVisibleAmount}>
+            {isTextAmount}
+          </button>
+          <button className="btn btn-update" onClick={toggleCurrencyForm}>
+            {currencyText}
+          </button>
+          <div>
+            {headerText}
+            {expenditure.length === 0 && token?.length > 0 ? (
+              <span className="expenditure">No expenditures yet</span>
+            ) : (
               <div className="expenditure">
                 <span>
-                  Week: {expenditure[0]?.date}. Amount: {expenditure[0]?.amount} {currency}
+                  Week: {expenditure[expenditure.length - 1]?.date}. Amount:{" "}
+                  {expenditure[expenditure.length - 1]?.amount} {currency}
                 </span>
               </div>
-          )}
-        </div>
-      </header>
-      {isVisibleRegisterForm ? (
-        <Register
-          setIsVisibleRegisterForm={setIsVisibleRegisterForm}
-          alreadyHaveAcc={alreadyHaveAcc}
-        />
-      ) : null}
-      {isVisibleCurrencyForm ? (
-        <form className="currencyForm" onSubmit={handleCurrency}>
-          <input
-            className="currencyForm_input"
-            type="text"
-            name="currency"
-            placeholder="ex. USD"
-            autoComplete="off"
-            autoFocus
+            )}
+          </div>
+        </header>
+        {isVisibleRegisterForm ? (
+          <Register
+            setIsVisibleRegisterForm={setIsVisibleRegisterForm}
+            alreadyHaveAcc={alreadyHaveAcc}
           />
-          <button className="btn btn-others" type="submit">
-            Currency
+        ) : null}
+        {isVisibleCurrencyForm ? (
+          <form className="currencyForm" onSubmit={handleCurrency}>
+            <input
+              className="currencyForm_input"
+              type="text"
+              name="currency"
+              placeholder="ex. USD"
+              autoComplete="off"
+              autoFocus
+            />
+            <button className="btn btn-others" type="submit">
+              Currency
+            </button>
+          </form>
+        ) : null}
+        {isVisibleLoginForm ? (
+          <Login
+            token={token}
+            setToken={setToken}
+            setRenderToken={setRenderToken}
+            setIsVisibleLoginForm={setIsVisibleLoginForm}
+            handleLogout={handleLogout}
+          />
+        ) : null}
+        <form
+          className={`amount-form ${
+            isVisibleAmount ? "visibleAmountForm" : "hiddenAmountForm"
+          }`}
+          onSubmit={addExpenditure}
+        >
+          <input
+            className="amount-form_input"
+            type="number"
+            name="amount"
+            id="amountId"
+            required
+            min="0"
+            placeholder="500"
+            step="0.01"
+            ref={expenditureFormRef}
+          />
+          <button type="submit" className="btn btn-others">
+            Add
           </button>
         </form>
-      ) : null}
-      {isVisibleLoginForm ? (
-        <Login
-          token={token}
-          setToken={setToken}
-          setRenderToken={setRenderToken}
-          setIsVisibleLoginForm={setIsVisibleLoginForm}
-          handleLogout={handleLogout}
-        />
-      ) : null}
-      <form
-        className={`amount-form ${
-          isVisibleAmount ? "visibleAmountForm" : "hiddenAmountForm"
-        }`}
-        onSubmit={addExpenditure}
-      >
-        <input
-          className="amount-form_input"
-          type="number"
-          name="amount"
-          id="amountId"
-          required
-          min="0"
-          placeholder="500"
-          step="0.01"
-          ref={expenditureFormRef}
-        />
-        <button type="submit" className="btn btn-others">
-          Add
-        </button>
-      </form>
-
-      <h1>Kitchen system</h1>
-      {isDarkMode ? (
-        <img
-          className="white-filter"
-          src={process.env.PUBLIC_URL + "dark-mode.png"}
-          alt="Dark mode"
-          role="button"
-          tabIndex="0"
-          onClick={toggleDarkMode}
-        />
-      ) : (
-        <img
-          src={process.env.PUBLIC_URL + "light-mode.png"}
-          alt="Light mode"
-          role="button"
-          tabIndex="0"
-          onClick={toggleDarkMode}
-        />
-      )}
-      <Fridge
-        items={fridgeItems}
-        setItems={setFridgeItems}
-        fetchItems={fetchItems}
-        addItem={addItem}
-        deleteItem={deleteItem}
-        updateItem={updateItem}
-        moveToSL={moveToSL}
-        regex={regex}
-        renderToken={renderToken}
-        transferState={transferState}
-        setTransferState={setTransferState}
-        transferFromSL={transferFromSL}
-        setTransferFromSL={setTransferFromSL}
-        token={token}
-        setToken={setToken}
-      />
-      <Freezer
-        items={freezerItems}
-        setItems={setFreezerItems}
-        fetchItems={fetchItems}
-        addItem={addItem}
-        deleteItem={deleteItem}
-        updateItem={updateItem}
-        moveToSL={moveToSL}
-        regex={regex}
-        renderToken={renderToken}
-        transferState={transferState}
-        setTransferState={setTransferState}
-        transferFromSL={transferFromSL}
-        setTransferFromSL={setTransferFromSL}
-        token={token}
-        setToken={setToken}
-      />
-      <Chamber
-        items={chamberItems}
-        setItems={setChamberItems}
-        fetchItems={fetchItems}
-        addItem={addItem}
-        deleteItem={deleteItem}
-        updateItem={updateItem}
-        moveToSL={moveToSL}
-        regex={regex}
-        renderToken={renderToken}
-        transferState={transferState}
-        setTransferState={setTransferState}
-        transferFromSL={transferFromSL}
-        setTransferFromSL={setTransferFromSL}
-        token={token}
-        setToken={setToken}
-      />
-      <Others
-        items={otherItems}
-        setItems={setOtherItems}
-        fetchItems={fetchItems}
-        addItem={addItem}
-        deleteItem={deleteItem}
-        updateItem={updateItem}
-        moveToSL={moveToSL}
-        regex={regex}
-        renderToken={renderToken}
-        transferState={transferState}
-        setTransferState={setTransferState}
-        transferFromSL={transferFromSL}
-        setTransferFromSL={setTransferFromSL}
-        token={token}
-        setToken={setToken}
-      />
-      <ShoppingList
-        items={shoppingListItems}
-        setItems={setShoppingListItems}
-        fetchItems={fetchItems}
-        addItem={addItem}
-        deleteItem={deleteItem}
-        updateItem={updateItem}
-        expenditure={yourAmount}
-        setExpenditure={setYourAmount}
-        renderToken={renderToken}
-        transferState={transferState}
-        setTransferState={setTransferState}
-        setTransferFromSL={setTransferFromSL}
-        token={token}
-        setToken={setToken}
-      />
-      <footer className="footer">Footer</footer>
+        <Routes>
+          <Route path="/chart" element={<Chart />} />
+          <Route path='register' element={<Register
+            setIsVisibleRegisterForm={setIsVisibleRegisterForm}
+            alreadyHaveAcc={alreadyHaveAcc}
+          />}/>
+          <Route path='login' element={<Login
+            token={token}
+            setToken={setToken}
+            setRenderToken={setRenderToken}
+            setIsVisibleLoginForm={setIsVisibleLoginForm}
+            handleLogout={handleLogout}
+          />}/>
+          <Route
+            path="*"
+            element={
+              <>
+                <h1>Kitchen system</h1>
+                {isDarkMode ? (
+                  <img
+                    className="white-filter"
+                    src={process.env.PUBLIC_URL + "dark-mode.png"}
+                    alt="Dark mode"
+                    role="button"
+                    tabIndex="0"
+                    onClick={toggleDarkMode}
+                  />
+                ) : (
+                  <img
+                    src={process.env.PUBLIC_URL + "light-mode.png"}
+                    alt="Light mode"
+                    role="button"
+                    tabIndex="0"
+                    onClick={toggleDarkMode}
+                  />
+                )}
+                <Fridge
+                  items={fridgeItems}
+                  setItems={setFridgeItems}
+                  fetchItems={fetchItems}
+                  addItem={addItem}
+                  deleteItem={deleteItem}
+                  updateItem={updateItem}
+                  moveToSL={moveToSL}
+                  regex={regex}
+                  renderToken={renderToken}
+                  transferState={transferState}
+                  setTransferState={setTransferState}
+                  transferFromSL={transferFromSL}
+                  setTransferFromSL={setTransferFromSL}
+                  token={token}
+                  setToken={setToken}
+                />
+                <Freezer
+                  items={freezerItems}
+                  setItems={setFreezerItems}
+                  fetchItems={fetchItems}
+                  addItem={addItem}
+                  deleteItem={deleteItem}
+                  updateItem={updateItem}
+                  moveToSL={moveToSL}
+                  regex={regex}
+                  renderToken={renderToken}
+                  transferState={transferState}
+                  setTransferState={setTransferState}
+                  transferFromSL={transferFromSL}
+                  setTransferFromSL={setTransferFromSL}
+                  token={token}
+                  setToken={setToken}
+                />
+                <Chamber
+                  items={chamberItems}
+                  setItems={setChamberItems}
+                  fetchItems={fetchItems}
+                  addItem={addItem}
+                  deleteItem={deleteItem}
+                  updateItem={updateItem}
+                  moveToSL={moveToSL}
+                  regex={regex}
+                  renderToken={renderToken}
+                  transferState={transferState}
+                  setTransferState={setTransferState}
+                  transferFromSL={transferFromSL}
+                  setTransferFromSL={setTransferFromSL}
+                  token={token}
+                  setToken={setToken}
+                />
+                <Others
+                  items={otherItems}
+                  setItems={setOtherItems}
+                  fetchItems={fetchItems}
+                  addItem={addItem}
+                  deleteItem={deleteItem}
+                  updateItem={updateItem}
+                  moveToSL={moveToSL}
+                  regex={regex}
+                  renderToken={renderToken}
+                  transferState={transferState}
+                  setTransferState={setTransferState}
+                  transferFromSL={transferFromSL}
+                  setTransferFromSL={setTransferFromSL}
+                  token={token}
+                  setToken={setToken}
+                />
+                <ShoppingList
+                  items={shoppingListItems}
+                  setItems={setShoppingListItems}
+                  fetchItems={fetchItems}
+                  addItem={addItem}
+                  deleteItem={deleteItem}
+                  updateItem={updateItem}
+                  expenditure={yourAmount}
+                  setExpenditure={setYourAmount}
+                  renderToken={renderToken}
+                  transferState={transferState}
+                  setTransferState={setTransferState}
+                  setTransferFromSL={setTransferFromSL}
+                  token={token}
+                  setToken={setToken}
+                />
+              </>
+            }
+          />
+        </Routes>
+        <footer className="footer">Footer</footer>
+      </HashRouter>
     </div>
   );
 }
