@@ -27,6 +27,7 @@ export default function App() {
   const [renderToken, setRenderToken] = useState("");
   const [transferState, setTransferState] = useState(false);
   const [transferFromSL, setTransferFromSL] = useState(false);
+  const [changedState, setChangedState] = useState(false);
 
   //// KIADÁSOK /////
   const [isVisibleAmount, setIsvisibleAmount] = useState(false);
@@ -54,18 +55,6 @@ export default function App() {
   const currencyText = isVisibleCurrencyForm
     ? "Close currency form"
     : "Set your currency";
-
-  const [isVisibleRegisterForm, setIsVisibleRegisterForm] = useState(false);
-  const handleVisibilityRegisterForm = () => {
-    setIsVisibleRegisterForm(!isVisibleRegisterForm);
-    setIsVisibleLoginForm(false);
-  };
-
-  const [isVisibleLoginForm, setIsVisibleLoginForm] = useState(false);
-  const handleVisibilityLoginForm = () => {
-    setIsVisibleLoginForm(!isVisibleLoginForm);
-    setIsVisibleRegisterForm(false);
-  };
 
   const [goToLogin, setGoToLogin] = useState(false);
   const loginText = token === null ? "Log in" : "Log out";
@@ -127,7 +116,9 @@ useEffect(() => {
   Be és kijelentkezésnél a renderToken tartalma megváltozik. Ez az useEffect bizonyítja.
 */
 
-  //Később ez majd kell, csak most ne zavarjon.
+/////////////////////////////////////
+//////////KIADÁS LEKÉRDEZÉS//////////
+/////////////////////////////////////
 
   useEffect(() => {
     const getExpenses = async () => {
@@ -144,6 +135,7 @@ useEffect(() => {
         const data = await response.json();
         setExpenditure(data.expenses);
         console.log("data. ", data.expenses);
+        setChangedState(false);
       } catch (error) {
         console.error("Failed to fetch expenses: ", error);
         alert("Nem sikerült lekérni a kiadásokat.");
@@ -152,7 +144,7 @@ useEffect(() => {
     if (token) {
       getExpenses();
     }
-  }, []);
+  }, [changedState]);
 
   const deleteExpenses = async () => {
     try {
@@ -203,6 +195,7 @@ useEffect(() => {
 
         const data = await response.json();
         console.log("Backend response: ", data);
+        setChangedState(true);
       } catch (error) {
         console.error("Failed to add expenditure: ", error.message);
         alert("Nem sikerült a kiadást rögzíteni.");
@@ -412,7 +405,6 @@ useEffect(() => {
             path="register"
             element={
               <Register
-                setIsVisibleRegisterForm={setIsVisibleRegisterForm}
                 alreadyHaveAcc={alreadyHaveAcc}
                 goToLogin={goToLogin}
               />
@@ -425,7 +417,6 @@ useEffect(() => {
                 token={token}
                 setToken={setToken}
                 setRenderToken={setRenderToken}
-                setIsVisibleLoginForm={setIsVisibleLoginForm}
               />
             }
           />

@@ -5,7 +5,6 @@ import "./Register.css";
 
 export default function Register({
   alreadyHaveAcc,
-  setIsVisibleRegisterForm,
   goToLogin,
 }) {
   const [userName, setUserName] = useState("");
@@ -44,7 +43,6 @@ export default function Register({
       });
       setUserName("");
       setPassword("");
-      setIsVisibleRegisterForm(false);
       alert("Registration successful.");
     } catch {
       console.error("Failed to register user");
