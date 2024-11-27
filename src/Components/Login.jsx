@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import './Login.css'
 
-export default function Login({ token, setToken, setRenderToken, setIsVisibleLoginForm }) {
+export default function Login({ token, setToken, setRenderToken }) {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -21,7 +21,6 @@ export default function Login({ token, setToken, setRenderToken, setIsVisibleLog
       setRenderToken(receivedToken);
       setUserName(receivedUserName);
       localStorage.setItem("token", receivedToken);
-      setIsVisibleLoginForm(false);
     } catch (error) {
       console.error("Error:", error.message);
     }

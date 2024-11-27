@@ -1,82 +1,84 @@
 .register-form {
-    width: 320px;
-    margin: 20px auto;
-    padding: 20px;
-    border-radius: 10px;
-    background-color: #f4f4f4;
-    box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.3);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .registerH2 {
-    color: #4c43cd; /* Illeszkedik a .btn-update gombhoz */
-    font-size: 22px;
-    font-weight: 600;
-    margin-bottom: 15px;
-  }
-  
-  .register-form label {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 15px;
-    font-size: 14px;
-    color: #333;
-  }
-  
-  .register-form input[type="text"],
-  .register-form input[type="password"] {
-    width: 100%;
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    background-color: #eaeaea;
-    color: #333;
-    margin-top: 5px;
-    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s;
-  }
-  
-  .register-form input[type="text"]:focus,
-  .register-form input[type="password"]:focus {
-    outline: none;
-    border-color: #4c43cd;
-    box-shadow: 0 0 5px rgba(76, 67, 205, 0.5);
-  }
-  
-  .register-form button[type="submit"] {
-    background-color: #2e8b57; /* Illeszkedik a .btn-others gombhoz */
-    color: white;
-    font-weight: 500;
-    padding: 10px 15px;
-    margin-top: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.3s;
-  }
-  
-  .register-form button[type="submit"]:hover {
-    background-color: #267049;
-    transform: scale(1.05);
-  }
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #f4f4f4;
+  box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  .SecondBtn {
-    background-color: #4c43cd;
-    color: white;
-    font-weight: 500;
-    padding: 10px 15px;
-    margin-top: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.3s;
-  }
+.registerH2 {
+  color: #4c43cd; /* Illeszkedik a .btn-update gombhoz */
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
 
-  .SecondBtn:hover {
-    background-color: #3b328d;
-    transform: scale(1.05);
-  }
-  
+.register-form label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #333;
+}
+
+.register-form input[type="text"],
+.register-form input[type="password"] {
+  width: 100%;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #eaeaea;
+  color: #333;
+  margin-top: 5px;
+  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s;
+}
+
+.register-form input[type="text"]:focus,
+.register-form input[type="password"]:focus {
+  outline: none;
+  border-color: #4c43cd;
+  box-shadow: 0 0 5px rgba(76, 67, 205, 0.5);
+}
+
+.register-form button[type="submit"] {
+  background-color: #2e8b57; /* Illeszkedik a .btn-others gombhoz */
+  color: white;
+  font-weight: 500;
+  padding: 10px 15px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.register-form button[type="submit"]:hover {
+  background-color: #267049;
+  transform: scale(1.05);
+}
+
+.SecondBtn {
+  background-color: #4c43cd;
+  color: white;
+  font-weight: 500;
+  padding: 10px 15px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.SecondBtn:hover {
+  background-color: #3b328d;
+  transform: scale(1.05);
+}

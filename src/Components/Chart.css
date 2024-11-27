@@ -1,0 +1,9 @@
+h1 {
+    margin: 20px 0 0 0;
+    padding: 0;
+}
+
+.chart-cointainer {
+    height: 750px;
+    width: 100%;
+}

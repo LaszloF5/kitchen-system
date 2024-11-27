@@ -6,6 +6,7 @@ import "./Register.css";
 export default function Register({
   alreadyHaveAcc,
   goToLogin,
+  setGoToLogin,
 }) {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
@@ -15,6 +16,7 @@ export default function Register({
   useEffect(() => {
     if (goToLogin) {
       navigate("/login");
+      setGoToLogin(false);
     }
   }, [goToLogin, navigate]);
 
@@ -52,7 +54,8 @@ export default function Register({
   };
 
   return (
-    <form className="register-form" onSubmit={handleRegister}>
+    <div className="form-div">
+      <form className="register-form" onSubmit={handleRegister}>
       <h2 className="registerH2">New account?</h2>
       <label htmlFor="newUserName">
         Username:
@@ -81,5 +84,6 @@ export default function Register({
         Already have an account? Log in!
       </button>
     </form>
+    </div>
   );
 }

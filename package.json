@@ -15,6 +15,7 @@
     "react-scripts": "^5.0.1",
     "resolve-url-loader": "^5.0.0",
     "svgo": "^3.3.2",
+    "victory": "^37.3.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

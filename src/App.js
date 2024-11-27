@@ -10,7 +10,7 @@ import Others from "./Components/Others";
 import ShoppingList from "./Components/ShoppingList";
 import Register from "./Components/Register";
 import Login from "./Components/Login";
-import DeleteUser from "./Components/DeleteUser";
+import Footer from "./Components/Footer";
 import "./App.css";
 
 export default function App() {
@@ -28,6 +28,7 @@ export default function App() {
   const [transferState, setTransferState] = useState(false);
   const [transferFromSL, setTransferFromSL] = useState(false);
   const [changedState, setChangedState] = useState(false);
+  // const isFooter = location.pathname !== "/login" && location.pathname !== "/register";
 
   //// KIADÁSOK /////
   const [isVisibleAmount, setIsvisibleAmount] = useState(false);
@@ -98,16 +99,20 @@ export default function App() {
     }
   }, []);
 
+  // useEffect(() => {
+  //   console.log('Token értéke: ', token);
+  // }, [])
+
   useEffect(() => {
     localStorage.setItem("toggle", JSON.stringify(isDarkMode));
   }, [isDarkMode]);
 
   // USEMEMO????
   useEffect(() => {
-    if (yourAmount[yourAmount.length - 1]?.amount > 0 && currency === "") {
+    if ([yourAmount.length - 1]?.amount > 0 && currency === "") {
       alert("Enter the currency that you want to use.");
     }
-  }, []);
+  }, [yourAmount, currency]);
   /*
 useEffect(() => {
     alert('A token tartalma megváltozott!');
@@ -116,9 +121,9 @@ useEffect(() => {
   Be és kijelentkezésnél a renderToken tartalma megváltozik. Ez az useEffect bizonyítja.
 */
 
-/////////////////////////////////////
-//////////KIADÁS LEKÉRDEZÉS//////////
-/////////////////////////////////////
+  /////////////////////////////////////
+  //////////KIADÁS LEKÉRDEZÉS//////////
+  /////////////////////////////////////
 
   useEffect(() => {
     const getExpenses = async () => {
@@ -144,7 +149,7 @@ useEffect(() => {
     if (token) {
       getExpenses();
     }
-  }, [changedState]);
+  }, [changedState, token]);
 
   const deleteExpenses = async () => {
     try {
@@ -324,7 +329,7 @@ useEffect(() => {
       localStorage.setItem("currency", JSON.stringify(currency));
       setPrevCurrency(currency);
     }
-  }, [currency]);
+  }, [currency, prevCurrency]);
 
   return (
     <div className={`${isDarkMode ? "getDark" : "getLight"} App`}>
@@ -333,35 +338,80 @@ useEffect(() => {
           <Link className="chart btn btn-others" to="/">
             Home
           </Link>
-          <Link className="chart btn btn-update" to="/Register">
-            Register
-          </Link>
-          <Link className="chart btn btn-update" to="/Login" onClick={handleLogout}>
+          {token === null ? (
+            <Link className="chart btn btn-update" to="/register">
+              Register
+            </Link>
+          ) : (
+            ""
+          )}
+          <Link
+            className="chart btn btn-update"
+            to="/login"
+            onClick={handleLogout}
+          >
             {loginText}
           </Link>
-          {token !== null ? <Link className="chart btn btn-update" to="/Chart">
-            Chart
-          </Link> : ''}
+          {token !== null ? (
+            <Link className="chart btn btn-update" to="/Chart">
+              Chart
+            </Link>
+          ) : (
+            ""
+          )}
           <button onClick={deleteExpenses}>Delete amount (test)</button>
-          <button className="btn btn-others" onClick={handleVisibleAmount}>
-            {isTextAmount}
-          </button>
-          <button className="btn btn-update" onClick={toggleCurrencyForm}>
-            {currencyText}
-          </button>
-          <div>
-            {headerText}
-            {expenditure.length === 0 && token?.length > 0 ? (
-              <span className="expenditure">No expenditures yet</span>
-            ) : (
-              <div className="expenditure">
-                <span>
-                  Week: {expenditure[expenditure.length - 1]?.date}. Amount:{" "}
-                  {expenditure[expenditure.length - 1]?.amount} {currency}
-                </span>
-              </div>
-            )}
-          </div>
+          {token === null ? (
+            ""
+          ) : (
+            <button className="btn btn-others" onClick={handleVisibleAmount}>
+              {isTextAmount}
+            </button>
+          )}
+          {token === null ? (
+            ""
+          ) : (
+            <button className="btn btn-update" onClick={toggleCurrencyForm}>
+              {currencyText}
+            </button>
+          )}
+          {isDarkMode ? (
+            <img
+              className="white-filter"
+              src={process.env.PUBLIC_URL + "dark-mode.png"}
+              alt="Dark mode"
+              role="button"
+              tabIndex="0"
+              onClick={toggleDarkMode}
+            />
+          ) : (
+            <img
+              src={process.env.PUBLIC_URL + "light-mode.png"}
+              alt="Light mode"
+              role="button"
+              tabIndex="0"
+              onClick={toggleDarkMode}
+            />
+          )}
+          {token === null ? (
+            ""
+          ) : (
+            <div>
+              {headerText}
+              {expenditure.length === 0 && token?.length > 0 ? (
+                <span className="expenditure">No expenditures yet</span>
+              ) : (
+                <div className="expenditure">
+                  <span>
+                    Week: {expenditure[expenditure.length - 1]?.date}.
+                  </span>
+                  <span>
+                    Amount: {expenditure[expenditure.length - 1]?.amount}{" "}
+                    {currency}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
         </header>
         {isVisibleCurrencyForm ? (
           <form className="currencyForm" onSubmit={handleCurrency}>
@@ -400,13 +450,17 @@ useEffect(() => {
           </button>
         </form>
         <Routes>
-          <Route path="/chart" element={<Chart />} />
+          <Route
+            path="/chart"
+            element={<Chart expenditure={expenditure} currency={currency} />}
+          />
           <Route
             path="register"
             element={
               <Register
                 alreadyHaveAcc={alreadyHaveAcc}
                 goToLogin={goToLogin}
+                setGoToLogin={setGoToLogin}
               />
             }
           />
@@ -425,24 +479,6 @@ useEffect(() => {
             element={
               <>
                 <h1>Kitchen system</h1>
-                {isDarkMode ? (
-                  <img
-                    className="white-filter"
-                    src={process.env.PUBLIC_URL + "dark-mode.png"}
-                    alt="Dark mode"
-                    role="button"
-                    tabIndex="0"
-                    onClick={toggleDarkMode}
-                  />
-                ) : (
-                  <img
-                    src={process.env.PUBLIC_URL + "light-mode.png"}
-                    alt="Light mode"
-                    role="button"
-                    tabIndex="0"
-                    onClick={toggleDarkMode}
-                  />
-                )}
                 <Fridge
                   items={fridgeItems}
                   setItems={setFridgeItems}
@@ -527,14 +563,11 @@ useEffect(() => {
                   token={token}
                   setToken={setToken}
                 />
+                <Footer token={token} />
               </>
             }
           />
         </Routes>
-        <footer className="footer">
-          <h1>Footer</h1>
-          {token !== null ? <DeleteUser/> : ''}
-        </footer>
       </HashRouter>
     </div>
   );
