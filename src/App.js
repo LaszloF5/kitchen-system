@@ -12,6 +12,7 @@ import Register from "./Components/Register";
 import Login from "./Components/Login";
 import Footer from "./Components/Footer";
 import "./App.css";
+import Recipes from "./Components/Recipes";
 
 export default function App() {
   const [fridgeItems, setFridgeItems] = useState([]);
@@ -359,6 +360,13 @@ useEffect(() => {
           ) : (
             ""
           )}
+          {token !== null ? (
+            <Link className="chart btn btn-update" to="/Recipes">
+              Recipes
+            </Link>
+          ) : (
+            ""
+          )}
           <button onClick={deleteExpenses}>Delete amount (test)</button>
           {token === null ? (
             ""
@@ -453,6 +461,10 @@ useEffect(() => {
           <Route
             path="/chart"
             element={<Chart expenditure={expenditure} currency={currency} />}
+          />
+          <Route
+          path="/recipes"
+          element={<Recipes/>}
           />
           <Route
             path="register"
