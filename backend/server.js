@@ -20,6 +20,12 @@ const db = new sqlite3.Database("./database.sqlite", (err) => {
 });
 
 db.serialize(() => {
+  db.run(`CREATE TABLE IF NOT EXISTS recipes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    ingredients TEXT NOT NULL,
+    preparation TEXT NOT NULL,
+    user_id INTEGER NOT NULL)`);
   db.run(
     `CREATE TABLE IF NOT EXISTS expenses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -206,6 +212,70 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+// Receptek felvétele
+
+app.post("/recipes", verifyToken, (req, res) => {
+  const { name, ingredients, preparation } = req.body;
+  const userId = req.user.id;
+  console.log("Received request body:", req.body);
+
+  if (!name || !ingredients || !preparation || !userId) {
+    return res.status(400).json({ error: "All fields are required!" });
+  }
+
+  const ingredientsJSON = JSON.stringify(ingredients);
+
+  const sql =
+    "INSERT INTO recipes (name, ingredients, preparation, user_id) VALUES (?, ?, ?, ?)";
+
+  db.run(sql, [name, ingredientsJSON, preparation, userId], function (err) {
+    if (err) {
+      console.error("Error inserting recipe: ", err.message);
+      return res.status(500).json({ error: "Failed to add recipe." });
+    }
+    console.log(`Recipe ${name} added successfully.`);
+    res.status(201).json({ id: this.lastID, name, ingredients, preparation });
+  });
+});
+
+// Receptek lekérése
+
+app.get("/recipes", verifyToken, (req, res) => {
+  const userId = req.user.id;
+  const sql = `SELECT * FROM recipes WHERE user_id = ?`;
+
+  db.all(sql, [userId], (err, rows) => {
+    if (err) {
+      console.error("Error fetching recipes: ", err.message);
+      return res.status(500).json({ error: "Failed to fetch recipes." });
+    }
+
+    if (rows.length === 0) {
+      return res.status(200).json({ message: "No recipes found." });
+    }
+
+    const formattedRows = rows.map((row) => ({
+      ...row,
+      ingredients: JSON.parse(row.ingredients),
+    }));
+    res.json(formattedRows);
+  });
+});
+
+// Receptek törlése
+
+app.delete("/recipes", verifyToken, function (req, res) {
+  const userId = req.user.id;
+  const sql = `DELETE FROM recipes WHERE user_id = ?`;
+
+  db.run(sql, [userId], function (err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ message: "All recipes deleted successfully." });
+  });
+});
+
 // Elemek mozgatása a shoppingList komponensből a többi komponensbe.
 
 app.post("/move_item", (req, res) => {
@@ -386,12 +456,14 @@ app.post("/expenses", verifyToken, (req, res) => {
         if (err) {
           return res.status(500).json({ error: err.message });
         }
-        return res.json({ message: "Expense added successfully.", id: this.lastID });
+        return res.json({
+          message: "Expense added successfully.",
+          id: this.lastID,
+        });
       });
     }
   });
 });
-
 
 app.delete("/expenses", verifyToken, function (req, res) {
   const userId = req.user.id;

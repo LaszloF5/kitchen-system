@@ -1,8 +1,13 @@
+.recipes-h1, .recipes-h2 {
+    margin: 10px 0;
+}
+
 /*********************************/
 .form-inside-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin: 10px 0;
 }
 
 .name-input {
@@ -16,12 +21,25 @@ textarea {
 }
 /*********************************/
 
-.name {
+.saved-recipes-ul {
     list-style-type: none;
+    padding: 0;
+}
+
+
+.recipe-name {
+    font-style: italic;
 }
 
 .ingredient-ul {
     padding: 0;
+}
+
+.one-recipe {
+    padding: 20px;
+    outline: 2px solid black;
+    width: 80%;
+    margin: 10px auto;
 }
 
 .ingredient-element {
