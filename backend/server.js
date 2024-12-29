@@ -264,17 +264,23 @@ app.get("/recipes", verifyToken, (req, res) => {
 
 // Receptek törlése
 
-app.delete("/recipes", verifyToken, function (req, res) {
+app.delete("/recipes/:id", verifyToken, function (req, res) {
   const userId = req.user.id;
-  const sql = `DELETE FROM recipes WHERE user_id = ?`;
+  const id = req.params.id; // Az URL paraméterként kapott recept ID
 
-  db.run(sql, [userId], function (err) {
+  const sql = `DELETE FROM recipes WHERE user_id = ? AND id = ?`;
+
+  db.run(sql, [userId, id], function (err) {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    res.json({ message: "All recipes deleted successfully." });
+    if (this.changes === 0) {
+      return res.status(404).json({ message: "Recipe not found or not authorized." });
+    }
+    res.json({ message: "Recipe deleted successfully." });
   });
 });
+
 
 // Elemek mozgatása a shoppingList komponensből a többi komponensbe.
 

@@ -21,22 +21,28 @@ export default function Recipes() {
     setIngredients(updatedIngredients);
   };
 
-  const deleteRecipes = async () => {
+  const deleteRecipe = async (e) => {
     const token = localStorage.getItem("token");
     if (!token) {
       alert("You need to be logged in to perform this action.");
       return;
     }
+
+    const itemId = e.target.id; // A törölni kívánt recept ID-je
     try {
-      await axios.delete("http://localhost:5500/recipes", {
+      await axios.delete(`http://localhost:5500/recipes/${itemId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      alert("All recipes deleted successfully.");
+      // Törölt recept eltávolítása az állapotból
+      setMyRecipes((prevRecipes) =>
+        prevRecipes.filter((recipe) => recipe.id !== parseInt(itemId))
+      );
+      alert("Recipe deleted successfully.");
     } catch (error) {
-      console.error("Error deleting recipes:", error);
-      alert("Failed to delete recipes. Please try again later.");
+      console.error("Error deleting recipe:", error);
+      alert("Failed to delete recipe. Please try again later.");
     }
   };
 
@@ -56,6 +62,8 @@ export default function Recipes() {
           },
         });
         setMyRecipes(response.data);
+        console.log("Adat ami kell: ", response.data[0].id); // Az adatszerkezet id-je, ami a szerverről jön.
+        console.log("A myRecipes: ", myRecipes);
       } catch (error) {
         console.error("Error fetching recipes:", error);
         alert("Failed to fetch recipes. Please try again later.");
@@ -110,10 +118,7 @@ export default function Recipes() {
       >
         Add new recipe
       </button>
-      <button
-        className="toggleNewRecipe btn btn-others"
-        onClick={deleteRecipes}
-      >
+      <button className="toggleNewRecipe btn btn-others" onClick={deleteRecipe}>
         Delete recipes
       </button>
       {isVisibleForm && (
@@ -178,6 +183,10 @@ export default function Recipes() {
                   </ul>
                   <h3>Preparation</h3>
                   <p className="preparation-p">{recipe.preparation}</p>
+                  <p>A recept id-je: {recipe.id}</p>
+                  <button onClick={deleteRecipe} id={recipe.id}>
+                    Delete recipe
+                  </button>
                 </li>
               ))
             : ""}
