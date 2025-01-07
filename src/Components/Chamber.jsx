@@ -9,6 +9,8 @@ export default function Chamber({
   updateItem,
   moveToSL,
   regex,
+  userId,
+  setUserId,
 }) {
   // Input values
   const [newItem, setNewItem] = useState("");
@@ -97,16 +99,18 @@ export default function Chamber({
   // Datas from the database
 
   useEffect(() => {
-    const getDatas = async () => {
-      const data = await fetchItems("chamber_items");
-      setItems(data);
-    };
-    getDatas();
+    if (userId.length > 0) {
+      const getDatas = async () => {
+        const data = await fetchItems("chamber_items");
+        setItems(data);
+      };
+      getDatas();
+    }
   }, [fetchItems, items, setItems]);
 
   const handleAddChamber = async () => {
     try {
-      await addItem("chamber_items", newItem, newQuantity, setItems);
+      await addItem("chamber_items", newItem, newQuantity, setItems, userId);
       setNewItem("");
       setNewQuantity("");
       setIsVisible(false);

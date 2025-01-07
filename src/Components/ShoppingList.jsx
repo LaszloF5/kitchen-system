@@ -12,6 +12,8 @@ export default function ShoppingList({
   updateItem,
   expenditure,
   setExpenditure,
+  userId,
+  setUserId,
 }) {
   // Input values
 
@@ -109,16 +111,19 @@ export default function ShoppingList({
   };
 
   useEffect(() => {
-    const getDatas = async () => {
-      const data = await fetchItems("shoppingList_items");
-      setItems(data);
-    };
-    getDatas();
+    if (userId.length > 0) {
+
+      const getDatas = async () => {
+        const data = await fetchItems("shoppingList_items");
+        setItems(data);
+      };
+      getDatas();
+    }
   }, [fetchItems, items, setItems]);
 
   const handleAdd = async () => {
     try {
-      await addItem("shoppingList_items", newItem, newQuantity, setItems);
+      await addItem("shoppingList_items", newItem, newQuantity, setItems, userId);
       setNewItem("");
       setNewQuantity("");
       setIsVisibleS(false);

@@ -6,6 +6,7 @@ import Chamber from "./Components/Chamber";
 import Others from "./Components/Others";
 import ShoppingList from "./Components/ShoppingList";
 import Login from "./Components/Login";
+import Register from "./Components/Register";
 import "./App.css";
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
   const headerText = "Weekly expenses: ";
   const [currency, setCurrency] = useState("");
   const [prevCurrency, setPrevCurrency] = useState("");
+  const [userId, setUserId] = useState(localStorage.getItem('userId') || "");
 
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
@@ -49,17 +51,19 @@ export default function App() {
   }, [isDarkMode]);
 
   // USEMEMO????
-  useEffect(() => {
-    if (yourAmount[yourAmount.length - 1]?.amount > 0 && currency === "") {
-      alert("Enter the currency that you want to use.");
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (yourAmount[yourAmount.length - 1]?.amount > 0 && currency === "") {
+  //     alert("Enter the currency that you want to use.");
+  //   }
+  // }, []);
 
   // Get items
 
-  const fetchItems = useCallback(async (table) => {
+  const fetchItems = useCallback(async (table, userId) => {
     try {
-      const response = await axios.get(`http://localhost:5500/${table}`);
+      const response = await axios.get(`http://localhost:5500/${table}`, {
+        params: {userId},
+      });
       return Array.isArray(response.data.items) ? response.data.items : [];
     } catch (error) {
       console.error("Error fetching items: ", error);
@@ -69,7 +73,7 @@ export default function App() {
 
   // Post items
 
-  const addItem = async (table, newItem, newQuantity, setItems) => {
+  const addItem = async (table, newItem, newQuantity, setItems, userId) => {
     if (newItem.length > 0 && newQuantity.length > 0) {
       const validQty = Number(...newQuantity.match(regexQtyBreakdown));
       const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
@@ -77,6 +81,7 @@ export default function App() {
         name: newItem.trim(),
         quantity: `${validQty} ${unit}`,
         date_added: new Date().toISOString().split("T")[0],
+        userId: userId,
       };
       try {
         const response = await axios.post(
@@ -172,11 +177,11 @@ export default function App() {
         </button>
         <div>
           {headerText}
-          {yourAmount.length > 0 && (
+          {yourAmount !== null ? (yourAmount.length > 0) && (
             <span>
               {yourAmount[yourAmount.length - 1].amount} {currency}
             </span>
-          )}
+          ) : ''}
         </div>
       </header>
 
@@ -215,6 +220,7 @@ export default function App() {
           onClick={toggleDarkMode}
         />
       )}
+      <Register/>
       <Login />
 
       <Fridge
@@ -226,6 +232,8 @@ export default function App() {
         updateItem={updateItem}
         moveToSL={moveToSL}
         regex={regex}
+        userId = {userId}
+        setUserId = {setUserId}
       />
       <Freezer
         items={freezerItems}
@@ -236,6 +244,8 @@ export default function App() {
         updateItem={updateItem}
         moveToSL={moveToSL}
         regex={regex}
+        userId = {userId}
+        setUserId = {setUserId}
       />
       <Chamber
         items={chamberItems}
@@ -246,6 +256,8 @@ export default function App() {
         updateItem={updateItem}
         moveToSL={moveToSL}
         regex={regex}
+        userId = {userId}
+        setUserId = {setUserId}
       />
       <Others
         items={otherItems}
@@ -256,6 +268,8 @@ export default function App() {
         updateItem={updateItem}
         moveToSL={moveToSL}
         regex={regex}
+        userId = {userId}
+        setUserId = {setUserId}
       />
       <ShoppingList
         items={shoppingListItems}
@@ -266,6 +280,8 @@ export default function App() {
         updateItem={updateItem}
         expenditure={yourAmount}
         setExpenditure={setYourAmount}
+        userId = {userId}
+        setUserId = {setUserId}
       />
       <footer className="footer">Footer</footer>
     </div>

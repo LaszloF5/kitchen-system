@@ -9,6 +9,8 @@ export default function Others({
   updateItem,
   moveToSL,
   regex,
+  userId,
+  setUserId,
 }) {
   const [newItem, setNewItem] = useState([]);
   const [newQuantity, setNewQuantity] = useState([]);
@@ -95,16 +97,19 @@ export default function Others({
   // Item modifier functions
 
   useEffect(() => {
-    const getDatas = async () => {
-      const data = await fetchItems("others_items");
-      setItems(data);
-    };
-    getDatas();
+    if (userId.length > 0) {
+
+      const getDatas = async () => {
+        const data = await fetchItems("others_items");
+        setItems(data);
+      };
+      getDatas();
+    }
   }, [fetchItems, items,setItems]);
 
   const handleAddOthers = async () => {
     try {
-      await addItem("others_items", newItem, newQuantity, setItems);
+      await addItem("others_items", newItem, newQuantity, setItems, userId);
       setNewItem("");
       setNewQuantity("");
       setIsVisibleO(false);

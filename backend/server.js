@@ -3,6 +3,7 @@ const sqlite3 = require("sqlite3");
 const cors = require("cors");
 const app = express();
 const PORT = 5500;
+const bcrypt = require("bcrypt");
 
 app.use(cors());
 app.use(express.json());
@@ -16,6 +17,12 @@ const db = new sqlite3.Database("./database.sqlite", (err) => {
 });
 
 db.serialize(() => {
+  db.run(
+    `CREATE TABLE IF NOT EXISTS register (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userName TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL)`
+  );
   db.run(
     `CREATE TABLE IF NOT EXISTS fridge_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,9 +67,229 @@ app.get("/", (req, res) => {
   res.send("The server is running.");
 });
 
+app.post("/register", async (req, res) => {
+  const { userName, password } = req.body;
+
+  if (!userName || !password) {
+    return res.status(400).json({ error: "Missing required fields." });
+  }
+
+  console.log("userName: ", userName, "password: ", password);
+
+  try {
+    // Ellenőrizze, hogy a felhasználónév már létezik-e
+    const existingUser = await getUserByUserName(userName);
+    if (existingUser) {
+      return res.status(400).json({ error: "Felhasználónév már foglalt." });
+    }
+
+    await registerUser(userName, password);
+    res.status(201).send("Sikeres regisztráció.");
+  } catch (err) {
+    res.status(500).send("Hiba történt a regisztráció során.");
+  }
+
+  async function getUserByUserName(userName) {
+    const sql = `SELECT * FROM register WHERE userName = ?`;
+    return new Promise((resolve, reject) => {
+      db.get(sql, [userName], (err, row) => {
+        if (err) reject(err);
+        resolve(row);
+      });
+    });
+  }
+
+  async function registerUser(userName, password) {
+    try {
+      const hashedPassword = await new Promise((resolve, reject) => {
+        bcrypt.hash(password, 10, (err, hashedPassword) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(hashedPassword);
+          }
+        });
+      });
+
+      const sql = `INSERT INTO register (userName, password) VALUES (?, ?)`;
+      await new Promise((resolve, reject) => {
+        db.run(sql, [userName, hashedPassword], function (err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      console.log("Sikeres regisztráció.");
+    } catch (err) {
+      throw err;
+    }
+  }
+});
+
+app.post("/login", async (req, res) => {
+  const { userName, password } = req.body;
+
+  if (!userName || !password) {
+    return res.status(400).json({ error: "Missing required fields." });
+  }
+
+  try {
+    const userId = await loginUser(userName, password);
+    res.status(200).send({ message: "Sikeres bejelentkezés", userId });
+  } catch (err) {
+    res.status(401).send("Hibás bejelentkezési adatok.");
+  }
+});
+
+async function loginUser(userName, password) {
+  const sql = `SELECT * FROM register WHERE userName = ?`;
+
+  const row = await new Promise((resolve, reject) => {
+    db.get(sql, [userName], (err, row) => {
+      if (err) reject(err);
+      else resolve(row);
+    });
+  });
+
+  if (!row) {
+    throw new Error("Felhasználó nem található.");
+  }
+
+  const match = await bcrypt.compare(password, row.password);
+
+  if (!match) {
+    throw new Error("Hibás jelszó.");
+  }
+
+  return row.id;
+}
+
+function verifyId(req, res, next) {
+  const userId = req.body.userId;
+  if (!userId) {
+    return res.status(400).send("Userid szükséges!");
+  }
+  const sql = "SELECT * FROM users where userId = ?";
+
+  db.get(sql, [userId], (err, row) => {
+    if (err) {
+      console.error(`Error verifying user id:`, err.message);
+      return res.status(500).json({ error: "Failed to verify user id." });
+    }
+    if (!row) {
+      console.error(`User not found with id: ${userId}`);
+      return res.status(404).json({ error: "User not found." });
+    }
+    req.user = row;
+    next();
+  });
+}
+
+//Felhasználók törlése
+
+// function deleteUsers () {
+//   app.delete('/register', (req, res) => {
+//     const sql = 'DELETE FROM register';
+//     db.run(sql, [], (err) => {
+//       if (err) {
+//         console.error(`Error deleting users:`, err.message);
+//         return res.status(500).json({ error: "Failed to delete users." });
+//       }
+//       res.status(200).json({ message: "Users deleted successfully." });
+//       console.log("Users deleted successfully.");
+//     });
+//   })
+// }
+
+// Kiadások kezelése
+
+// app.get("/expenses", verifyToken, (req, res) => {
+//   const userId = req.user.id;
+//   const sql = `SELECT * FROM expenses WHERE user_id = ?`;
+
+//   db.all(sql, [userId], (err, rows) => {
+//     if (err) {
+//       console.error(
+//         `[${new Date().toISOString()}] Error retrieving expenses:`,
+//         err.message
+//       );
+//       return res.status(500).json({ error: "Failed to retrieve expenses." });
+//     }
+
+//     if (rows.length === 0) {
+//       return res
+//         .status(404)
+//         .json({ message: "No expenses found for the user." });
+//     }
+
+//     res.json({ expenses: rows });
+//   });
+// });
+
+// app.post("/expenses", verifyToken, (req, res) => {
+//   const userId = req.user.id;
+//   const { amount, date } = req.body;
+
+//   console.log("Request body: ", req.body);
+//   console.log("User ID: ", req.user.id);
+
+//   if (!amount || !date || !userId) {
+//     return res.status(400).json({ error: "Missing required fields." });
+//   }
+
+//   // Ellenőrizzük, hogy van-e már azonos dátummal rekord
+//   const checkSql = `SELECT amount FROM expenses WHERE date = ? AND user_id = ?`;
+//   db.get(checkSql, [date, userId], (err, row) => {
+//     if (err) {
+//       return res.status(500).json({ error: err.message });
+//     }
+
+//     if (row) {
+//       // Ha van egyezés, frissítjük az amount értéket
+//       const updatedAmount = row.amount + amount;
+//       const updateSql = `UPDATE expenses SET amount = ? WHERE date = ? AND user_id = ?`;
+
+//       db.run(updateSql, [updatedAmount, date, userId], function (err) {
+//         if (err) {
+//           return res.status(500).json({ error: err.message });
+//         }
+//         return res.json({ message: "Expense updated successfully." });
+//       });
+//     } else {
+//       // Ha nincs egyezés, beszúrunk egy új rekordot
+//       const insertSql = `INSERT INTO expenses (amount, date, user_id) VALUES (?, ?, ?)`;
+
+//       db.run(insertSql, [amount, date, userId], function (err) {
+//         if (err) {
+//           return res.status(500).json({ error: err.message });
+//         }
+//         return res.json({
+//           message: "Expense added successfully.",
+//           id: this.lastID,
+//         });
+//       });
+//     }
+//   });
+// });
+
+// app.delete("/expenses", verifyToken, function (req, res) {
+//   const userId = req.user.id;
+//   const sql = `DELETE FROM expenses WHERE user_id = ?`;
+
+//   db.run(sql, [userId], function (err) {
+//     if (err) {
+//       return res.status(500).json({ error: err.message });
+//     }
+//     res.json({ message: "All expenses deleted successfully." });
+//   });
+// });
+
 // Elemek mozgatása a shoppingList komponensből a többi komponensbe.
 
-app.post("/move_item", (req, res) => {
+app.post("/move_item", verifyId, (req, res) => {
   const { itemName, sourceTable, targetTable } = req.body;
   console.log("Received request body:", req.body);
 
@@ -180,7 +407,7 @@ app.post("/move_item", (req, res) => {
 
 // Elemek mozgatása a shoppingList komponensbe.
 
-app.post("/moveto_sl", (req, res) => {
+app.post("/moveto_sl", verifyId, (req, res) => {
   const { itemName, newQuantity, date, sourceTable, targetTable } = req.body;
   const validTables = [
     "fridge_items",
@@ -260,7 +487,7 @@ app.post("/moveto_sl", (req, res) => {
 
 // fridge items
 
-app.get("/:table", (req, res) => {
+app.get("/:table", verifyId, (req, res) => {
   const { table } = req.params;
   const validTables = [
     "fridge_items",
@@ -284,7 +511,7 @@ app.get("/:table", (req, res) => {
   });
 });
 
-app.post("/:table", (req, res) => {
+app.post("/:table", verifyId, (req, res) => {
   const { table } = req.params;
   const { name, quantity, date_added } = req.body;
   const validTables = [
@@ -307,7 +534,7 @@ app.post("/:table", (req, res) => {
   });
 });
 
-app.delete("/:table/:id", (req, res) => {
+app.delete("/:table/:id", verifyId, (req, res) => {
   const { table, id } = req.params;
   const validTables = [
     "fridge_items",
@@ -348,7 +575,7 @@ app.delete("/:table/:id", (req, res) => {
   });
 });
 
-app.put("/:table/:id", (req, res) => {
+app.put("/:table/:id", verifyId, (req, res) => {
   const { table, id } = req.params;
   const validTables = [
     "fridge_items",
@@ -377,7 +604,6 @@ app.put("/:table/:id", (req, res) => {
     res.json({ message: "Item quantity updated", id, quantity });
   });
 });
-
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

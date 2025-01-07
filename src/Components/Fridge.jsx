@@ -10,6 +10,8 @@ export default function Fridge({
   updateItem,
   moveToSL,
   regex,
+  userId,
+  setUserId,
 }) {
   //Input values
 
@@ -93,18 +95,21 @@ export default function Fridge({
   // Datas from the database
 
   useEffect(() => {
-    const getDatas = async () => {
-      const data = await fetchItems("fridge_items");
-      setItems(data);
-    };
-    getDatas();
+    if (userId.length > 0) {
+
+      const getDatas = async () => {
+        const data = await fetchItems("fridge_items");
+        setItems(data);
+      };
+      getDatas();
+    }
   }, [fetchItems, items, setItems]);
 
   // functions
 
   const handleAddFridge = async () => {
     try {
-      await addItem("fridge_items", newItem, newQuantity, setItems);
+      await addItem("fridge_items", newItem, newQuantity, setItems, userId);
       setNewItem("");
       setNewQuantity("");
       setIsVisible(false);
