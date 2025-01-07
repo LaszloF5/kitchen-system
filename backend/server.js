@@ -168,7 +168,7 @@ async function loginUser(userName, password) {
 }
 
 function verifyId(req, res, next) {
-  const userId = req.body.userId;
+  const userId = req.query.userId;
   if (!userId) {
     return res.status(400).send("Userid szükséges!");
   }
@@ -489,6 +489,7 @@ app.post("/moveto_sl", verifyId, (req, res) => {
 
 app.get("/:table", verifyId, (req, res) => {
   const { table } = req.params;
+  const { userId } = req.query;
   const validTables = [
     "fridge_items",
     "freezer_items",

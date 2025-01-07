@@ -19,7 +19,7 @@ export default function App() {
   const headerText = "Weekly expenses: ";
   const [currency, setCurrency] = useState("");
   const [prevCurrency, setPrevCurrency] = useState("");
-  const [userId, setUserId] = useState(localStorage.getItem('userId') || "");
+  const [userId, setUserId] = useState(localStorage.getItem("userId") || "");
 
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
@@ -62,7 +62,7 @@ export default function App() {
   const fetchItems = useCallback(async (table, userId) => {
     try {
       const response = await axios.get(`http://localhost:5500/${table}`, {
-        params: {userId},
+        params: { userId },
       });
       return Array.isArray(response.data.items) ? response.data.items : [];
     } catch (error) {
@@ -81,12 +81,11 @@ export default function App() {
         name: newItem.trim(),
         quantity: `${validQty} ${unit}`,
         date_added: new Date().toISOString().split("T")[0],
-        userId: userId,
       };
       try {
         const response = await axios.post(
           `http://localhost:5500/${table}`,
-          newItemData
+          newItemData,
         );
         setItems((prevItems) => [...prevItems, response.data]);
         return response.data;
@@ -101,11 +100,15 @@ export default function App() {
 
   // Delete item
 
-  const deleteItem = async (table, itemToDelete, setItems) => {
+  const deleteItem = async (table, itemToDelete, setItems, userId) => {
     try {
-      await axios.delete(`http://localhost:5500/${table}/${itemToDelete.id}`);
-      const response = await axios.get(`http://localhost:5500/${table}`);
-      setItems(response.data.items);
+      await axios.delete(`http://localhost:5500/${table}/${itemToDelete.id}`, {
+        params: { userId },
+      });
+
+      setItems((prevItems) =>
+        prevItems.filter((item) => item.id !== itemToDelete.id)
+      );
     } catch (error) {
       console.error("Error deleting item:", error);
       alert("Error deleting item. Please try again.");
@@ -114,9 +117,10 @@ export default function App() {
 
   // Update item
 
-  const updateItem = async (table, modifyQuantity, updateId, setItems) => {
+  const updateItem = async (table, modifyQuantity, updateId, setItems, userId) => {
     await axios.put(`http://localhost:5500/${table}/${updateId}`, {
       quantity: modifyQuantity.trim(),
+      userId: userId,
     });
     const response = await axios.get(`http://localhost:5500/${table}`);
     setItems(response.data.items);
@@ -127,7 +131,8 @@ export default function App() {
     newQuantity,
     date,
     sourceTable,
-    targetTable
+    targetTable,
+    userId
   ) => {
     try {
       await axios.post("http://localhost:5500/moveto_sl", {
@@ -136,6 +141,7 @@ export default function App() {
         date,
         sourceTable,
         targetTable,
+        userId,
       });
     } catch {
       alert("Error moving to the SL.");
@@ -177,11 +183,13 @@ export default function App() {
         </button>
         <div>
           {headerText}
-          {yourAmount !== null ? (yourAmount.length > 0) && (
-            <span>
-              {yourAmount[yourAmount.length - 1].amount} {currency}
-            </span>
-          ) : ''}
+          {yourAmount !== null
+            ? yourAmount.length > 0 && (
+                <span>
+                  {yourAmount[yourAmount.length - 1].amount} {currency}
+                </span>
+              )
+            : ""}
         </div>
       </header>
 
@@ -220,7 +228,7 @@ export default function App() {
           onClick={toggleDarkMode}
         />
       )}
-      <Register/>
+      <Register />
       <Login />
 
       <Fridge
@@ -232,8 +240,8 @@ export default function App() {
         updateItem={updateItem}
         moveToSL={moveToSL}
         regex={regex}
-        userId = {userId}
-        setUserId = {setUserId}
+        userId={userId}
+        setUserId={setUserId}
       />
       <Freezer
         items={freezerItems}
@@ -244,8 +252,8 @@ export default function App() {
         updateItem={updateItem}
         moveToSL={moveToSL}
         regex={regex}
-        userId = {userId}
-        setUserId = {setUserId}
+        userId={userId}
+        setUserId={setUserId}
       />
       <Chamber
         items={chamberItems}
@@ -256,8 +264,8 @@ export default function App() {
         updateItem={updateItem}
         moveToSL={moveToSL}
         regex={regex}
-        userId = {userId}
-        setUserId = {setUserId}
+        userId={userId}
+        setUserId={setUserId}
       />
       <Others
         items={otherItems}
@@ -268,8 +276,8 @@ export default function App() {
         updateItem={updateItem}
         moveToSL={moveToSL}
         regex={regex}
-        userId = {userId}
-        setUserId = {setUserId}
+        userId={userId}
+        setUserId={setUserId}
       />
       <ShoppingList
         items={shoppingListItems}
@@ -280,8 +288,8 @@ export default function App() {
         updateItem={updateItem}
         expenditure={yourAmount}
         setExpenditure={setYourAmount}
-        userId = {userId}
-        setUserId = {setUserId}
+        userId={userId}
+        setUserId={setUserId}
       />
       <footer className="footer">Footer</footer>
     </div>
