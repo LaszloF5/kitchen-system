@@ -4,12 +4,32 @@
 
 .header {
   height: 5vh;
-  background-color: #4A4A4A;
-  background-color:  #2C3E50; /*Ez jobb.*/ 
+  /* background-color: #4A4A4A; */
+  background-color:  #2C3E50; /*Ez jobb.*/
   color: whitesmoke;
   display: flex;
   align-items: center;
   justify-content: space-evenly;
+}
+
+.header-nav {
+  height: 100%;
+  width: 100%;
+}
+
+.header-nav_ul {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.header-nav_ul_li {
+  color: white;
+  font-size: 2rem;
 }
 
 .currencyForm {

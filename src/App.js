@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { HashRouter, Route, Routes, Link } from "react-router-dom";
 import axios from "axios";
 import Fridge from "./Components/Fridge";
 import Freezer from "./Components/Freezer";
@@ -202,8 +203,22 @@ export default function App() {
 
   return (
     <div className={`${isDarkMode ? "getDark" : "getLight"} App`}>
+      <HashRouter>
       <header className="header">
-        <button className="btn btn-update" onClick={toggleCurrencyForm}>
+        <nav className="header-nav">
+          <ul className="header-nav_ul">
+            <li className="header-nav_ul_li">
+              <Link to="/">Home</Link>
+            </li>
+            <li className="header-nav_ul_li">
+              <Link to="/login">Login</Link>
+            </li>
+            <li className="header-nav_ul_li">
+              <Link to="/register">Register</Link>
+            </li>
+          </ul>
+        </nav>
+        {/* <button className="btn btn-update" onClick={toggleCurrencyForm}>
           {currencyText}
         </button>
         <div>
@@ -215,7 +230,7 @@ export default function App() {
                 </span>
               )
             : ""}
-        </div>
+        </div> */}
       </header>
 
       {isVisibleCurrencyForm ? (
@@ -253,10 +268,12 @@ export default function App() {
           onClick={toggleDarkMode}
         />
       )}
-      <Register />
-      <Login userId={userId} setUserId={setUserId} />
-
-      <Fridge
+      <Routes>
+        <Route path="/Register" element={<Register/>}/>
+        <Route path="/Login" element={<Login userId={userId} setUserId={setUserId} />}/>
+        <Route path="/" element={
+          <>
+          <Fridge
         items={fridgeItems}
         setItems={setFridgeItems}
         fetchItems={fetchItems}
@@ -267,7 +284,7 @@ export default function App() {
         regex={regex}
         userId={userId}
         setUserId={setUserId}
-      />
+        />
       <Freezer
         items={freezerItems}
         setItems={setFreezerItems}
@@ -316,6 +333,10 @@ export default function App() {
         userId={userId}
         setUserId={setUserId}
       />
+          </>
+        }/>
+      </Routes>
+        </HashRouter>
       <footer className="footer">Footer</footer>
     </div>
   );
