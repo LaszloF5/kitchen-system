@@ -111,7 +111,7 @@ export default function ShoppingList({
   };
 
   useEffect(() => {
-    if (userId.length > 0) {
+    if (userId && userId.length > 0) {
 
       const getDatas = async () => {
         const data = await fetchItems("shoppingList_items");
@@ -119,7 +119,7 @@ export default function ShoppingList({
       };
       getDatas();
     }
-  }, [fetchItems, items, setItems]);
+  }, [fetchItems, userId, setItems]);
 
   const handleAdd = async () => {
     try {

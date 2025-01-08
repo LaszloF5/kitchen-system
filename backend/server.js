@@ -169,10 +169,11 @@ async function loginUser(userName, password) {
 
 function verifyId(req, res, next) {
   const userId = req.query.userId;
+  console.log('Backend userId: ', userId);
   if (!userId) {
     return res.status(400).send("Userid szükséges!");
   }
-  const sql = "SELECT * FROM users where userId = ?";
+  const sql = "SELECT * FROM register where id = ?";
 
   db.get(sql, [userId], (err, row) => {
     if (err) {
@@ -184,6 +185,7 @@ function verifyId(req, res, next) {
       return res.status(404).json({ error: "User not found." });
     }
     req.user = row;
+    console.log(req.user);
     next();
   });
 }
@@ -489,7 +491,7 @@ app.post("/moveto_sl", verifyId, (req, res) => {
 
 app.get("/:table", verifyId, (req, res) => {
   const { table } = req.params;
-  const { userId } = req.query;
+  const userId = req.user.id;
   const validTables = [
     "fridge_items",
     "freezer_items",
@@ -502,9 +504,9 @@ app.get("/:table", verifyId, (req, res) => {
     return res.status(400).json({ error: "Invalid table name." });
   }
 
-  const sql = `SELECT * FROM ${table}`;
+  const sql = `SELECT * FROM ${table} WHERE user_id = ?`;
 
-  db.all(sql, [], (err, rows) => {
+  db.all(sql, [userId], (err, rows) => {
     if (err) {
       return res.status(400).json({ error: err.message });
     }
@@ -515,6 +517,7 @@ app.get("/:table", verifyId, (req, res) => {
 app.post("/:table", verifyId, (req, res) => {
   const { table } = req.params;
   const { name, quantity, date_added } = req.body;
+  const userId = req.user.id;
   const validTables = [
     "fridge_items",
     "freezer_items",
@@ -525,13 +528,13 @@ app.post("/:table", verifyId, (req, res) => {
   if (!validTables.includes(table)) {
     return res.status(400).json({ error: "Invalid table name." });
   }
-  const sql = `INSERT INTO ${table} (name, quantity, date_added) VALUES(?, ?, ?)`;
+  const sql = `INSERT INTO ${table} (name, quantity, date_added, user_id) VALUES(?, ?, ?, ?)`;
   db.run(sql, [name, quantity, date_added], function (err) {
     if (err) {
       res.status(400).json({ error: err.message });
       return;
     }
-    res.json({ id: this.lastID, name, quantity, date_added });
+    res.json({ id: this.lastID, name, quantity, date_added, user_id: userId});
   });
 });
 

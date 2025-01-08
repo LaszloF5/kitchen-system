@@ -97,7 +97,7 @@ export default function Others({
   // Item modifier functions
 
   useEffect(() => {
-    if (userId.length > 0) {
+    if (userId && userId.length > 0) {
 
       const getDatas = async () => {
         const data = await fetchItems("others_items");
@@ -105,7 +105,7 @@ export default function Others({
       };
       getDatas();
     }
-  }, [fetchItems, items,setItems]);
+  }, [fetchItems, userId ,setItems]);
 
   const handleAddOthers = async () => {
     try {

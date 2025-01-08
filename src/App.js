@@ -19,7 +19,7 @@ export default function App() {
   const headerText = "Weekly expenses: ";
   const [currency, setCurrency] = useState("");
   const [prevCurrency, setPrevCurrency] = useState("");
-  const [userId, setUserId] = useState(localStorage.getItem("userId") || "");
+  const [userId, setUserId] = useState(localStorage.getItem("userId") || null);
 
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
@@ -59,7 +59,9 @@ export default function App() {
 
   // Get items
 
-  const fetchItems = useCallback(async (table, userId) => {
+  const fetchItems = useCallback(async (table) => {
+    const userId = localStorage.getItem("userId");
+    console.log(userId);
     try {
       const response = await axios.get(`http://localhost:5500/${table}`, {
         params: { userId },
@@ -73,7 +75,9 @@ export default function App() {
 
   // Post items
 
-  const addItem = async (table, newItem, newQuantity, setItems, userId) => {
+  const addItem = async (table, newItem, newQuantity, setItems) => {
+    const userId = localStorage.getItem("userId");
+    console.log("Frontend userId: ", userId);
     if (newItem.length > 0 && newQuantity.length > 0) {
       const validQty = Number(...newQuantity.match(regexQtyBreakdown));
       const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
@@ -86,6 +90,9 @@ export default function App() {
         const response = await axios.post(
           `http://localhost:5500/${table}`,
           newItemData,
+          {
+            params: { userId },
+          }
         );
         setItems((prevItems) => [...prevItems, response.data]);
         return response.data;
@@ -100,7 +107,8 @@ export default function App() {
 
   // Delete item
 
-  const deleteItem = async (table, itemToDelete, setItems, userId) => {
+  const deleteItem = async (table, itemToDelete, setItems) => {
+    const userId = localStorage.getItem('userId');
     try {
       await axios.delete(`http://localhost:5500/${table}/${itemToDelete.id}`, {
         params: { userId },
@@ -117,7 +125,13 @@ export default function App() {
 
   // Update item
 
-  const updateItem = async (table, modifyQuantity, updateId, setItems, userId) => {
+  const updateItem = async (
+    table,
+    modifyQuantity,
+    updateId,
+    setItems,
+    userId
+  ) => {
     await axios.put(`http://localhost:5500/${table}/${updateId}`, {
       quantity: modifyQuantity.trim(),
       userId: userId,
@@ -229,7 +243,7 @@ export default function App() {
         />
       )}
       <Register />
-      <Login />
+      <Login userId={userId} setUserId={setUserId} />
 
       <Fridge
         items={fridgeItems}

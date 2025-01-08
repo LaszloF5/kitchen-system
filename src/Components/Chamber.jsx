@@ -99,14 +99,14 @@ export default function Chamber({
   // Datas from the database
 
   useEffect(() => {
-    if (userId.length > 0) {
+    if (userId && userId.length > 0) {
       const getDatas = async () => {
         const data = await fetchItems("chamber_items");
         setItems(data);
       };
       getDatas();
     }
-  }, [fetchItems, items, setItems]);
+  }, [fetchItems, userId, setItems]);
 
   const handleAddChamber = async () => {
     try {

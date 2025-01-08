@@ -46,7 +46,7 @@ export default function Freezer({
   // Data fetching from the database
 
   useEffect(() => {
-    if (userId.length > 0) {
+    if (userId && userId.length > 0) {
 
       const getDatas = async () => {
         const data = await fetchItems("freezer_items");
@@ -54,7 +54,7 @@ export default function Freezer({
       };
       getDatas();
     }
-  }, [fetchItems, items, setItems]);
+  }, [fetchItems, userId, setItems]);
 
   ////////// FUNCTIONS //////////
 

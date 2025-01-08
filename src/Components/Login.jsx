@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-export default function Login() {
+export default function Login({userId, setUserId}) {
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [validUserId, setValidUserId] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -18,11 +17,11 @@ export default function Login() {
         password,
       });
       console.log("Bejelentkezés sikeres", response.data);
-      const userId = response.data.userId;
-      localStorage.setItem('userId', userId);
-      setValidUserId(localStorage.getItem('userId'));
+      const myUserId = response.data.userId;
+      localStorage.setItem('userId', myUserId);
+      setUserId(localStorage.getItem('userId'));
       alert("Bejelentkezés sikeres!");
-      console.log('A bejelentkezett felhasználó id-je: ', userId);
+      console.log('A bejelentkezett felhasználó id-je: ', myUserId);
     } catch (error) {
       console.log("Bejelentkezés sikertelen", error);
       setErrorMessage("Hibás felhasználónév vagy jelszó!");
@@ -33,7 +32,7 @@ export default function Login() {
 
   const handleLogOut = () => {
     localStorage.removeItem('userId');
-    setValidUserId('');
+    setUserId(null);
     alert("Kijelentkezés sikeres!");
     console.log("Kijelentkezés sikeres!");
   }
@@ -48,7 +47,7 @@ export default function Login() {
         </button>
       </form>
       {errorMessage && <div style={{ color: "red" }}>{errorMessage}</div>}
-      {validUserId.length > 0 && <button onClick={handleLogOut}>Kijelentkezés</button>}
+      {(userId && userId.length > 0) ? <button onClick={handleLogOut}>Kijelentkezés</button> : ''}
     </div>
   );
 }

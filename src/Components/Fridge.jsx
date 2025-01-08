@@ -95,7 +95,7 @@ export default function Fridge({
   // Datas from the database
 
   useEffect(() => {
-    if (userId.length > 0) {
+    if (userId && userId.length > 0) {
 
       const getDatas = async () => {
         const data = await fetchItems("fridge_items");
@@ -103,7 +103,7 @@ export default function Fridge({
       };
       getDatas();
     }
-  }, [fetchItems, items, setItems]);
+  }, [fetchItems, userId, setItems]);
 
   // functions
 
