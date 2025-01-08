@@ -108,7 +108,7 @@ export default function App() {
   // Delete item
 
   const deleteItem = async (table, itemToDelete, setItems) => {
-    const userId = localStorage.getItem('userId');
+    const userId = localStorage.getItem("userId");
     try {
       await axios.delete(`http://localhost:5500/${table}/${itemToDelete.id}`, {
         params: { userId },
@@ -129,33 +129,44 @@ export default function App() {
     table,
     modifyQuantity,
     updateId,
-    setItems,
-    userId
+    setItems
   ) => {
-    await axios.put(`http://localhost:5500/${table}/${updateId}`, {
-      quantity: modifyQuantity.trim(),
-      userId: userId,
-    });
-    const response = await axios.get(`http://localhost:5500/${table}`);
+    const userId = localStorage.getItem('userId');
+    console.log('updateItem id: ', userId);
+  
+    if (!userId) {
+      console.error('No userId found in localStorage!');
+      return;
+    }
+  
+    // PUT kérés URL-jének megfelelő formázása
+    await axios.put(
+      `http://localhost:5500/${table}/${updateId}?user_id=${userId}`, // query paraméterként
+      { quantity: modifyQuantity.trim() } // kérés törzse
+    );
+  
+    const response = await axios.get(
+      `http://localhost:5500/${table}?user_id=${userId}` // GET kérés a friss adatokért
+    );
     setItems(response.data.items);
   };
+  
 
   const moveToSL = async (
     itemName,
     newQuantity,
     date,
     sourceTable,
-    targetTable,
-    userId
+    targetTable
   ) => {
+    const userId = localStorage.getItem("userId");
     try {
-      await axios.post("http://localhost:5500/moveto_sl", {
+      await axios.post(`http://localhost:5500/moveto_sl?userId=${userId}`, {
         itemName,
         newQuantity,
         date,
         sourceTable,
         targetTable,
-        userId,
       });
     } catch {
       alert("Error moving to the SL.");

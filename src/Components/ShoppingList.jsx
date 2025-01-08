@@ -111,12 +111,9 @@ export default function ShoppingList({
   };
 
   useEffect(() => {
-    if (userId && userId.length > 0) {
-
-      const getDatas = async () => {
+        const getDatas = async () => {
         const data = await fetchItems("shoppingList_items");
         setItems(data);
-      };
       getDatas();
     }
   }, [fetchItems, userId, setItems]);
@@ -154,6 +151,8 @@ export default function ShoppingList({
   // Elemek mozgatása komponensek között //
 
   const moveItem = async (itemName, sourceTable, targetTable) => {
+    const userId = localStorage.getItem("userId");
+    console.log('moveItem function userId: ', userId);
     const validTables = [
       'fridge_items',
       'freezer_items',
@@ -171,14 +170,15 @@ export default function ShoppingList({
     }
   
     try {
-      const response = await axios.post("http://localhost:5500/move_item", {
+      const response = await axios.post(`http://localhost:5500/move_item?user_id=${userId}`, {
         itemName,
         sourceTable: trimmedSourceTable,
         targetTable: trimmedTargetTable,
+        userId,
       });
   
       if (response.status === 200) {
-        const newList = await axios.get("http://localhost:5500/shoppingList_items");
+        const newList = await axios.get(`http://localhost:5500/shoppingList_items?user_id=${userId}`);
         setItems(newList.data.items);
         setIsVisibleMoveTo(false);
         setNewIndex(null);

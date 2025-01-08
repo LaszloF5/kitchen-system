@@ -97,14 +97,11 @@ export default function Others({
   // Item modifier functions
 
   useEffect(() => {
-    if (userId && userId.length > 0) {
-
       const getDatas = async () => {
         const data = await fetchItems("others_items");
         setItems(data);
       };
       getDatas();
-    }
   }, [fetchItems, userId ,setItems]);
 
   const handleAddOthers = async () => {

@@ -168,8 +168,7 @@ async function loginUser(userName, password) {
 }
 
 function verifyId(req, res, next) {
-  const userId = req.query.userId;
-  console.log('Backend userId: ', userId);
+  const userId = req.query.user_id || req.params.userId || req.body.userId || req.query.userId;
   if (!userId) {
     return res.status(400).send("Userid szükséges!");
   }
@@ -292,7 +291,8 @@ function verifyId(req, res, next) {
 // Elemek mozgatása a shoppingList komponensből a többi komponensbe.
 
 app.post("/move_item", verifyId, (req, res) => {
-  const { itemName, sourceTable, targetTable } = req.body;
+  const { itemName, sourceTable, targetTable, userId } = req.body;
+  // const userId = req.user.id;
   console.log("Received request body:", req.body);
 
   const validTables = [
@@ -317,8 +317,8 @@ app.post("/move_item", verifyId, (req, res) => {
   }
 
   db.get(
-    `SELECT * FROM ${sourceTable} WHERE name = ?`,
-    [itemName],
+    `SELECT * FROM ${sourceTable} WHERE name = ? AND user_id = ?`,
+    [itemName, userId],
     (err, sourceRow) => {
       if (err) return res.status(500).json({ error: err.message });
       if (!sourceRow) return res.status(404).json({ error: "Item not found." });
@@ -332,8 +332,8 @@ app.post("/move_item", verifyId, (req, res) => {
 
       // Cél tábla lekérdezése az itemName alapján
       db.get(
-        `SELECT * FROM ${targetTable} WHERE name = ?`,
-        [itemName],
+        `SELECT * FROM ${targetTable} WHERE name = ? AND user_id = ?`,
+        [itemName, userId],
         (err, targetRow) => {
           if (err) return res.status(500).json({ error: err.message });
 
@@ -352,15 +352,15 @@ app.post("/move_item", verifyId, (req, res) => {
               const updatedQuantity = `${newQuantity} ${targetUnit}`;
 
               db.run(
-                `UPDATE ${targetTable} SET quantity = ? WHERE name = ?`,
-                [updatedQuantity, itemName],
+                `UPDATE ${targetTable} SET quantity = ? WHERE name = ? AND user_id = ?`,
+                [updatedQuantity, itemName, userId],
                 function (err) {
                   if (err) return res.status(500).json({ error: err.message });
 
                   // Sikeres UPDATE után törli a forrástáblából
                   db.run(
-                    `DELETE FROM ${sourceTable} WHERE name = ?`,
-                    [itemName],
+                    `DELETE FROM ${sourceTable} WHERE name = ? AND user_id = ?`,
+                    [itemName, userId],
                     function (err) {
                       if (err)
                         return res.status(500).json({ error: err.message });
@@ -380,15 +380,20 @@ app.post("/move_item", verifyId, (req, res) => {
           } else {
             // Ha nincs cél tábla sor, akkor beszúrja az új elemet
             db.run(
-              `INSERT INTO ${targetTable} (name, quantity, date_added) VALUES (?, ?, ?)`,
-              [sourceRow.name, sourceRow.quantity, sourceRow.date_added],
+              `INSERT INTO ${targetTable} (name, quantity, date_added, user_id) VALUES (?, ?, ?, ?)`,
+              [
+                sourceRow.name,
+                sourceRow.quantity,
+                sourceRow.date_added,
+                userId,
+              ],
               function (err) {
                 if (err) return res.status(500).json({ error: err.message });
 
                 // Sikeres INSERT után törli a forrástáblából
                 db.run(
-                  `DELETE FROM ${sourceTable} WHERE name = ?`,
-                  [itemName],
+                  `DELETE FROM ${sourceTable} WHERE name = ? AND user_id = ?`,
+                  [itemName, userId],
                   function (err) {
                     if (err)
                       return res.status(500).json({ error: err.message });
@@ -411,6 +416,7 @@ app.post("/move_item", verifyId, (req, res) => {
 
 app.post("/moveto_sl", verifyId, (req, res) => {
   const { itemName, newQuantity, date, sourceTable, targetTable } = req.body;
+  const userId = req.user.id;
   const validTables = [
     "fridge_items",
     "freezer_items",
@@ -426,9 +432,9 @@ app.post("/moveto_sl", verifyId, (req, res) => {
     return res.status(400).json({ error: "Invalid source or target table." });
   }
 
-  const sql = `SELECT * FROM ${sourceTable} WHERE name = ?`;
+  const sql = `SELECT * FROM ${sourceTable} WHERE name = ? AND user_id = ?`;
 
-  db.get(sql, [itemName], function (err, transferItem) {
+  db.get(sql, [itemName, userId], function (err, transferItem) {
     if (err) {
       return res.status(400).json({ error: err.message });
     }
@@ -438,8 +444,8 @@ app.post("/moveto_sl", verifyId, (req, res) => {
         .status(400)
         .json({ error: `Item not found in the ${sourceTable}` });
     }
-    const sql2 = `SELECT * FROM ${targetTable} WHERE name = ?`;
-    db.get(sql2, [itemName], function (err, targetItem) {
+    const sql2 = `SELECT * FROM ${targetTable} WHERE name = ? AND user_id = ?`;
+    db.get(sql2, [itemName, userId], function (err, targetItem) {
       if (err) {
         return res.status(400).json({ error: err.message });
       }
@@ -461,8 +467,8 @@ app.post("/moveto_sl", verifyId, (req, res) => {
 
         const validQty = `${newTotalQty} ${unit}`;
 
-        const sql3 = `UPDATE ${targetTable} SET quantity = ?, date_added = ? WHERE name = ?`;
-        db.run(sql3, [validQty, date, itemName], function (err) {
+        const sql3 = `UPDATE ${targetTable} SET quantity = ?, date_added = ? WHERE name = ? AND user_id = ?`;
+        db.run(sql3, [validQty, date, itemName, userId], function (err) {
           if (err) {
             return res.status(400).json({ error: err.message });
           }
@@ -475,13 +481,17 @@ app.post("/moveto_sl", verifyId, (req, res) => {
         const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
         const validQty = `${qty} ${unit}`;
         console.log("QTY ami eddig nem jelent meg: ", validQty);
-        const sql4 = `INSERT INTO ${targetTable} (name, quantity, date_added) VALUES (?, ?, ?)`;
-        db.run(sql4, [transferItem.name, validQty, date], function (err) {
-          if (err) {
-            return res.status(400).json({ error: err.message });
+        const sql4 = `INSERT INTO ${targetTable} (name, quantity, date_added, user_id) VALUES (?, ?, ?, ?)`;
+        db.run(
+          sql4,
+          [transferItem.name, validQty, date, userId],
+          function (err) {
+            if (err) {
+              return res.status(400).json({ error: err.message });
+            }
+            res.json({ message: "Item moved to shopping list successfully." });
           }
-          res.json({ message: "Item moved to shopping list successfully." });
-        });
+        );
       }
     });
   });
@@ -492,6 +502,7 @@ app.post("/moveto_sl", verifyId, (req, res) => {
 app.get("/:table", verifyId, (req, res) => {
   const { table } = req.params;
   const userId = req.user.id;
+  console.log("Backend userid a table-get-nél: ", userId);
   const validTables = [
     "fridge_items",
     "freezer_items",
@@ -529,12 +540,12 @@ app.post("/:table", verifyId, (req, res) => {
     return res.status(400).json({ error: "Invalid table name." });
   }
   const sql = `INSERT INTO ${table} (name, quantity, date_added, user_id) VALUES(?, ?, ?, ?)`;
-  db.run(sql, [name, quantity, date_added], function (err) {
+  db.run(sql, [name, quantity, date_added, userId], function (err) {
     if (err) {
       res.status(400).json({ error: err.message });
       return;
     }
-    res.json({ id: this.lastID, name, quantity, date_added, user_id: userId});
+    res.json({ id: this.lastID, name, quantity, date_added, user_id: userId });
   });
 });
 
@@ -581,6 +592,7 @@ app.delete("/:table/:id", verifyId, (req, res) => {
 
 app.put("/:table/:id", verifyId, (req, res) => {
   const { table, id } = req.params;
+  const userId = req.user.id;
   const validTables = [
     "fridge_items",
     "freezer_items",
@@ -589,18 +601,18 @@ app.put("/:table/:id", verifyId, (req, res) => {
     "shoppingList_items",
   ];
   const { quantity } = req.body;
-
+  console.log("VerifyId ok.");
   if (!validTables.includes(table)) {
     return res.status(400).json({ error: "Invalid table name." });
   }
 
-  const sql = `UPDATE ${table} SET quantity = ? WHERE id = ?`;
+  const sql = `UPDATE ${table} SET quantity = ? WHERE id = ? AND user_id = ?`;
   const regex = /\d+(\.\d+)?/;
   const qty = Number(...quantity.match(regex));
   const unit = quantity.replace(Number.parseFloat(quantity), "");
   const validQty = `${qty} ${unit}`;
 
-  db.run(sql, [validQty, id], function (err) {
+  db.run(sql, [validQty, id, userId], function (err) {
     if (err) {
       res.status(400).json({ error: err.message });
       return;
