@@ -207,14 +207,14 @@ export default function App() {
       <header className="header">
         <nav className="header-nav">
           <ul className="header-nav_ul">
-            <li className="header-nav_ul_li">
-              <Link to="/">Home</Link>
+            <li>
+              <Link className="header-nav_ul_li_link" to="/">Home</Link>
             </li>
-            <li className="header-nav_ul_li">
-              <Link to="/login">Login</Link>
+            <li>
+              <Link className="header-nav_ul_li_link" to="/register">Register</Link>
             </li>
-            <li className="header-nav_ul_li">
-              <Link to="/register">Register</Link>
+            <li>
+              <Link className="header-nav_ul_li_link" to="/login">Login</Link>
             </li>
           </ul>
         </nav>
@@ -248,8 +248,6 @@ export default function App() {
           </button>
         </form>
       ) : null}
-
-      <h1>Kitchen system</h1>
       {isDarkMode ? (
         <img
           className="white-filter"
@@ -273,6 +271,7 @@ export default function App() {
         <Route path="/Login" element={<Login userId={userId} setUserId={setUserId} />}/>
         <Route path="/" element={
           <>
+          <h1>Kitchen system</h1>
           <Fridge
         items={fridgeItems}
         setItems={setFridgeItems}
@@ -336,8 +335,8 @@ export default function App() {
           </>
         }/>
       </Routes>
+      {/* <footer className="footer">Footer</footer> */}
         </HashRouter>
-      <footer className="footer">Footer</footer>
     </div>
   );
 }

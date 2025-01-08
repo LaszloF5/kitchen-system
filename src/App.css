@@ -27,9 +27,20 @@
   padding: 0;
 }
 
-.header-nav_ul_li {
+.header-nav_ul li {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-nav_ul_li_link {
   color: white;
-  font-size: 2rem;
+  font-size: 24px;
+  text-decoration: none;
+}
+
+.header-nav_ul_li_link:hover {
+  transform: scale(1.1);
 }
 
 .currencyForm {
@@ -80,12 +91,11 @@ p {
 }
 
 .footer {
-  height: 20vh;
+  height: 10vh;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid black;
-  margin-top: 2rem;
 }
 
 img {

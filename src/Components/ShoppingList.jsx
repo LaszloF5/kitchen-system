@@ -110,13 +110,13 @@ export default function ShoppingList({
     e.preventDefault();
   };
 
-  useEffect(() => {
-        const getDatas = async () => {
-        const data = await fetchItems("shoppingList_items");
-        setItems(data);
-      getDatas();
-    }
-  }, [fetchItems, userId, setItems]);
+  // useEffect(() => {
+  //       const getDatas = async () => {
+  //       const data = await fetchItems("shoppingList_items");
+  //       setItems(data);
+  //     getDatas();
+  //   }
+  // }, [fetchItems, userId, setItems]);
 
   const handleAdd = async () => {
     try {

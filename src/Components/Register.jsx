@@ -1,8 +1,16 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import './Register.css'
 
 export default function Register() {
   const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
+
+  const isHaveAcc = (e) => {
+    e.preventDefault();
+    navigate('/Login');
+  }
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -30,11 +38,13 @@ export default function Register() {
   };
 
   return (
-    <div>
-      <form onSubmit={handleRegister}>
-        <input type="text" placeholder="userName" name="username" required />
-        <input type="password" placeholder="Password" name="password" required />
-        <button type="submit">Regisztráció</button>
+    <div className="register-container">
+      <form className="register-form" onSubmit={handleRegister}>
+        <p>Register</p>
+        <input className="register-form_input" type="text" placeholder="Username" name="username" required />
+        <input className="register-form_input" type="password" placeholder="Password" name="password" required />
+        <button className="register-form_button" type="submit">Register</button>
+        <button className="register-form_button" type="submit" onClick={isHaveAcc}>Already have an account? Log in!</button>
       </form>
       {/* Csak akkor rendereljük a hibát, ha van */}
       {errorMessage && <div style={{ color: "red" }}>{errorMessage}</div>}
