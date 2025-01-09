@@ -23,6 +23,14 @@ db.serialize(() => {
     userName TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL)`
   );
+  db.run(`CREATE TABLE IF NOT EXISTS expenses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    amount REAL NOT NULL,
+    year INTEGER NOT NULL,
+    month INTEGER NOT NULL,
+    week INTEGER NOT NULL,
+    userId INTEGER NOT NULL
+    )`)
   db.run(
     `CREATE TABLE IF NOT EXISTS fridge_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -207,86 +215,86 @@ function verifyId(req, res, next) {
 
 // Kiadások kezelése
 
-// app.get("/expenses", verifyToken, (req, res) => {
-//   const userId = req.user.id;
-//   const sql = `SELECT * FROM expenses WHERE user_id = ?`;
+app.get("/expenses", verifyId, (req, res) => {
+  const userId = req.user.id;
+  const sql = `SELECT * FROM expenses WHERE user_id = ?`;
 
-//   db.all(sql, [userId], (err, rows) => {
-//     if (err) {
-//       console.error(
-//         `[${new Date().toISOString()}] Error retrieving expenses:`,
-//         err.message
-//       );
-//       return res.status(500).json({ error: "Failed to retrieve expenses." });
-//     }
+  db.all(sql, [userId], (err, rows) => {
+    if (err) {
+      console.error(
+        `[${new Date().toISOString()}] Error retrieving expenses:`,
+        err.message
+      );
+      return res.status(500).json({ error: "Failed to retrieve expenses." });
+    }
 
-//     if (rows.length === 0) {
-//       return res
-//         .status(404)
-//         .json({ message: "No expenses found for the user." });
-//     }
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No expenses found for the user." });
+    }
 
-//     res.json({ expenses: rows });
-//   });
-// });
+    res.json({ expenses: rows });
+  });
+});
 
-// app.post("/expenses", verifyToken, (req, res) => {
-//   const userId = req.user.id;
-//   const { amount, date } = req.body;
+app.post("/expenses", verifyId, (req, res) => {
+  const userId = req.user.id;
+  const { amount, date } = req.body;
 
-//   console.log("Request body: ", req.body);
-//   console.log("User ID: ", req.user.id);
+  console.log("Request body: ", req.body);
+  console.log("User ID: ", req.user.id);
 
-//   if (!amount || !date || !userId) {
-//     return res.status(400).json({ error: "Missing required fields." });
-//   }
+  if (!amount || !date || !userId) {
+    return res.status(400).json({ error: "Missing required fields." });
+  }
 
-//   // Ellenőrizzük, hogy van-e már azonos dátummal rekord
-//   const checkSql = `SELECT amount FROM expenses WHERE date = ? AND user_id = ?`;
-//   db.get(checkSql, [date, userId], (err, row) => {
-//     if (err) {
-//       return res.status(500).json({ error: err.message });
-//     }
+  // Ellenőrizzük, hogy van-e már azonos dátummal rekord
+  const checkSql = `SELECT amount FROM expenses WHERE date = ? AND user_id = ?`;
+  db.get(checkSql, [date, userId], (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
 
-//     if (row) {
-//       // Ha van egyezés, frissítjük az amount értéket
-//       const updatedAmount = row.amount + amount;
-//       const updateSql = `UPDATE expenses SET amount = ? WHERE date = ? AND user_id = ?`;
+    if (row) {
+      // Ha van egyezés, frissítjük az amount értéket
+      const updatedAmount = row.amount + amount;
+      const updateSql = `UPDATE expenses SET amount = ? WHERE date = ? AND user_id = ?`;
 
-//       db.run(updateSql, [updatedAmount, date, userId], function (err) {
-//         if (err) {
-//           return res.status(500).json({ error: err.message });
-//         }
-//         return res.json({ message: "Expense updated successfully." });
-//       });
-//     } else {
-//       // Ha nincs egyezés, beszúrunk egy új rekordot
-//       const insertSql = `INSERT INTO expenses (amount, date, user_id) VALUES (?, ?, ?)`;
+      db.run(updateSql, [updatedAmount, date, userId], function (err) {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        return res.json({ message: "Expense updated successfully." });
+      });
+    } else {
+      // Ha nincs egyezés, beszúrunk egy új rekordot
+      const insertSql = `INSERT INTO expenses (amount, date, user_id) VALUES (?, ?, ?)`;
 
-//       db.run(insertSql, [amount, date, userId], function (err) {
-//         if (err) {
-//           return res.status(500).json({ error: err.message });
-//         }
-//         return res.json({
-//           message: "Expense added successfully.",
-//           id: this.lastID,
-//         });
-//       });
-//     }
-//   });
-// });
+      db.run(insertSql, [amount, date, userId], function (err) {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        return res.json({
+          message: "Expense added successfully.",
+          id: this.lastID,
+        });
+      });
+    }
+  });
+});
 
-// app.delete("/expenses", verifyToken, function (req, res) {
-//   const userId = req.user.id;
-//   const sql = `DELETE FROM expenses WHERE user_id = ?`;
+app.delete("/expenses", verifyId, function (req, res) {
+  const userId = req.user.id;
+  const sql = `DELETE FROM expenses WHERE user_id = ?`;
 
-//   db.run(sql, [userId], function (err) {
-//     if (err) {
-//       return res.status(500).json({ error: err.message });
-//     }
-//     res.json({ message: "All expenses deleted successfully." });
-//   });
-// });
+  db.run(sql, [userId], function (err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ message: "All expenses deleted successfully." });
+  });
+});
 
 // Elemek mozgatása a shoppingList komponensből a többi komponensbe.
 

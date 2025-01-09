@@ -26,11 +26,8 @@ export default function Register() {
       alert('Sikeres regisztráció!');
     } catch (error) {
       if (error.response) {
-        // Backend válasza
-        // Ha van hibaüzenet, szöveggé alakítjuk
         setErrorMessage(error.response.data.error || "Sikertelen regisztráció");
       } else {
-        // Más típusú hiba (pl. hálózati hiba)
         setErrorMessage("Hálózati hiba történt");
       }
       console.log("Hiba történt:", error);

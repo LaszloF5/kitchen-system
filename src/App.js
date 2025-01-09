@@ -8,6 +8,7 @@ import Others from "./Components/Others";
 import ShoppingList from "./Components/ShoppingList";
 import Login from "./Components/Login";
 import Register from "./Components/Register";
+import Expenses from "./Components/Expenses";
 import "./App.css";
 
 export default function App() {
@@ -140,14 +141,13 @@ export default function App() {
       return;
     }
   
-    // PUT kérés URL-jének megfelelő formázása
     await axios.put(
-      `http://localhost:5500/${table}/${updateId}?user_id=${userId}`, // query paraméterként
-      { quantity: modifyQuantity.trim() } // kérés törzse
+      `http://localhost:5500/${table}/${updateId}?user_id=${userId}`,
+      { quantity: modifyQuantity.trim() }
     );
   
     const response = await axios.get(
-      `http://localhost:5500/${table}?user_id=${userId}` // GET kérés a friss adatokért
+      `http://localhost:5500/${table}?user_id=${userId}`
     );
     setItems(response.data.items);
   };
@@ -216,6 +216,9 @@ export default function App() {
             <li>
               <Link className="header-nav_ul_li_link" to="/login">Login</Link>
             </li>
+            <li>
+              <Link className="header-nav_ul_li_link" to="/expenses">Expenses</Link>
+            </li>
           </ul>
         </nav>
         {/* <button className="btn btn-update" onClick={toggleCurrencyForm}>
@@ -269,6 +272,7 @@ export default function App() {
       <Routes>
         <Route path="/Register" element={<Register/>}/>
         <Route path="/Login" element={<Login userId={userId} setUserId={setUserId} />}/>
+        <Route path="/Expenses" element={<Expenses/>}/>
         <Route path="/" element={
           <>
           <h1>Kitchen system</h1>
