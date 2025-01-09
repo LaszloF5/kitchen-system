@@ -29,8 +29,8 @@ db.serialize(() => {
     year INTEGER NOT NULL,
     month INTEGER NOT NULL,
     week INTEGER NOT NULL,
-    userId INTEGER NOT NULL
-    )`)
+    user_id INTEGER NOT NULL
+    )`);
   db.run(
     `CREATE TABLE IF NOT EXISTS fridge_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -176,7 +176,11 @@ async function loginUser(userName, password) {
 }
 
 function verifyId(req, res, next) {
-  const userId = req.query.user_id || req.params.userId || req.body.userId || req.query.userId;
+  const userId =
+    req.query.user_id ||
+    req.params.userId ||
+    req.body.userId ||
+    req.query.userId;
   if (!userId) {
     return res.status(400).send("Userid szükséges!");
   }
@@ -221,63 +225,63 @@ app.get("/expenses", verifyId, (req, res) => {
 
   db.all(sql, [userId], (err, rows) => {
     if (err) {
-      console.error(
-        `[${new Date().toISOString()}] Error retrieving expenses:`,
-        err.message
-      );
+      console.error(`Error retrieving expenses:`, err.message);
       return res.status(500).json({ error: "Failed to retrieve expenses." });
     }
-
     if (rows.length === 0) {
       return res
         .status(404)
         .json({ message: "No expenses found for the user." });
     }
-
     res.json({ expenses: rows });
   });
 });
 
 app.post("/expenses", verifyId, (req, res) => {
   const userId = req.user.id;
-  const { amount, date } = req.body;
+  const { amount, year, month, week } = req.body;
 
-  console.log("Request body: ", req.body);
-  console.log("User ID: ", req.user.id);
+  console.log("Request body: ", amount, year, month, week);
+  console.log("User id: ", userId);
 
-  if (!amount || !date || !userId) {
+  if (!amount || !year || !month || !week) {
     return res.status(400).json({ error: "Missing required fields." });
   }
 
-  // Ellenőrizzük, hogy van-e már azonos dátummal rekord
-  const checkSql = `SELECT amount FROM expenses WHERE date = ? AND user_id = ?`;
-  db.get(checkSql, [date, userId], (err, row) => {
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is missing." });
+  }
+  // Ha már van bevitt amount az aktuális héten.
+  const sql = `SELECT amount FROM expenses WHERE year = ? AND month = ? AND week = ? AND user_id = ?`;
+
+  db.get(sql, [year, month, week, userId], (err, result) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
+    if (result) {
+      const updatedAmount = Number(result.amount) + Number(amount);
+      const updateSql = `UPDATE expenses SET amount = ? WHERE year = ? AND month = ? AND week = ? AND user_id = ?`;
 
-    if (row) {
-      // Ha van egyezés, frissítjük az amount értéket
-      const updatedAmount = row.amount + amount;
-      const updateSql = `UPDATE expenses SET amount = ? WHERE date = ? AND user_id = ?`;
-
-      db.run(updateSql, [updatedAmount, date, userId], function (err) {
-        if (err) {
-          return res.status(500).json({ error: err.message });
-        }
-        return res.json({ message: "Expense updated successfully." });
-      });
-    } else {
-      // Ha nincs egyezés, beszúrunk egy új rekordot
-      const insertSql = `INSERT INTO expenses (amount, date, user_id) VALUES (?, ?, ?)`;
-
-      db.run(insertSql, [amount, date, userId], function (err) {
+      db.run(updateSql, [updatedAmount, year, month, week, userId], (err) => {
         if (err) {
           return res.status(500).json({ error: err.message });
         }
         return res.json({
           message: "Expense added successfully.",
-          id: this.lastID,
+          data: { amount, year, month, week, user_id: userId },
+        });
+      });
+    } else {
+      // Ha nincs egyezés új sort hozunk létre
+      const insertSql = `INSERT INTO expenses (amount, year, month, week, user_id) VALUES(?, ?, ?, ?, ?)`;
+
+      db.run(insertSql, [amount, year, month, week, userId], (err) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        return res.json({
+          message: "Expense added successfully.",
+          data: { amount, year, month, week, user_id: userId },
         });
       });
     }
@@ -286,9 +290,26 @@ app.post("/expenses", verifyId, (req, res) => {
 
 app.delete("/expenses", verifyId, function (req, res) {
   const userId = req.user.id;
-  const sql = `DELETE FROM expenses WHERE user_id = ?`;
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is missing." });
+  }
+  // Ellenőrizzük, hogy a felhasználóhoz van-e elérhető rekord.
+  const sql = `SELECT * FROM expenses WHERE user_id = ?`;
+  db.get(sql, [userId], (err, row) => {
+    if (err) {
+      console.error(`Error retrieving expenses:`, err.message);
+      return res.status(500).json({ error: "Failed to retrieve expenses." });
+    }
+    if (!row) {
+      return res
+        .status(404)
+        .json({ message: "No expenses found for this user." });
+    }
+  });
+  // Ha van, akkor töröljük.
+  const deleteSql = `DELETE FROM expenses WHERE user_id = ?`;
 
-  db.run(sql, [userId], function (err) {
+  db.run(deleteSql, [userId], (err) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }

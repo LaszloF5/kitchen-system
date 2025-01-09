@@ -52,7 +52,7 @@ export default function Login({userId, setUserId}) {
         <input className="login-form_input" type="text" placeholder="Username" name="username" required />
         <input className="login-form_input" type="password" placeholder="Password" name="password" required />
         <button className="login-form_button" type="submit" disabled={isLoading}>
-          {isLoading ? "Bejelentkezés..." : "Login"}
+          {isLoading ? "Loading..." : "Login"}
         </button>
         <button className="login-form_button" type="submit" onClick={haventAcc}>0 acc? Reg</button>
       </form>

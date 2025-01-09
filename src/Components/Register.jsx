@@ -5,6 +5,7 @@ import './Register.css'
 
 export default function Register() {
   const [errorMessage, setErrorMessage] = useState("");
+  const [isWaiting, setIsWaiting] = useState(false);
   const navigate = useNavigate();
 
   const isHaveAcc = (e) => {
@@ -16,7 +17,7 @@ export default function Register() {
     e.preventDefault();
     const userName = e.target.username.value;
     const password = e.target.password.value;
-
+    setIsWaiting(true);
     try {
       const response = await axios.post("http://localhost:5500/register", {
         userName,
@@ -24,13 +25,17 @@ export default function Register() {
       });
       console.log("Sikeres regisztráció", response.data);
       alert('Sikeres regisztráció!');
-    } catch (error) {
+    } 
+    catch (error) {
       if (error.response) {
         setErrorMessage(error.response.data.error || "Sikertelen regisztráció");
       } else {
         setErrorMessage("Hálózati hiba történt");
       }
       console.log("Hiba történt:", error);
+    }
+    finally {
+      setIsWaiting(false);
     }
   };
 
@@ -40,7 +45,7 @@ export default function Register() {
         <p>Register</p>
         <input className="register-form_input" type="text" placeholder="Username" name="username" required />
         <input className="register-form_input" type="password" placeholder="Password" name="password" required />
-        <button className="register-form_button" type="submit">Register</button>
+        <button className="register-form_button" type="submit" disabled={isWaiting}>{isWaiting ? 'Loading...' : 'Register'}</button>
         <button className="register-form_button" type="submit" onClick={isHaveAcc}>Already have an account? Log in!</button>
       </form>
       {/* Csak akkor rendereljük a hibát, ha van */}
