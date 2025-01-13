@@ -42,8 +42,8 @@ export default function Expenses() {
         userId,
       });
       console.log("Expense added successfully: ", response.data);
-      e.target.expense.value = '';
-      setExpenses(prevExpenses => Number(prevExpenses) + Number(amount))
+      e.target.expense.value = "";
+      setExpenses((prevExpenses) => Number(prevExpenses) + Number(amount));
       setIsVisibleExForm(false);
     } catch (err) {
       console.error("Error adding expense:", err.response?.data || err.message);
@@ -116,9 +116,19 @@ export default function Expenses() {
             year: "numeric",
           })}
         </h2> */}
-        <button onClick={handleToggleExForm}>{button1Text}</button>
-        <button onClick={handleToggleCurForm}>{button2Text}</button>
-        <button onClick={handleDeleteExpenses} disabled={isWorking}>{isWorking ? 'Loading...' : 'Delete expenses'}</button>
+        <button className="btn btn-others" onClick={handleToggleExForm}>
+          {button1Text}
+        </button>
+        <button className="btn btn-update" onClick={handleToggleCurForm}>
+          {button2Text}
+        </button>
+        <button
+          className="btn btn-delete"
+          onClick={handleDeleteExpenses}
+          disabled={isWorking}
+        >
+          {isWorking ? "Loading..." : "Delete expenses"}
+        </button>
       </header>
       <h1>Expenses</h1>
       {isVisibleExForm && (
@@ -131,8 +141,12 @@ export default function Expenses() {
             placeholder="Enter expense amount"
             required
           />
-          <button className="expense-form_button" type="submit" disabled={isWorking}>
-            {isWorking ? 'Loading...' : 'Add expense'}
+          <button
+            className="expense-form_button"
+            type="submit"
+            disabled={isWorking}
+          >
+            {isWorking ? "Loading..." : "Add expense"}
           </button>
         </form>
       )}
@@ -146,29 +160,35 @@ export default function Expenses() {
             placeholder="ex. USD"
             required
           />
-          <button className="currency-form_button" disabled={isWorking}>{isWorking ? 'Loading...' : 'Set currency'}</button>
+          <button className="currency-form_button" disabled={isWorking}>
+            {isWorking ? "Loading..." : "Set currency"}
+          </button>
         </form>
       )}
-      <p>Expenses: {expenses || 0} {currency || "Currency not set."}</p>
-      <p>
-        Ez a teljes adathalmaz, amivel majd kell dolgozni a havi költésnél, és a
-        chartoknál:
-      </p>
-      <div>
-        {datas.map((item, index) => {
-          return (
-            <ul className="expenses-ul" key={index}>
-              <li className="expenses-ul_li">
-                Amount: {item.amount} {currency || "Currency not set."}
-              </li>
-              <li className="expenses-ul_li">Year: {item.year}</li>
-              <li className="expenses-ul_li">Month: {item.month}</li>
-              <li className="expenses-ul_li">Week: {item.week}</li>
-            </ul>
-          );
-        })}
+        <table className="expenses-table">
+        <caption className="expenses-table-caption">Weekly expenses overview</caption>
+          <thead>
+            <tr>
+              <th className="expenses-table_th">Date (y,m,w)</th>
+              <th className="expenses-table_th">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {datas.map((item, index) => {
+              return (
+                <tr key={index}>
+                  <td className="expenses-table_td">
+                    {item.year}. {item.month}. {item.week}.
+                  </td>
+                  <td className="expenses-table_td">
+                    {item.amount} {currency || "Currency not set."}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
-    </div>
     //Itt lista helyett vagy táblázatos megoldás lesz, vagy chart.
     // Ha nincs kapcsolat a szerverrel, automatikusan kijelenetkeztetni a felhasználókat.
   );

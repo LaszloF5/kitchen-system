@@ -127,31 +127,25 @@ export default function App() {
 
   // Update item
 
-  const updateItem = async (
-    table,
-    modifyQuantity,
-    updateId,
-    setItems
-  ) => {
-    const userId = localStorage.getItem('userId');
-    console.log('updateItem id: ', userId);
-  
+  const updateItem = async (table, modifyQuantity, updateId, setItems) => {
+    const userId = localStorage.getItem("userId");
+    console.log("updateItem id: ", userId);
+
     if (!userId) {
-      console.error('No userId found in localStorage!');
+      console.error("No userId found in localStorage!");
       return;
     }
-  
+
     await axios.put(
       `http://localhost:5500/${table}/${updateId}?user_id=${userId}`,
       { quantity: modifyQuantity.trim() }
     );
-  
+
     const response = await axios.get(
       `http://localhost:5500/${table}?user_id=${userId}`
     );
     setItems(response.data.items);
   };
-  
 
   const moveToSL = async (
     itemName,
@@ -204,24 +198,37 @@ export default function App() {
   return (
     <div className={`${isDarkMode ? "getDark" : "getLight"} App`}>
       <HashRouter>
-      <header className="header">
-        <nav className="header-nav">
-          <ul className="header-nav_ul">
-            <li>
-              <Link className="header-nav_ul_li_link" to="/">Home</Link>
-            </li>
-            <li>
-              <Link className="header-nav_ul_li_link" to="/register">Register</Link>
-            </li>
-            <li>
-              <Link className="header-nav_ul_li_link" to="/login">Login</Link>
-            </li>
-            <li>
-              <Link className="header-nav_ul_li_link" to="/expenses">Expenses</Link>
-            </li>
-          </ul>
-        </nav>
-        {/* <button className="btn btn-update" onClick={toggleCurrencyForm}>
+        <header className="header">
+          <nav className="header-nav">
+            <ul className="header-nav_ul">
+              <li>
+                <Link className="header-nav_ul_li_link" to="/">
+                  Home
+                </Link>
+              </li>
+              {userId === null ? (
+                <li>
+                  <Link className="header-nav_ul_li_link" to="/register">
+                    Register
+                  </Link>
+                  ;
+                </li>
+              ) : (
+                ""
+              )}
+              <li>
+                <Link className="header-nav_ul_li_link" to="/login">
+                  {userId === null ? "Login" : "Logout"}
+                </Link>
+              </li>
+              <li>
+                <Link className="header-nav_ul_li_link" to="/expenses">
+                  Expenses
+                </Link>
+              </li>
+            </ul>
+          </nav>
+          {/* <button className="btn btn-update" onClick={toggleCurrencyForm}>
           {currencyText}
         </button>
         <div>
@@ -234,113 +241,119 @@ export default function App() {
               )
             : ""}
         </div> */}
-      </header>
+        </header>
 
-      {isVisibleCurrencyForm ? (
-        <form className="currencyForm" onSubmit={handleCurrency}>
-          <input
-            className="currencyForm_input"
-            type="text"
-            name="currency"
-            placeholder="ex. USD"
-            autoComplete="off"
-            autoFocus
+        {isVisibleCurrencyForm ? (
+          <form className="currencyForm" onSubmit={handleCurrency}>
+            <input
+              className="currencyForm_input"
+              type="text"
+              name="currency"
+              placeholder="ex. USD"
+              autoComplete="off"
+              autoFocus
+            />
+            <button className="btn btn-others" type="submit">
+              Currency
+            </button>
+          </form>
+        ) : null}
+        {isDarkMode ? (
+          <img
+            className="white-filter"
+            src={process.env.PUBLIC_URL + "dark-mode.png"}
+            alt="Dark mode"
+            role="button"
+            tabIndex="0"
+            onClick={toggleDarkMode}
           />
-          <button className="btn btn-others" type="submit">
-            Currency
-          </button>
-        </form>
-      ) : null}
-      {isDarkMode ? (
-        <img
-          className="white-filter"
-          src={process.env.PUBLIC_URL + "dark-mode.png"}
-          alt="Dark mode"
-          role="button"
-          tabIndex="0"
-          onClick={toggleDarkMode}
-        />
-      ) : (
-        <img
-          src={process.env.PUBLIC_URL + "light-mode.png"}
-          alt="Light mode"
-          role="button"
-          tabIndex="0"
-          onClick={toggleDarkMode}
-        />
-      )}
-      <Routes>
-        <Route path="/Register" element={<Register/>}/>
-        <Route path="/Login" element={<Login userId={userId} setUserId={setUserId} />}/>
-        <Route path="/Expenses" element={<Expenses/>}/>
-        <Route path="/" element={
-          <>
-          <h1>Kitchen system</h1>
-          <Fridge
-        items={fridgeItems}
-        setItems={setFridgeItems}
-        fetchItems={fetchItems}
-        addItem={addItem}
-        deleteItem={deleteItem}
-        updateItem={updateItem}
-        moveToSL={moveToSL}
-        regex={regex}
-        userId={userId}
-        setUserId={setUserId}
-        />
-      <Freezer
-        items={freezerItems}
-        setItems={setFreezerItems}
-        fetchItems={fetchItems}
-        addItem={addItem}
-        deleteItem={deleteItem}
-        updateItem={updateItem}
-        moveToSL={moveToSL}
-        regex={regex}
-        userId={userId}
-        setUserId={setUserId}
-      />
-      <Chamber
-        items={chamberItems}
-        setItems={setChamberItems}
-        fetchItems={fetchItems}
-        addItem={addItem}
-        deleteItem={deleteItem}
-        updateItem={updateItem}
-        moveToSL={moveToSL}
-        regex={regex}
-        userId={userId}
-        setUserId={setUserId}
-      />
-      <Others
-        items={otherItems}
-        setItems={setOtherItems}
-        fetchItems={fetchItems}
-        addItem={addItem}
-        deleteItem={deleteItem}
-        updateItem={updateItem}
-        moveToSL={moveToSL}
-        regex={regex}
-        userId={userId}
-        setUserId={setUserId}
-      />
-      <ShoppingList
-        items={shoppingListItems}
-        setItems={setShoppingListItems}
-        fetchItems={fetchItems}
-        addItem={addItem}
-        deleteItem={deleteItem}
-        updateItem={updateItem}
-        expenditure={yourAmount}
-        setExpenditure={setYourAmount}
-        userId={userId}
-        setUserId={setUserId}
-      />
-          </>
-        }/>
-      </Routes>
-      {/* <footer className="footer">Footer</footer> */}
-        </HashRouter>
+        ) : (
+          <img
+            src={process.env.PUBLIC_URL + "light-mode.png"}
+            alt="Light mode"
+            role="button"
+            tabIndex="0"
+            onClick={toggleDarkMode}
+          />
+        )}
+        <Routes>
+          <Route path="/Register" element={<Register />} />
+          <Route
+            path="/Login"
+            element={<Login userId={userId} setUserId={setUserId} />}
+          />
+          <Route path="/Expenses" element={<Expenses />} />
+          <Route
+            path="/"
+            element={
+              <>
+                <h1>Kitchen system</h1>
+                <Fridge
+                  items={fridgeItems}
+                  setItems={setFridgeItems}
+                  fetchItems={fetchItems}
+                  addItem={addItem}
+                  deleteItem={deleteItem}
+                  updateItem={updateItem}
+                  moveToSL={moveToSL}
+                  regex={regex}
+                  userId={userId}
+                  setUserId={setUserId}
+                />
+                <Freezer
+                  items={freezerItems}
+                  setItems={setFreezerItems}
+                  fetchItems={fetchItems}
+                  addItem={addItem}
+                  deleteItem={deleteItem}
+                  updateItem={updateItem}
+                  moveToSL={moveToSL}
+                  regex={regex}
+                  userId={userId}
+                  setUserId={setUserId}
+                />
+                <Chamber
+                  items={chamberItems}
+                  setItems={setChamberItems}
+                  fetchItems={fetchItems}
+                  addItem={addItem}
+                  deleteItem={deleteItem}
+                  updateItem={updateItem}
+                  moveToSL={moveToSL}
+                  regex={regex}
+                  userId={userId}
+                  setUserId={setUserId}
+                />
+                <Others
+                  items={otherItems}
+                  setItems={setOtherItems}
+                  fetchItems={fetchItems}
+                  addItem={addItem}
+                  deleteItem={deleteItem}
+                  updateItem={updateItem}
+                  moveToSL={moveToSL}
+                  regex={regex}
+                  userId={userId}
+                  setUserId={setUserId}
+                />
+                <ShoppingList
+                  items={shoppingListItems}
+                  setItems={setShoppingListItems}
+                  fetchItems={fetchItems}
+                  addItem={addItem}
+                  deleteItem={deleteItem}
+                  updateItem={updateItem}
+                  expenditure={yourAmount}
+                  setExpenditure={setYourAmount}
+                  userId={userId}
+                  setUserId={setUserId}
+                />
+              </>
+            }
+          />
+        </Routes>
+        {/* <footer className="footer">Footer</footer> */}
+      </HashRouter>
     </div>
   );
 }

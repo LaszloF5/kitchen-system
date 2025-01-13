@@ -182,7 +182,9 @@ function verifyId(req, res, next) {
     req.body.userId ||
     req.query.userId;
   if (!userId) {
-    return res.status(400).send("Userid szükséges!");
+    return res
+      .status(400)
+      .send("You need to be logged in to perform this action!");
   }
   const sql = "SELECT * FROM register where id = ?";
 
@@ -200,6 +202,61 @@ function verifyId(req, res, next) {
     next();
   });
 }
+
+// Delete user
+
+app.delete("/delete-account", verifyId, async (req, res) => {
+  const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).json({ error: "Missing required fields." });
+  }
+
+  const tables = [
+    "expenses",
+    "fridge_items",
+    "freezer_items",
+    "chamber_items",
+    "others_items",
+    "shoppingList_items",
+  ];
+
+  try {
+    for (let table of tables) {
+      await new Promise ((resolve, reject) => {
+        const sql = `DELETE FROM ${table} WHERE user_id = ?`;
+
+        db.run(sql, [userId], function (err) {
+          if (err) {
+            console.error(`Error deleting from table ${table}`, err.message);
+            reject(err);
+          }
+          console.log(`Deleted from table ${table}: `, this.changes, 'rows');
+          resolve();
+        })
+
+      })
+    }
+  } catch {
+    console.error(`Error deleting user's data:`, err.message);
+    return res.status(500).json({ error: "Failed to delete user's data." });
+  }
+
+  const sql = "DELETE FROM register WHERE id = ?";
+
+  db.run(sql, [userId], function (err) {
+    if (err) {
+      console.error(`Error deleting user:`, err.message);
+      return res.status(500).json({ error: "Failed to delete user." });
+    }
+
+    if (this.changes === 0) {
+      return res.status(404).json({ message: "User not found to delete." });
+    }
+
+    res.status(200).json({ message: "User deleted successfully." });
+    console.log("User deleted successfully.");
+  });
+});
 
 //Felhasználók törlése
 

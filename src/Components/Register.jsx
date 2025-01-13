@@ -43,8 +43,8 @@ export default function Register() {
     <div className="register-container">
       <form className="register-form" onSubmit={handleRegister}>
         <p>Register</p>
-        <input className="register-form_input" type="text" placeholder="Username" name="username" required />
-        <input className="register-form_input" type="password" placeholder="Password" name="password" required />
+        <input className="register-form_input" type="text" placeholder="Username" name="username" required autoComplete="false"/>
+        <input className="register-form_input" type="password" placeholder="Password" name="password" required autoComplete="false"/>
         <button className="register-form_button" type="submit" disabled={isWaiting}>{isWaiting ? 'Loading...' : 'Register'}</button>
         <button className="register-form_button" type="submit" onClick={isHaveAcc}>Already have an account? Log in!</button>
       </form>

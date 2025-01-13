@@ -1,3 +1,8 @@
+.is-logged-in-container {
+  display: flex;
+  flex-direction: column;
+}
+
 .login-container {
     height: 80vh;
     display: flex;
