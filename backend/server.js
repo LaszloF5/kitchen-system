@@ -137,6 +137,63 @@ app.post("/register", async (req, res) => {
   }
 });
 
+app.post("/change-password", async (req, res) => {
+  const { userId, oldPassword, newPassword } = req.body;
+
+  if (!userId || !oldPassword || !newPassword) {
+    return res.status(400).json({ error: "Missing required fields." });
+  }
+
+  try {
+    const user = await getUserById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    const match = await bcrypt.compare(oldPassword, user.password);
+    if (!match) {
+      return res.status(401).json({ error: "Invalid old password." });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await updatePassword(userId, hashedPassword);
+
+    res.status(200).json({ message: "Password changed successfully." });
+
+  } catch (err) {
+    console.error("Error during password change:", err);
+    res.status(500).send("An error occurred during password change.");
+  }
+
+  async function getUserById(userId) {
+    const sql = "SELECT * FROM register WHERE id = ?";
+    return new Promise((resolve, reject) => {
+      db.get(sql, [userId], (err, row) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(row);
+      });
+    });
+  }
+
+  async function updatePassword(userId, newPassword) {
+    const sql = 'UPDATE register SET password = ? WHERE id = ?';
+
+    return new Promise((resolve, reject) => {
+      db.run(sql, [newPassword, userId], (err) => {
+        if (err) {
+          reject(err);
+        }
+        resolve();
+      });
+    });
+  }
+});
+
+
 app.post("/login", async (req, res) => {
   const { userName, password } = req.body;
 
@@ -222,7 +279,7 @@ app.delete("/delete-account", verifyId, async (req, res) => {
 
   try {
     for (let table of tables) {
-      await new Promise ((resolve, reject) => {
+      await new Promise((resolve, reject) => {
         const sql = `DELETE FROM ${table} WHERE user_id = ?`;
 
         db.run(sql, [userId], function (err) {
@@ -230,11 +287,10 @@ app.delete("/delete-account", verifyId, async (req, res) => {
             console.error(`Error deleting from table ${table}`, err.message);
             reject(err);
           }
-          console.log(`Deleted from table ${table}: `, this.changes, 'rows');
+          console.log(`Deleted from table ${table}: `, this.changes, "rows");
           resolve();
-        })
-
-      })
+        });
+      });
     }
   } catch {
     console.error(`Error deleting user's data:`, err.message);
