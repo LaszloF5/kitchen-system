@@ -314,22 +314,6 @@ app.delete("/delete-account", verifyId, async (req, res) => {
   });
 });
 
-//Felhasználók törlése
-
-// function deleteUsers () {
-//   app.delete('/register', (req, res) => {
-//     const sql = 'DELETE FROM register';
-//     db.run(sql, [], (err) => {
-//       if (err) {
-//         console.error(`Error deleting users:`, err.message);
-//         return res.status(500).json({ error: "Failed to delete users." });
-//       }
-//       res.status(200).json({ message: "Users deleted successfully." });
-//       console.log("Users deleted successfully.");
-//     });
-//   })
-// }
-
 // Kiadások kezelése
 
 app.get("/expenses", verifyId, (req, res) => {
@@ -681,6 +665,7 @@ app.post("/:table", verifyId, (req, res) => {
   if (!validTables.includes(table)) {
     return res.status(400).json({ error: "Invalid table name." });
   }
+  console.log('A date_added formátuma: ', date_added);
   const sql = `INSERT INTO ${table} (name, quantity, date_added, user_id) VALUES(?, ?, ?, ?)`;
   db.run(sql, [name, quantity, date_added, userId], function (err) {
     if (err) {
@@ -742,24 +727,28 @@ app.put("/:table/:id", verifyId, (req, res) => {
     "others_items",
     "shoppingList_items",
   ];
-  const { quantity } = req.body;
+  const { quantity, dateNow } = req.body;
   console.log("VerifyId ok.");
   if (!validTables.includes(table)) {
     return res.status(400).json({ error: "Invalid table name." });
   }
 
-  const sql = `UPDATE ${table} SET quantity = ? WHERE id = ? AND user_id = ?`;
+  if (!quantity || !dateNow) {
+    return res.status(400).json({ error: "Missing required fields." });
+  }
+
+  const sql = `UPDATE ${table} SET quantity = ?, date_added = ? WHERE id = ? AND user_id = ?`;
   const regex = /\d+(\.\d+)?/;
   const qty = Number(...quantity.match(regex));
   const unit = quantity.replace(Number.parseFloat(quantity), "");
   const validQty = `${qty} ${unit}`;
 
-  db.run(sql, [validQty, id, userId], function (err) {
+  db.run(sql, [validQty, dateNow, id, userId], function (err) {
     if (err) {
       res.status(400).json({ error: err.message });
       return;
     }
-    res.json({ message: "Item quantity updated", id, quantity });
+    res.json({ message: "Item quantity and date updated", id, quantity, dateNow });
   });
 });
 

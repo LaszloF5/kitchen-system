@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { HashRouter, Route, Routes, Link } from "react-router-dom";
 import axios from "axios";
+import { DateTime } from "luxon";
 import Fridge from "./Components/Fridge";
 import Freezer from "./Components/Freezer";
 import Chamber from "./Components/Chamber";
@@ -18,7 +19,6 @@ export default function App() {
   const [otherItems, setOtherItems] = useState([]);
   const [shoppingListItems, setShoppingListItems] = useState([]);
   const [yourAmount, setYourAmount] = useState([]);
-  const headerText = "Weekly expenses: ";
   const [currency, setCurrency] = useState("");
   const [prevCurrency, setPrevCurrency] = useState("");
   const [userId, setUserId] = useState(localStorage.getItem("userId") || null);
@@ -127,8 +127,11 @@ export default function App() {
 
   // Update item
 
+  // Ezt folytatni
+
   const updateItem = async (table, modifyQuantity, updateId, setItems) => {
     const userId = localStorage.getItem("userId");
+    const dateNow = DateTime.now().toISO().replace(/T.*/, "");
     console.log("updateItem id: ", userId);
 
     if (!userId) {
@@ -138,7 +141,9 @@ export default function App() {
 
     await axios.put(
       `http://localhost:5500/${table}/${updateId}?user_id=${userId}`,
-      { quantity: modifyQuantity.trim() }
+      { quantity: modifyQuantity.trim(),
+        dateNow
+       }
     );
 
     const response = await axios.get(
@@ -221,11 +226,15 @@ export default function App() {
                   {userId === null ? "Login" : "Logout"}
                 </Link>
               </li>
-              <li>
-                <Link className="header-nav_ul_li_link" to="/expenses">
-                  Expenses
-                </Link>
-              </li>
+              {userId === null ? (
+                ""
+              ) : (
+                <li>
+                  <Link className="header-nav_ul_li_link" to="/expenses">
+                    Expenses
+                  </Link>
+                </li>
+              )}
             </ul>
           </nav>
           {/* <button className="btn btn-update" onClick={toggleCurrencyForm}>
@@ -242,7 +251,6 @@ export default function App() {
             : ""}
         </div> */}
         </header>
-
         {isVisibleCurrencyForm ? (
           <form className="currencyForm" onSubmit={handleCurrency}>
             <input
@@ -260,7 +268,7 @@ export default function App() {
         ) : null}
         {isDarkMode ? (
           <img
-            className="white-filter"
+            className="white-filter darkOrLight"
             src={process.env.PUBLIC_URL + "dark-mode.png"}
             alt="Dark mode"
             role="button"
@@ -269,6 +277,7 @@ export default function App() {
           />
         ) : (
           <img
+            className="darkOrLight"
             src={process.env.PUBLIC_URL + "light-mode.png"}
             alt="Light mode"
             role="button"
@@ -282,7 +291,7 @@ export default function App() {
             path="/Login"
             element={<Login userId={userId} setUserId={setUserId} />}
           />
-          <Route path="/Expenses" element={<Expenses />} />
+          <Route path="/Expenses" element={<Expenses/>} />
           <Route
             path="/"
             element={

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { DateTime } from "luxon";
 import "./Expenses.css";
+import { tr } from "date-fns/locale";
 
 export default function Expenses() {
   const [isVisibleExForm, setIsVisibleExForm] = useState(false);
@@ -12,6 +13,7 @@ export default function Expenses() {
   );
   const [expenses, setExpenses] = useState([]);
   const [datas, setDatas] = useState([]);
+  const [monthlyDatas, setMonthlyDatas] = useState([]);
 
   const button1Text = isVisibleExForm ? "Close form" : "Add expense";
   const button2Text = isVisibleCurForm ? "Close form" : "Set currency";
@@ -87,6 +89,21 @@ export default function Expenses() {
         });
         const data = response.data.expenses;
         setDatas(data);
+        const monthlyData = [];
+        data.forEach((item) => {
+          const key = `${item.year} - ${item.month}`;
+          if (monthlyData[key]) {
+            monthlyData[key].amount += Number(item.amount);
+          } else {
+            monthlyData[key] = {
+              year: item.year,
+              month: item.month,
+              amount: Number(item.amount),
+            };
+          }
+        });
+        setMonthlyDatas(monthlyData);
+        console.log("Monthly data: ", monthlyData);
         console.log(
           "Válasz: ",
           response.data.expenses[response.data.expenses.length - 1].amount
@@ -103,19 +120,11 @@ export default function Expenses() {
       }
     };
     getExpenses();
-  }, []);
+  }, [expenses]);
 
   return (
     <div className="expenses-container">
       <header className="expenses-header">
-        {/* <h2>
-          Expenses for Week{" "}
-          {new Date().toLocaleDateString("en-US", {
-            weekday: "long",
-            month: "long",
-            year: "numeric",
-          })}
-        </h2> */}
         <button className="btn btn-others" onClick={handleToggleExForm}>
           {button1Text}
         </button>
@@ -140,6 +149,7 @@ export default function Expenses() {
             name="expense"
             placeholder="Enter expense amount"
             required
+            autoFocus
           />
           <button
             className="expense-form_button"
@@ -159,37 +169,63 @@ export default function Expenses() {
             name="currency"
             placeholder="ex. USD"
             required
+            autoFocus
           />
           <button className="currency-form_button" disabled={isWorking}>
             {isWorking ? "Loading..." : "Set currency"}
           </button>
         </form>
       )}
-        <table className="expenses-table">
-        <caption className="expenses-table-caption">Weekly expenses overview</caption>
-          <thead>
-            <tr>
-              <th className="expenses-table_th">Date (y,m,w)</th>
-              <th className="expenses-table_th">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {datas.map((item, index) => {
-              return (
-                <tr key={index}>
-                  <td className="expenses-table_td">
-                    {item.year}. {item.month}. {item.week}.
-                  </td>
-                  <td className="expenses-table_td">
-                    {item.amount} {currency || "Currency not set."}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    //Itt lista helyett vagy táblázatos megoldás lesz, vagy chart.
-    // Ha nincs kapcsolat a szerverrel, automatikusan kijelenetkeztetni a felhasználókat.
+      <table className="expenses-table">
+        <caption className="expenses-table-caption">
+          Weekly expenses overview
+        </caption>
+        <thead>
+          <tr>
+            <th className="expenses-table_th">Date (y,m,w)</th>
+            <th className="expenses-table_th">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {datas.map((item, index) => {
+            return (
+              <tr key={index}>
+                <td className="expenses-table_td">
+                  {item.year}. {item.month}. {item.week}.
+                </td>
+                <td className="expenses-table_td">
+                  {item.amount} {currency || "Currency not set."}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <table className="expenses-table">
+        <caption className="expenses-table-caption">
+          Monthly expenses overview
+        </caption>
+        <thead>
+          <tr>
+            <th className="expenses-table_th">Date (y,m)</th>
+            <th className="expenses-table_th">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Object.entries(monthlyDatas).map(([key, value]) => {
+            return (
+              <tr key={key}>
+                <td className="expenses-table_td">
+                  {value.year}. {value.month}.
+                </td>
+                <td className="expenses-table_td">
+                  {value.amount} {currency || "Currency not set."}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }

@@ -2,6 +2,10 @@
     margin: 5px;
 }
 
+.expenses-container {
+  min-height: calc(100vh - 50px);
+}
+
 .expense-form, .currency-form {
     display: flex;
     flex-direction: column;
@@ -68,7 +72,8 @@
     font-size: 18px;
     font-weight: bold;
     margin-bottom: 10px;
-    color: #333;
+    color: whitesmoke;
+    background-color: rgb(38,38,38);
   }
  
   

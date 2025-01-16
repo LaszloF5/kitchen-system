@@ -154,6 +154,7 @@ export default function Login({ userId, setUserId }) {
             id="oldPassword"
             required
             autoComplete="false"
+            autoFocus
           />
         </label>
         <label className="change-pw-form_label" htmlFor="newPassword">
@@ -180,6 +181,7 @@ export default function Login({ userId, setUserId }) {
             name="username"
             required
             autoComplete="false"
+            autoFocus
           />
           <input
             className="login-form_input"
@@ -201,7 +203,7 @@ export default function Login({ userId, setUserId }) {
             type="submit"
             onClick={haventAcc}
           >
-            0 acc? Reg
+            You don't have an account? Register one!
           </button>
         </form>
       )}
