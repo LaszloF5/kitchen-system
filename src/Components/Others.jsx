@@ -10,7 +10,7 @@ export default function Others({
   moveToSL,
   regex,
   userId,
-  setUserId,
+  isModified,
 }) {
   const [newItem, setNewItem] = useState([]);
   const [newQuantity, setNewQuantity] = useState([]);
@@ -96,13 +96,13 @@ export default function Others({
 
   // Item modifier functions
 
-  // useEffect(() => {
-  //     const getDatas = async () => {
-  //       const data = await fetchItems("others_items");
-  //       setItems(data);
-  //     };
-  //     getDatas();
-  // }, [fetchItems, userId ,setItems]);
+  useEffect(() => {
+      const getDatas = async () => {
+        const data = await fetchItems("others_items");
+        setItems(data);
+      };
+      getDatas();
+  }, [fetchItems, userId ,setItems, isModified]);
 
   const handleAddOthers = async () => {
     try {

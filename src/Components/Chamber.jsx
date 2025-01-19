@@ -10,7 +10,7 @@ export default function Chamber({
   moveToSL,
   regex,
   userId,
-  setUserId,
+  isModified,
 }) {
   // Input values
   const [newItem, setNewItem] = useState("");
@@ -98,13 +98,13 @@ export default function Chamber({
 
   // Datas from the database
 
-  // useEffect(() => {
-  //     const getDatas = async () => {
-  //       const data = await fetchItems("chamber_items");
-  //       setItems(data);
-  //     };
-  //     getDatas();
-  // }, [fetchItems, userId, setItems]);
+  useEffect(() => {
+      const getDatas = async () => {
+        const data = await fetchItems("chamber_items");
+        setItems(data);
+      };
+      getDatas();
+  }, [fetchItems, userId, setItems, isModified]);
 
   const handleAddChamber = async () => {
     try {

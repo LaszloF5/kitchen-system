@@ -255,7 +255,7 @@ function verifyId(req, res, next) {
       return res.status(404).json({ error: "User not found." });
     }
     req.user = row;
-    console.log(req.user);
+    console.log('VerifyId: ', req.user);
     next();
   });
 }
@@ -628,7 +628,6 @@ app.post("/moveto_sl", verifyId, (req, res) => {
 app.get("/:table", verifyId, (req, res) => {
   const { table } = req.params;
   const userId = req.user.id;
-  console.log("Backend userid a table-get-nél: ", userId);
   const validTables = [
     "fridge_items",
     "freezer_items",
@@ -752,6 +751,31 @@ app.put("/:table/:id", verifyId, (req, res) => {
   });
 });
 
+function getDatas() {
+  const sql = `SELECT * FROM shoppingList_items WHERE user_id = ?`;
+  db.all(sql, [2], (err, rows) => {
+    if (err) {
+      console.error(err);
+    } else {
+      console.log(rows);
+    }
+  });
+};
+
+getDatas();
+
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// process.on('SIGINT', () => {
+//   db.close((err) => {
+//     if (err) {
+//       console.error('Error closing db: ', err.message)
+//     } else {
+//       console.log('DB connection closed')
+//       process.exit(0)
+//     }
+//   })
+// })

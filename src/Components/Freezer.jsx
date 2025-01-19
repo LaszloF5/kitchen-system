@@ -10,7 +10,7 @@ export default function Freezer({
   moveToSL,
   regex,
   userId,
-  setUserId,
+  isModified,
 }) {
   // Input values
   const [newItem, setNewItem] = useState("");
@@ -45,13 +45,13 @@ export default function Freezer({
 
   // Data fetching from the database
 
-  // useEffect(() => {
-  //     const getDatas = async () => {
-  //       const data = await fetchItems("freezer_items");
-  //       setItems(data);
-  //     };
-  //     getDatas();
-  // }, [fetchItems, userId, setItems]);
+  useEffect(() => {
+      const getDatas = async () => {
+        const data = await fetchItems("freezer_items");
+        setItems(data);
+      };
+      getDatas();
+  }, [fetchItems, userId, setItems, isModified]);
 
   ////////// FUNCTIONS //////////
 

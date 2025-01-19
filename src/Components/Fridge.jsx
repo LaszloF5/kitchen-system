@@ -11,7 +11,7 @@ export default function Fridge({
   moveToSL,
   regex,
   userId,
-  setUserId,
+  isModified,
 }) {
   //Input values
 
@@ -100,7 +100,7 @@ export default function Fridge({
         setItems(data);
       };
       getDatas();
-  }, [fetchItems, userId, setItems]);
+  }, [fetchItems, userId, setItems, isModified]);
 
   // functions
 

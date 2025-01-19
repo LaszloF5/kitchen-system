@@ -13,7 +13,7 @@ export default function ShoppingList({
   expenditure,
   setExpenditure,
   userId,
-  setUserId,
+  isModified,
 }) {
   // Input values
 
@@ -110,17 +110,23 @@ export default function ShoppingList({
     e.preventDefault();
   };
 
-  // useEffect(() => {
-  //       const getDatas = async () => {
-  //       const data = await fetchItems("shoppingList_items");
-  //       setItems(data);
-  //     getDatas();
-  //   }
-  // }, [fetchItems, userId, setItems]);
+  useEffect(() => {
+    const getDatas = async () => {
+      const data = await fetchItems("shoppingList_items");
+      setItems(data);
+    };
+    getDatas();
+  }, [fetchItems, userId, setItems, isModified]);
 
   const handleAdd = async () => {
     try {
-      await addItem("shoppingList_items", newItem, newQuantity, setItems, userId);
+      await addItem(
+        "shoppingList_items",
+        newItem,
+        newQuantity,
+        setItems,
+        userId
+      );
       setNewItem("");
       setNewQuantity("");
       setIsVisibleS(false);
@@ -152,33 +158,41 @@ export default function ShoppingList({
 
   const moveItem = async (itemName, sourceTable, targetTable) => {
     const userId = localStorage.getItem("userId");
-    console.log('moveItem function userId: ', userId);
+    console.log("moveItem function userId: ", userId);
     const validTables = [
-      'fridge_items',
-      'freezer_items',
-      'chamber_items',
-      'others_items',
-      'shoppingList_items',
+      "fridge_items",
+      "freezer_items",
+      "chamber_items",
+      "others_items",
+      "shoppingList_items",
     ];
-  
+
     const trimmedSourceTable = sourceTable.trim();
     const trimmedTargetTable = targetTable.trim();
-  
-    if (!validTables.includes(trimmedSourceTable) || !validTables.includes(trimmedTargetTable)) {
+
+    if (
+      !validTables.includes(trimmedSourceTable) ||
+      !validTables.includes(trimmedTargetTable)
+    ) {
       console.log("Invalid table name.");
       return;
     }
-  
+
     try {
-      const response = await axios.post(`http://localhost:5500/move_item?user_id=${userId}`, {
-        itemName,
-        sourceTable: trimmedSourceTable,
-        targetTable: trimmedTargetTable,
-        userId,
-      });
-  
+      const response = await axios.post(
+        `http://localhost:5500/move_item?user_id=${userId}`,
+        {
+          itemName,
+          sourceTable: trimmedSourceTable,
+          targetTable: trimmedTargetTable,
+          userId,
+        }
+      );
+
       if (response.status === 200) {
-        const newList = await axios.get(`http://localhost:5500/shoppingList_items?user_id=${userId}`);
+        const newList = await axios.get(
+          `http://localhost:5500/shoppingList_items?user_id=${userId}`
+        );
         setItems(newList.data.items);
         setIsVisibleMoveTo(false);
         setNewIndex(null);
@@ -194,7 +208,6 @@ export default function ShoppingList({
       }
     }
   };
-  
 
   //Fridge component//
 

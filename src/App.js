@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, } from "react";
 import { HashRouter, Route, Routes, Link } from "react-router-dom";
 import axios from "axios";
 import { DateTime } from "luxon";
@@ -22,6 +22,8 @@ export default function App() {
   const [currency, setCurrency] = useState("");
   const [prevCurrency, setPrevCurrency] = useState("");
   const [userId, setUserId] = useState(localStorage.getItem("userId") || null);
+  const [isModified, setIsModified] = useState(false);
+  const [myState, setMyState] = useState(false);
 
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
@@ -63,7 +65,6 @@ export default function App() {
 
   const fetchItems = useCallback(async (table) => {
     const userId = localStorage.getItem("userId");
-    console.log(userId);
     try {
       const response = await axios.get(`http://localhost:5500/${table}`, {
         params: { userId },
@@ -127,8 +128,6 @@ export default function App() {
 
   // Update item
 
-  // Ezt folytatni
-
   const updateItem = async (table, modifyQuantity, updateId, setItems) => {
     const userId = localStorage.getItem("userId");
     const dateNow = DateTime.now().toISO().replace(/T.*/, "");
@@ -171,6 +170,7 @@ export default function App() {
     } catch {
       alert("Error moving to the SL.");
     }
+    setIsModified(!isModified);
   };
 
   const handleCurrency = (e) => {
@@ -237,19 +237,6 @@ export default function App() {
               )}
             </ul>
           </nav>
-          {/* <button className="btn btn-update" onClick={toggleCurrencyForm}>
-          {currencyText}
-        </button>
-        <div>
-          {headerText}
-          {yourAmount !== null
-            ? yourAmount.length > 0 && (
-                <span>
-                  {yourAmount[yourAmount.length - 1].amount} {currency}
-                </span>
-              )
-            : ""}
-        </div> */}
         </header>
         {isVisibleCurrencyForm ? (
           <form className="currencyForm" onSubmit={handleCurrency}>
@@ -308,6 +295,7 @@ export default function App() {
                   regex={regex}
                   userId={userId}
                   setUserId={setUserId}
+                  isModified={isModified}
                 />
                 <Freezer
                   items={freezerItems}
@@ -320,6 +308,7 @@ export default function App() {
                   regex={regex}
                   userId={userId}
                   setUserId={setUserId}
+                  isModified={isModified}
                 />
                 <Chamber
                   items={chamberItems}
@@ -332,6 +321,7 @@ export default function App() {
                   regex={regex}
                   userId={userId}
                   setUserId={setUserId}
+                  isModified={isModified}
                 />
                 <Others
                   items={otherItems}
@@ -344,6 +334,7 @@ export default function App() {
                   regex={regex}
                   userId={userId}
                   setUserId={setUserId}
+                  isModified={isModified}
                 />
                 <ShoppingList
                   items={shoppingListItems}
@@ -356,6 +347,7 @@ export default function App() {
                   setExpenditure={setYourAmount}
                   userId={userId}
                   setUserId={setUserId}
+                  isModified={isModified}
                 />
               </>
             }
