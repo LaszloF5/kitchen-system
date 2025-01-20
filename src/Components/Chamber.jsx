@@ -11,7 +11,6 @@ export default function Chamber({
   moveToSL,
   regex,
   userId,
-  isModified,
 }) {
   // useContext
 
@@ -109,7 +108,7 @@ export default function Chamber({
       setItems(data);
     };
     getDatas();
-  }, [fetchItems, userId, setItems, isModified, chamberState]);
+  }, [fetchItems, userId, setItems, chamberState]);
 
   const handleAddChamber = async () => {
     try {

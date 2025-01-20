@@ -11,7 +11,6 @@ export default function Others({
   moveToSL,
   regex,
   userId,
-  isModified,
 }) {
 
   const {othersState} = useContext(OthersContext);
@@ -106,7 +105,7 @@ export default function Others({
         setItems(data);
       };
       getDatas();
-  }, [fetchItems, userId ,setItems, isModified, othersState]);
+  }, [fetchItems, userId ,setItems, othersState]);
 
   const handleAddOthers = async () => {
     try {

@@ -11,7 +11,6 @@ export default function Freezer({
   moveToSL,
   regex,
   userId,
-  isModified,
 }) {
 
   // useContext
@@ -57,7 +56,7 @@ export default function Freezer({
         setItems(data);
       };
       getDatas();
-  }, [fetchItems, userId, setItems, isModified, freezerState]);
+  }, [fetchItems, userId, setItems, freezerState]);
 
   ////////// FUNCTIONS //////////
 

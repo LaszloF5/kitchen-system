@@ -12,7 +12,6 @@ export default function Fridge({
   moveToSL,
   regex,
   userId,
-  isModified,
 }) {
 
   // useContext
@@ -106,7 +105,7 @@ export default function Fridge({
         setItems(data);
       };
       getDatas();
-  }, [fetchItems, userId, setItems, isModified, fridgeState]);
+  }, [fetchItems, userId, setItems, fridgeState]);
 
   // functions
 

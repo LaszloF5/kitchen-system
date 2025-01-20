@@ -5,6 +5,7 @@ import FridgeContext from "../Contexts/FridgeContext";
 import FreezerContext from "../Contexts/FreezerContext";
 import ChamberContext from "../Contexts/ChamberContext";
 import OthersContext from "../Contexts/OthersContext";
+import SLContext from "../Contexts/SLContext";
 import "./ShoppingList.css";
 
 export default function ShoppingList({
@@ -17,7 +18,6 @@ export default function ShoppingList({
   expenditure,
   setExpenditure,
   userId,
-  isModified,
 }) {
 
     
@@ -57,6 +57,8 @@ export default function ShoppingList({
     setOthersState(!othersState);
   }
 
+  const {sLState} = useContext(SLContext);
+
   // Input values
 
   const [newItem, setNewItem] = useState("");
@@ -72,6 +74,8 @@ export default function ShoppingList({
   const updateSLFormRef = useRef(null);
   const addSLFormRef = useRef(null);
   const expenditureFormRef = useRef(null);
+  const formRef = useRef(null);
+  const formRefMove = useRef(null);
 
   useEffect(() => {
     if (isVisibleAmount) {
@@ -82,19 +86,16 @@ export default function ShoppingList({
       updateSLFormRef.current.focus();
     }
 
-    if (isVisibleS) {
+    if (isVisibleS && formRef.current) {
       addSLFormRef.current.focus();
+      formRef.current.scrollIntoView({behavior: 'smooth', block: 'start'})
     }
-  }, [isVisibleAmount, isVisibleQty, isVisibleS]);
 
-  // Visible amount form
+    if (isVisibleMoveTo && formRefMove.current) {
+      formRefMove.current.scrollIntoView({behavior: 'smooth', block: 'start'});
+    }
 
-  const isTextAmount = isVisibleAmount
-    ? "Close expenditure form"
-    : "Expenditure recording";
-  const handleVisibleAmount = () => {
-    setIsvisibleAmount(!isVisibleAmount);
-  };
+  }, [isVisibleAmount, isVisibleQty, isVisibleS, isVisibleMoveTo]);
 
   // Visible Add form
 
@@ -158,7 +159,7 @@ export default function ShoppingList({
       setItems(data);
     };
     getDatas();
-  }, [fetchItems, userId, setItems, isModified]);
+  }, [fetchItems, userId, setItems, sLState]);
 
   const handleAdd = async () => {
     try {
@@ -346,9 +347,6 @@ export default function ShoppingList({
       <button className="btn btn-others center" onClick={handleVisibleAdd}>
         {isTextS}
       </button>
-      <button className="btn btn-others center" onClick={handleVisibleAmount}>
-        {isTextAmount}
-      </button>
       <form
         className={`amount-form ${
           isVisibleAmount ? "visibleAmountForm" : "hiddenAmountForm"
@@ -373,6 +371,7 @@ export default function ShoppingList({
       <form
         action="#"
         method="GET"
+        ref={formRefMove}
         className={`quantity-update-form main-item-style ${
           isVisibleMoveTo ? "visibleMoveTo" : "hiddenMoveTo"
         }`}
@@ -431,6 +430,7 @@ export default function ShoppingList({
       <form
         action="#"
         method="GET"
+        ref={formRef}
         className={`main-item-style fridge-form-update ${
           isVisibleS ? "visible" : "hidden"
         }`}

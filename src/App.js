@@ -14,6 +14,7 @@ import FridgeContext from "./Contexts/FridgeContext";
 import FreezerContext from "./Contexts/FreezerContext";
 import ChamberContext from "./Contexts/ChamberContext";
 import OthersContext from "./Contexts/OthersContext";
+import SLContext from "./Contexts/SLContext";
 import "./App.css";
 
 export default function App() {
@@ -26,8 +27,6 @@ export default function App() {
   const [currency, setCurrency] = useState("");
   const [prevCurrency, setPrevCurrency] = useState("");
   const [userId, setUserId] = useState(localStorage.getItem("userId") || null);
-  const [isModified, setIsModified] = useState(false);
-  const [myState, setMyState] = useState(false);
 
   // Contexts
 
@@ -35,6 +34,7 @@ export default function App() {
   const [freezerState, setFreezerState] = useState(false);
   const [chamberState, setChamberState] = useState(false);
   const [othersState, setOthersState] = useState(false);
+  const [sLState, setSLState] = useState(false);
 
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
@@ -179,9 +179,7 @@ export default function App() {
     } catch {
       alert("Error moving to the SL.");
     }
-    console.log('srcTable: ', sourceTable);
-    console.log('targetTable: ', targetTable);
-    setIsModified(!isModified);
+    setSLState(!sLState);
   };
 
   /* Csak a targetTable renderelése kell ebben az esetben. vagyis a sl-items. */
@@ -297,24 +295,23 @@ export default function App() {
             element={
               <>
                 <h1>Kitchen system</h1>
-                  <FridgeContext.Provider
-                    value={{ fridgeState, setFridgeState }}
-                  >
-                    <Fridge
-                      items={fridgeItems}
-                      setItems={setFridgeItems}
-                      fetchItems={fetchItems}
-                      addItem={addItem}
-                      deleteItem={deleteItem}
-                      updateItem={updateItem}
-                      moveToSL={moveToSL}
-                      regex={regex}
-                      userId={userId}
-                      setUserId={setUserId}
-                      isModified={isModified}
-                    />
-                  </FridgeContext.Provider>
-                  <FreezerContext.Provider value= {{freezerState, setFreezerState}}>
+                <FridgeContext.Provider value={{ fridgeState, setFridgeState }}>
+                  <Fridge
+                    items={fridgeItems}
+                    setItems={setFridgeItems}
+                    fetchItems={fetchItems}
+                    addItem={addItem}
+                    deleteItem={deleteItem}
+                    updateItem={updateItem}
+                    moveToSL={moveToSL}
+                    regex={regex}
+                    userId={userId}
+                    setUserId={setUserId}
+                  />
+                </FridgeContext.Provider>
+                <FreezerContext.Provider
+                  value={{ freezerState, setFreezerState }}
+                >
                   <Freezer
                     items={freezerItems}
                     setItems={setFreezerItems}
@@ -326,10 +323,11 @@ export default function App() {
                     regex={regex}
                     userId={userId}
                     setUserId={setUserId}
-                    isModified={isModified}
                   />
-                  </FreezerContext.Provider>
-                  <ChamberContext.Provider value={{chamberState, setChamberState}}>
+                </FreezerContext.Provider>
+                <ChamberContext.Provider
+                  value={{ chamberState, setChamberState }}
+                >
                   <Chamber
                     items={chamberItems}
                     setItems={setChamberItems}
@@ -341,10 +339,9 @@ export default function App() {
                     regex={regex}
                     userId={userId}
                     setUserId={setUserId}
-                    isModified={isModified}
                   />
-                  </ChamberContext.Provider>
-                  <OthersContext.Provider value={{othersState, setOthersState}}>
+                </ChamberContext.Provider>
+                <OthersContext.Provider value={{ othersState, setOthersState }}>
                   <Others
                     items={otherItems}
                     setItems={setOtherItems}
@@ -356,21 +353,19 @@ export default function App() {
                     regex={regex}
                     userId={userId}
                     setUserId={setUserId}
-                    isModified={isModified}
                   />
-                  </OthersContext.Provider>
-                  <FridgeContext.Provider
-                    value={{ fridgeState, setFridgeState }}
+                </OthersContext.Provider>
+                <FridgeContext.Provider value={{ fridgeState, setFridgeState }}>
+                  <FreezerContext.Provider
+                    value={{ freezerState, setFreezerState }}
                   >
-                    <FreezerContext.Provider
-                      value={{ freezerState, setFreezerState }}
+                    <ChamberContext.Provider
+                      value={{ chamberState, setChamberState }}
                     >
-                      <ChamberContext.Provider
-                        value={{ chamberState, setChamberState }}
+                      <OthersContext.Provider
+                        value={{ othersState, setOthersState }}
                       >
-                        <OthersContext.Provider
-                          value={{ othersState, setOthersState }}
-                        >
+                        <SLContext.Provider value={{ sLState, setSLState }}>
                           <ShoppingList
                             items={shoppingListItems}
                             setItems={setShoppingListItems}
@@ -382,17 +377,17 @@ export default function App() {
                             setExpenditure={setYourAmount}
                             userId={userId}
                             setUserId={setUserId}
-                            isModified={isModified}
                           />
-                        </OthersContext.Provider>
-                      </ChamberContext.Provider>
-                    </FreezerContext.Provider>
-                  </FridgeContext.Provider>
+                        </SLContext.Provider>
+                      </OthersContext.Provider>
+                    </ChamberContext.Provider>
+                  </FreezerContext.Provider>
+                </FridgeContext.Provider>
               </>
             }
           />
         </Routes>
-        {/* <footer className="footer">Footer</footer> */}
+        <footer className="footer">Footer</footer>
       </HashRouter>
     </div>
   );
