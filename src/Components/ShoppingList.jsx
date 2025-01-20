@@ -1,6 +1,10 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import { getWeek } from "date-fns";
 import axios from "axios";
+import FridgeContext from "../Contexts/FridgeContext";
+import FreezerContext from "../Contexts/FreezerContext";
+import ChamberContext from "../Contexts/ChamberContext";
+import OthersContext from "../Contexts/OthersContext";
 import "./ShoppingList.css";
 
 export default function ShoppingList({
@@ -15,6 +19,44 @@ export default function ShoppingList({
   userId,
   isModified,
 }) {
+
+    
+  // useContext for fridge_items
+
+  const {fridgeState} = useContext(FridgeContext);
+  const {setFridgeState} = useContext(FridgeContext);
+
+  const toggleFridgeState = () => {
+    setFridgeState(!fridgeState);
+  }
+
+  // useContext for freezer_items
+
+  const {freezerState} = useContext(FreezerContext);
+  const {setFreezerState} = useContext(FreezerContext);
+
+  const toggleFreezerState = () => {
+    setFreezerState(!freezerState);
+  }
+
+  // useContext for chamber_items
+
+  const {chamberState} = useContext(ChamberContext);
+  const {setChamberState} = useContext(ChamberContext);
+
+  const toggleChamberState = () => {
+    setChamberState(!chamberState);
+  }
+
+  // useContext for others_items
+
+  const {othersState} = useContext(OthersContext);
+  const {setOthersState} = useContext(OthersContext);
+
+  const toggleOthersState = () => {
+    setOthersState(!othersState);
+  }
+
   // Input values
 
   const [newItem, setNewItem] = useState("");
@@ -206,6 +248,17 @@ export default function ShoppingList({
       } else {
         alert("Hiba a mozgatáskor: " + error.message);
       }
+    }
+    console.log('A céltábla amit renderelni kell: ', targetTable);
+    // toggleRenderState();
+    if (targetTable === 'fridge_items') {
+      toggleFridgeState();
+    } else if (targetTable === 'freezer_items') {
+      toggleFreezerState();
+    } else if (targetTable === 'chamber_items') {
+      toggleChamberState();
+    } else if (targetTable === 'others_items') {
+      toggleOthersState();
     }
   };
 

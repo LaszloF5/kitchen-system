@@ -1,4 +1,5 @@
-import React, {useEffect, useState, useRef } from "react";
+import React, {useEffect, useState, useRef, useContext } from "react";
+import FridgeContext from "../Contexts/FridgeContext";
 import "./Fridge.css";
 
 export default function Fridge({
@@ -13,6 +14,11 @@ export default function Fridge({
   userId,
   isModified,
 }) {
+
+  // useContext
+
+  const {fridgeState} = useContext(FridgeContext);
+
   //Input values
 
   const [newItem, setNewItem] = useState("");
@@ -100,7 +106,7 @@ export default function Fridge({
         setItems(data);
       };
       getDatas();
-  }, [fetchItems, userId, setItems, isModified]);
+  }, [fetchItems, userId, setItems, isModified, fridgeState]);
 
   // functions
 

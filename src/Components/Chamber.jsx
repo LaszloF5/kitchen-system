@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
+import ChamberContext from "../Contexts/ChamberContext";
 
 export default function Chamber({
   items,
@@ -12,6 +13,10 @@ export default function Chamber({
   userId,
   isModified,
 }) {
+  // useContext
+
+  const { chamberState } = useContext(ChamberContext);
+
   // Input values
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
@@ -99,12 +104,12 @@ export default function Chamber({
   // Datas from the database
 
   useEffect(() => {
-      const getDatas = async () => {
-        const data = await fetchItems("chamber_items");
-        setItems(data);
-      };
-      getDatas();
-  }, [fetchItems, userId, setItems, isModified]);
+    const getDatas = async () => {
+      const data = await fetchItems("chamber_items");
+      setItems(data);
+    };
+    getDatas();
+  }, [fetchItems, userId, setItems, isModified, chamberState]);
 
   const handleAddChamber = async () => {
     try {

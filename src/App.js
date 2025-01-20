@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { HashRouter, Route, Routes, Link } from "react-router-dom";
 import axios from "axios";
 import { DateTime } from "luxon";
@@ -10,6 +10,10 @@ import ShoppingList from "./Components/ShoppingList";
 import Login from "./Components/Login";
 import Register from "./Components/Register";
 import Expenses from "./Components/Expenses";
+import FridgeContext from "./Contexts/FridgeContext";
+import FreezerContext from "./Contexts/FreezerContext";
+import ChamberContext from "./Contexts/ChamberContext";
+import OthersContext from "./Contexts/OthersContext";
 import "./App.css";
 
 export default function App() {
@@ -24,6 +28,13 @@ export default function App() {
   const [userId, setUserId] = useState(localStorage.getItem("userId") || null);
   const [isModified, setIsModified] = useState(false);
   const [myState, setMyState] = useState(false);
+
+  // Contexts
+
+  const [fridgeState, setFridgeState] = useState(false);
+  const [freezerState, setFreezerState] = useState(false);
+  const [chamberState, setChamberState] = useState(false);
+  const [othersState, setOthersState] = useState(false);
 
   // Validate qty with regex
   const regex = /^(0(\.\d+)?|1(\.0+)?)\b(?!\.\d).*$/;
@@ -140,9 +151,7 @@ export default function App() {
 
     await axios.put(
       `http://localhost:5500/${table}/${updateId}?user_id=${userId}`,
-      { quantity: modifyQuantity.trim(),
-        dateNow
-       }
+      { quantity: modifyQuantity.trim(), dateNow }
     );
 
     const response = await axios.get(
@@ -170,8 +179,12 @@ export default function App() {
     } catch {
       alert("Error moving to the SL.");
     }
+    console.log('srcTable: ', sourceTable);
+    console.log('targetTable: ', targetTable);
     setIsModified(!isModified);
   };
+
+  /* Csak a targetTable renderelése kell ebben az esetben. vagyis a sl-items. */
 
   const handleCurrency = (e) => {
     e.preventDefault();
@@ -278,77 +291,103 @@ export default function App() {
             path="/Login"
             element={<Login userId={userId} setUserId={setUserId} />}
           />
-          <Route path="/Expenses" element={<Expenses/>} />
+          <Route path="/Expenses" element={<Expenses />} />
           <Route
             path="/"
             element={
               <>
                 <h1>Kitchen system</h1>
-                <Fridge
-                  items={fridgeItems}
-                  setItems={setFridgeItems}
-                  fetchItems={fetchItems}
-                  addItem={addItem}
-                  deleteItem={deleteItem}
-                  updateItem={updateItem}
-                  moveToSL={moveToSL}
-                  regex={regex}
-                  userId={userId}
-                  setUserId={setUserId}
-                  isModified={isModified}
-                />
-                <Freezer
-                  items={freezerItems}
-                  setItems={setFreezerItems}
-                  fetchItems={fetchItems}
-                  addItem={addItem}
-                  deleteItem={deleteItem}
-                  updateItem={updateItem}
-                  moveToSL={moveToSL}
-                  regex={regex}
-                  userId={userId}
-                  setUserId={setUserId}
-                  isModified={isModified}
-                />
-                <Chamber
-                  items={chamberItems}
-                  setItems={setChamberItems}
-                  fetchItems={fetchItems}
-                  addItem={addItem}
-                  deleteItem={deleteItem}
-                  updateItem={updateItem}
-                  moveToSL={moveToSL}
-                  regex={regex}
-                  userId={userId}
-                  setUserId={setUserId}
-                  isModified={isModified}
-                />
-                <Others
-                  items={otherItems}
-                  setItems={setOtherItems}
-                  fetchItems={fetchItems}
-                  addItem={addItem}
-                  deleteItem={deleteItem}
-                  updateItem={updateItem}
-                  moveToSL={moveToSL}
-                  regex={regex}
-                  userId={userId}
-                  setUserId={setUserId}
-                  isModified={isModified}
-                />
-                <ShoppingList
-                  items={shoppingListItems}
-                  setItems={setShoppingListItems}
-                  fetchItems={fetchItems}
-                  addItem={addItem}
-                  deleteItem={deleteItem}
-                  updateItem={updateItem}
-                  expenditure={yourAmount}
-                  setExpenditure={setYourAmount}
-                  userId={userId}
-                  setUserId={setUserId}
-                  isModified={isModified}
-                />
+                  <FridgeContext.Provider
+                    value={{ fridgeState, setFridgeState }}
+                  >
+                    <Fridge
+                      items={fridgeItems}
+                      setItems={setFridgeItems}
+                      fetchItems={fetchItems}
+                      addItem={addItem}
+                      deleteItem={deleteItem}
+                      updateItem={updateItem}
+                      moveToSL={moveToSL}
+                      regex={regex}
+                      userId={userId}
+                      setUserId={setUserId}
+                      isModified={isModified}
+                    />
+                  </FridgeContext.Provider>
+                  <FreezerContext.Provider value= {{freezerState, setFreezerState}}>
+                  <Freezer
+                    items={freezerItems}
+                    setItems={setFreezerItems}
+                    fetchItems={fetchItems}
+                    addItem={addItem}
+                    deleteItem={deleteItem}
+                    updateItem={updateItem}
+                    moveToSL={moveToSL}
+                    regex={regex}
+                    userId={userId}
+                    setUserId={setUserId}
+                    isModified={isModified}
+                  />
+                  </FreezerContext.Provider>
+                  <ChamberContext.Provider value={{chamberState, setChamberState}}>
+                  <Chamber
+                    items={chamberItems}
+                    setItems={setChamberItems}
+                    fetchItems={fetchItems}
+                    addItem={addItem}
+                    deleteItem={deleteItem}
+                    updateItem={updateItem}
+                    moveToSL={moveToSL}
+                    regex={regex}
+                    userId={userId}
+                    setUserId={setUserId}
+                    isModified={isModified}
+                  />
+                  </ChamberContext.Provider>
+                  <OthersContext.Provider value={{othersState, setOthersState}}>
+                  <Others
+                    items={otherItems}
+                    setItems={setOtherItems}
+                    fetchItems={fetchItems}
+                    addItem={addItem}
+                    deleteItem={deleteItem}
+                    updateItem={updateItem}
+                    moveToSL={moveToSL}
+                    regex={regex}
+                    userId={userId}
+                    setUserId={setUserId}
+                    isModified={isModified}
+                  />
+                  </OthersContext.Provider>
+                  <FridgeContext.Provider
+                    value={{ fridgeState, setFridgeState }}
+                  >
+                    <FreezerContext.Provider
+                      value={{ freezerState, setFreezerState }}
+                    >
+                      <ChamberContext.Provider
+                        value={{ chamberState, setChamberState }}
+                      >
+                        <OthersContext.Provider
+                          value={{ othersState, setOthersState }}
+                        >
+                          <ShoppingList
+                            items={shoppingListItems}
+                            setItems={setShoppingListItems}
+                            fetchItems={fetchItems}
+                            addItem={addItem}
+                            deleteItem={deleteItem}
+                            updateItem={updateItem}
+                            expenditure={yourAmount}
+                            setExpenditure={setYourAmount}
+                            userId={userId}
+                            setUserId={setUserId}
+                            isModified={isModified}
+                          />
+                        </OthersContext.Provider>
+                      </ChamberContext.Provider>
+                    </FreezerContext.Provider>
+                  </FridgeContext.Provider>
               </>
             }
           />

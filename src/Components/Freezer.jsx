@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
+import FreezerContext from "../Contexts/FreezerContext";
 
 export default function Freezer({
   items,
@@ -12,6 +13,11 @@ export default function Freezer({
   userId,
   isModified,
 }) {
+
+  // useContext
+
+  const { freezerState } = useContext(FreezerContext);
+
   // Input values
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
@@ -51,7 +57,7 @@ export default function Freezer({
         setItems(data);
       };
       getDatas();
-  }, [fetchItems, userId, setItems, isModified]);
+  }, [fetchItems, userId, setItems, isModified, freezerState]);
 
   ////////// FUNCTIONS //////////
 

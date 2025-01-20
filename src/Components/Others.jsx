@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
+import OthersContext from "../Contexts/OthersContext";
 
 export default function Others({
   items,
@@ -12,6 +13,9 @@ export default function Others({
   userId,
   isModified,
 }) {
+
+  const {othersState} = useContext(OthersContext);
+
   const [newItem, setNewItem] = useState([]);
   const [newQuantity, setNewQuantity] = useState([]);
 
@@ -102,7 +106,7 @@ export default function Others({
         setItems(data);
       };
       getDatas();
-  }, [fetchItems, userId ,setItems, isModified]);
+  }, [fetchItems, userId ,setItems, isModified, othersState]);
 
   const handleAddOthers = async () => {
     try {
