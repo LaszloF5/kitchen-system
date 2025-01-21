@@ -28,6 +28,7 @@ export default function App() {
   const [prevCurrency, setPrevCurrency] = useState("");
   const [userId, setUserId] = useState(localStorage.getItem("userId") || null);
   const [isVisibleScrollBtn, setIsVisibleScrollBtn] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   // ScrollToTop
 
@@ -47,7 +48,34 @@ export default function App() {
   }, []);
 
   const handleScrollToTop = () => {
-    window.scrollTo({top: 0, behavior: 'smooth'})
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // hamburger menu
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768) {
+        setIsMobile(true);
+      } else {
+        setIsMobile(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  const [isVisibleHamMenu, setIsVisibleHamMenu] = useState(false);
+
+  const toggleHamMenu = () => {
+    setIsVisibleHamMenu(!isVisibleHamMenu);
+  }
+
+  const handleCloseHamMenu = () => {
+    setIsVisibleHamMenu(false);
   }
 
   // Contexts
@@ -79,13 +107,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("toggle", JSON.stringify(isDarkMode));
   }, [isDarkMode]);
-
-  // USEMEMO????
-  // useEffect(() => {
-  //   if (yourAmount[yourAmount.length - 1]?.amount > 0 && currency === "") {
-  //     alert("Enter the currency that you want to use.");
-  //   }
-  // }, []);
 
   // Get items
 
@@ -230,7 +251,7 @@ export default function App() {
       setPrevCurrency(currency);
     }
   }, [currency]);
-
+  /*header-nav_ul temoprary delete */
   return (
     <div className={`${isDarkMode ? "getDark" : "getLight"} App`}>
       {isVisibleScrollBtn && (
@@ -244,24 +265,24 @@ export default function App() {
       <HashRouter>
         <header className="header">
           <nav className="header-nav">
-            <ul className="header-nav_ul">
+            <img className={`${isMobile ? 'hamburger-menu-icon' : 'hidden-ham-icon'}`} src={process.env.PUBLIC_URL + "hamburger-menu.png"} alt="hamburger menu icon" onClick={toggleHamMenu}/>
+            <ul className={`${isMobile ? 'hidden-menu' : 'header-nav_ul'} ${isVisibleHamMenu ? 'visible-ham-menu' : 'hidden-ham-menu'}`}>
               <li>
-                <Link className="header-nav_ul_li_link" to="/">
+                <Link className="header-nav_ul_li_link" to="/" onClick={handleCloseHamMenu}>
                   Home
                 </Link>
               </li>
               {userId === null ? (
                 <li>
-                  <Link className="header-nav_ul_li_link" to="/register">
+                  <Link className="header-nav_ul_li_link" to="/register" onClick={handleCloseHamMenu}>
                     Register
                   </Link>
-                  ;
                 </li>
               ) : (
                 ""
               )}
               <li>
-                <Link className="header-nav_ul_li_link" to="/login">
+                <Link className="header-nav_ul_li_link" to="/login" onClick={handleCloseHamMenu}>
                   {userId === null ? "Login" : "Logout"}
                 </Link>
               </li>
@@ -269,7 +290,7 @@ export default function App() {
                 ""
               ) : (
                 <li>
-                  <Link className="header-nav_ul_li_link" to="/expenses">
+                  <Link className="header-nav_ul_li_link" to="/expenses" onClick={handleCloseHamMenu}>
                     Expenses
                   </Link>
                 </li>
@@ -446,10 +467,11 @@ export default function App() {
   - A shoppinglistből a célkomponensbe nem frissül a dátum.
   - Ha van szerver kapcsolat, viszont nincs bejelentkezve a felhasználó, akkor ne dobáljon hibaüzeneteket.
   - To top arrow.
+  - Ha az Add to SL nyitva van, ne lehessen kinyitni az update itemet, és fordítva. (Szarul néz ki + helytakarékosság.)
 
   TODO:
   - Footer.
   - Responsive design.
-  - Ha az Add to SL nyitva van, ne lehessen kinyitni az update itemet, és fordítva. (Szarul néz ki + helytakarékosság.)
+  - Hamburger icon --> white.
   - Egy input mező, ahova be lehet írni / másolni hozzávalókat ételekhez, és végigfuttatni egy keresést arra vonatkozóan, hogy a beadott    elemek szerepelnek-e valamelyik containerbe. Visszatérési érték az az elem lenne, amelyik nem található meg egyik container-be sem /Vagy elemek/;
 */

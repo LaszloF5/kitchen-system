@@ -140,3 +140,10 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
   
+@media screen and (max-width: 576px) {
+  .change-pw-form, .change-pw-form_input {
+    width: 400px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}

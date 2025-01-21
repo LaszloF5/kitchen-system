@@ -8,6 +8,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 26px;
 }
 /********************/
 .alert-color {
@@ -156,6 +157,7 @@ label {
 .quantity-update-form {
   display: flex;
   align-items: center;
+  justify-content: center;
   width: 500px;
 }
 
@@ -169,6 +171,7 @@ label {
   display: flex;
   justify-content: space-around;
   align-items: center;
+  height: 36px;
 }
 
 .form-label {
@@ -181,7 +184,7 @@ label {
 }
 
 .centerBtn {
-  margin: 20px auto 5px;
+  margin: 5px auto 5px;
 }
 
 /*Add visible and hidden styles*/
@@ -270,3 +273,44 @@ li:hover p {
 }
 
 /*MOBILE VIEW STARTS AT: 768px*/
+
+@media screen and (max-width: 768px) {
+
+  .main-item-style, .fridge-ul {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+
+  .fridge-li-element {
+    padding: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 52px;
+  }
+
+  .main-item-style {
+    background-size: 100% 62px;
+  }
+
+  /*Ezt a btn-update margót még átgondoljuk...*/
+
+  .btn-update {
+    margin-top: 5px;
+  }
+
+  /*Input fields*/
+  .centerBtn {
+    margin-top: 19px;
+  }
+
+  .input-container {
+    height: 62px;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .quantity-update-form, .fridge-form-update {
+    width: 400px;
+   }
+}

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { DateTime } from "luxon";
 import "./Expenses.css";
-import { tr } from "date-fns/locale";
 
 export default function Expenses() {
   const [isVisibleExForm, setIsVisibleExForm] = useState(false);
