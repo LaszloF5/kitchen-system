@@ -27,6 +27,28 @@ export default function App() {
   const [currency, setCurrency] = useState("");
   const [prevCurrency, setPrevCurrency] = useState("");
   const [userId, setUserId] = useState(localStorage.getItem("userId") || null);
+  const [isVisibleScrollBtn, setIsVisibleScrollBtn] = useState(false);
+
+  // ScrollToTop
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsVisibleScrollBtn(true);
+      } else {
+        setIsVisibleScrollBtn(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const handleScrollToTop = () => {
+    window.scrollTo({top: 0, behavior: 'smooth'})
+  }
 
   // Contexts
 
@@ -42,16 +64,9 @@ export default function App() {
 
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isVisibleCurrencyForm, setIsVisibleCurrencyForm] = useState(false);
-  const currencyText = isVisibleCurrencyForm
-    ? "Close currency form"
-    : "Set your currency";
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
-  };
-
-  const toggleCurrencyForm = () => {
-    setIsVisibleCurrencyForm(!isVisibleCurrencyForm);
   };
 
   useEffect(() => {
@@ -76,19 +91,19 @@ export default function App() {
 
   const fetchItems = useCallback(async (table) => {
     const userId = localStorage.getItem("userId");
-      if (userId === null) {
-        // console.log('You need to be logged in to perform this aciton.');
-        return [];
-      }
-      try {
-        const response = await axios.get(`http://localhost:5500/${table}`, {
-          params: { userId },
-        });
-        return Array.isArray(response.data.items) ? response.data.items : [];
-      } catch (error) {
-        console.error("Error fetching items: ", error);
-        return [];
-      }
+    if (userId === null) {
+      // console.log('You need to be logged in to perform this aciton.');
+      return [];
+    }
+    try {
+      const response = await axios.get(`http://localhost:5500/${table}`, {
+        params: { userId },
+      });
+      return Array.isArray(response.data.items) ? response.data.items : [];
+    } catch (error) {
+      console.error("Error fetching items: ", error);
+      return [];
+    }
   }, []);
 
   // Post items
@@ -146,7 +161,7 @@ export default function App() {
   const updateItem = async (table, modifyQuantity, updateId, setItems) => {
     const userId = localStorage.getItem("userId");
     const dateNow = DateTime.now().toISO().replace(/T.*/, "");
-    console.log('date: ', dateNow);
+    console.log("date: ", dateNow);
     console.log("updateItem id: ", userId);
 
     if (!userId) {
@@ -218,6 +233,14 @@ export default function App() {
 
   return (
     <div className={`${isDarkMode ? "getDark" : "getLight"} App`}>
+      {isVisibleScrollBtn && (
+        <img
+          className="top-arrow"
+          src={process.env.PUBLIC_URL + "top-arrow.png"}
+          alt="top arrow button"
+          onClick={handleScrollToTop}
+        />
+      )}
       <HashRouter>
         <header className="header">
           <nav className="header-nav">
@@ -422,9 +445,11 @@ export default function App() {
   - A bevásárlások értékének bevitele.Ezeket gyűjteni egy objektumba, heti és havi kimutatást készíteni diagram formájában is, de szerintem csak ha az aktuális heti, és havi ráfordítás megjelnne az is jó lenne. A diagramok pedig külön oldalon szerepelnének.
   - A shoppinglistből a célkomponensbe nem frissül a dátum.
   - Ha van szerver kapcsolat, viszont nincs bejelentkezve a felhasználó, akkor ne dobáljon hibaüzeneteket.
+  - To top arrow.
 
   TODO:
-  - To top arrow.
+  - Footer.
   - Responsive design.
+  - Ha az Add to SL nyitva van, ne lehessen kinyitni az update itemet, és fordítva. (Szarul néz ki + helytakarékosság.)
   - Egy input mező, ahova be lehet írni / másolni hozzávalókat ételekhez, és végigfuttatni egy keresést arra vonatkozóan, hogy a beadott    elemek szerepelnek-e valamelyik containerbe. Visszatérési érték az az elem lenne, amelyik nem található meg egyik container-be sem /Vagy elemek/;
 */

@@ -1,9 +1,5 @@
-/* Dark mode */
-
-/*///////////*/
-
 .fridge-ul {
-  width: 60vw;
+  width: 820px;
   min-height: 20vh;
 }
 
@@ -242,3 +238,35 @@ li:hover p {
 }
 
 /*******************************/
+
+@media screen and (max-width: 1200px) {
+  .fridge-ul {
+    width: 70vw;
+  }
+}
+
+@media screen and (max-width: 1100px) {
+  .fridge-ul {
+    width: 75vw;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .fridge-ul {
+    width: 80vw;
+  }
+}
+
+@media screen and (max-width: 850px) {
+  .fridge-ul {
+    width: 85vw;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .fridge-ul {
+    width: 95vw;
+  }
+}
+
+/*MOBILE VIEW STARTS AT: 768px*/

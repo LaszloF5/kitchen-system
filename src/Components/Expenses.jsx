@@ -20,10 +20,12 @@ export default function Expenses() {
 
   const handleToggleExForm = () => {
     setIsVisibleExForm(!isVisibleExForm);
+    setIsVisibleCurForm(false);
   };
 
   const handleToggleCurForm = () => {
     setIsVisibleCurForm(!isVisibleCurForm);
+    setIsVisibleExForm(false);
   };
 
   const handleExpense = async (e) => {

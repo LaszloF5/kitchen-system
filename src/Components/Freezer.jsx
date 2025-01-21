@@ -63,6 +63,7 @@ export default function Freezer({
   const toggleTransferForm = (index) => {
     setTempIndex(index);
     setIsVisibleTransferForm(!isVisibleTransferForm);
+    setIsVisibleUpdateF(false);
   };
 
   const SLText = isVisibleTransferForm ? "Close modification" : "Add to SL";
@@ -94,8 +95,9 @@ export default function Freezer({
   };
 
   const toggleVisibilityUpdateF = (index, id) => {
-    setIsVisibleUpdateF(!isVisibleUpdateF);
     setUpdateId(id);
+    setIsVisibleUpdateF(!isVisibleUpdateF);
+    setIsVisibleTransferForm(false);
   };
 
   // Add item to the database

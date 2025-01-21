@@ -109,15 +109,17 @@ export default function ShoppingList({
 
   const isTextQty = isVisibleQty ? "Close modification" : "Update item";
   const handleVisibleQty = (index, id) => {
-    setIsVisibleQty(!isVisibleQty);
     setUpdateId(id);
+    setIsVisibleQty(!isVisibleQty);
+    setIsVisibleMoveTo(false);
   };
 
   // Visible move to form
 
   const toggleVisibleMoveTo = (index) => {
-    setIsVisibleMoveTo(!isVisibleMoveTo);
     setNewIndex(index);
+    setIsVisibleMoveTo(!isVisibleMoveTo);
+    setIsVisibleQty(false);
   };
 
   const [prevExpenditure, setPrevExpenditure] = useState([]);

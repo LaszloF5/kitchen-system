@@ -46,6 +46,7 @@ export default function Fridge({
   const toggleVisibleTransferForm = (index) => {
     setTempIndex(index);
     setIsVisibleTransferForm(!isVisibleTransferForm);
+    setIsVisibleUpdate(false);
   };
 
   const SLText = isVisibleTransferForm ? "Close modification" : "Add to SL";
@@ -94,6 +95,7 @@ export default function Fridge({
   const toggleVisibilityUpdate = (index, id) => {
     setUpdateId(id);
     setIsVisibleUpdate(!isVisibleUpdate);
+    setIsVisibleTransferForm(false);
   };
 
 
@@ -145,7 +147,7 @@ export default function Fridge({
   };
 
   return (
-    <div>
+    <>
       <h2>Fridge items</h2>
       <ul className="fridge-ul main-item-style">
         {items.length === 0 ? (
@@ -288,6 +290,6 @@ export default function Fridge({
           onClick={handleAddFridge}
         />
       </form>
-    </div>
+    </>
   );
 }

@@ -30,8 +30,9 @@ export default function Chamber({
   // Visible transfer form
   const [isVisibleTransferForm, setIsVisibleTransferForm] = useState(false);
   const toggleVisibleTransferForm = (index) => {
-    setIsVisibleTransferForm(!isVisibleTransferForm);
     setTempIndex(index);
+    setIsVisibleTransferForm(!isVisibleTransferForm);
+    setIsVisibleQuantity(false);
   };
 
   const SLText = isVisibleTransferForm ? "Close modification" : "Add to SL";
@@ -94,8 +95,9 @@ export default function Chamber({
   };
 
   const toggleUpdateForm = (index, id) => {
-    setIsVisibleQuantity(!isVisibleQuantity);
     setUpdateId(id);
+    setIsVisibleQuantity(!isVisibleQuantity);
+    setIsVisibleTransferForm(false);
   };
 
   // Item modifier functions

@@ -42,6 +42,7 @@ export default function Others({
   const toggleVisibleTransferForm = (index) => {
     setTempIndex(index);
     setIsVisibleTransferForm(!isVisibleTransferForm);
+    setIsVisibleQtyO(false);
   };
 
   // Functions
@@ -93,8 +94,9 @@ export default function Others({
   };
 
   const toggleModifyQty = (index, id) => {
-    setIsVisibleQtyO(!isVisibleQtyO);
     setUpdateId(id);
+    setIsVisibleQtyO(!isVisibleQtyO);
+    setIsVisibleTransferForm(false);
   };
 
   // Item modifier functions
