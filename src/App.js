@@ -76,15 +76,19 @@ export default function App() {
 
   const fetchItems = useCallback(async (table) => {
     const userId = localStorage.getItem("userId");
-    try {
-      const response = await axios.get(`http://localhost:5500/${table}`, {
-        params: { userId },
-      });
-      return Array.isArray(response.data.items) ? response.data.items : [];
-    } catch (error) {
-      console.error("Error fetching items: ", error);
-      return [];
-    }
+      if (userId === null) {
+        // console.log('You need to be logged in to perform this aciton.');
+        return [];
+      }
+      try {
+        const response = await axios.get(`http://localhost:5500/${table}`, {
+          params: { userId },
+        });
+        return Array.isArray(response.data.items) ? response.data.items : [];
+      } catch (error) {
+        console.error("Error fetching items: ", error);
+        return [];
+      }
   }, []);
 
   // Post items
@@ -142,6 +146,7 @@ export default function App() {
   const updateItem = async (table, modifyQuantity, updateId, setItems) => {
     const userId = localStorage.getItem("userId");
     const dateNow = DateTime.now().toISO().replace(/T.*/, "");
+    console.log('date: ', dateNow);
     console.log("updateItem id: ", userId);
 
     if (!userId) {
@@ -412,12 +417,14 @@ export default function App() {
   - DARK MODE-BAN AZ ADD ITEM MEGNYITÁSAKOR A SZÖVEG NEM LÁTSZÓDIK, MA KÖTELEZŐ JAVÍTANI! 2024-10-11. + A VONALAZÁST IS;
   - Dark mode-ban az árnyék alul és jobb oldalon legyen;
   - Adatbázis készítése, összekötni az oldallal;
+  - Bejelentkezési felület, és bejelentkezés;
+  A valuta megadására hívja fel a figyelmet, ha az nincs megadva. Ez külön legyen kezelve a form-tól.
+  - A bevásárlások értékének bevitele.Ezeket gyűjteni egy objektumba, heti és havi kimutatást készíteni diagram formájában is, de szerintem csak ha az aktuális heti, és havi ráfordítás megjelnne az is jó lenne. A diagramok pedig külön oldalon szerepelnének.
+  - A shoppinglistből a célkomponensbe nem frissül a dátum.
+  - Ha van szerver kapcsolat, viszont nincs bejelentkezve a felhasználó, akkor ne dobáljon hibaüzeneteket.
 
   TODO:
-  - A bevásárlások értékének bevitele.Ezeket gyűjteni egy objektumba, heti és havi kimutatást készíteni diagram formájában is, de szerintem csak ha az aktuális heti, és havi ráfordítás megjelnne az is jó lenne. A diagramok pedig külön oldalon szerepelnének.
-  A valuta megadására hívja fel a figyelmet, ha az nincs megadva. Ez külön legyen kezelve a form-tól.
-  - Bejelentkezési felület, és bejelentkezés;
-  - Bizonyos termékekre mennyi volt a havi ráfordítás (Vagy akár az összesre.);
-  - 1 gomb amivel lehet váltani az adott tétel színét, jelezve a vásárlás sikerességét (esetleg pipa v x), vagy az adott elem nevére kattintáskor áthúzni az elemet, ezzel jelezve a vásárlás sikerességét. EZ NEM BIZTOS HOGY HASZNOS ÖTLET;
+  - To top arrow.
+  - Responsive design.
   - Egy input mező, ahova be lehet írni / másolni hozzávalókat ételekhez, és végigfuttatni egy keresést arra vonatkozóan, hogy a beadott    elemek szerepelnek-e valamelyik containerbe. Visszatérési érték az az elem lenne, amelyik nem található meg egyik container-be sem /Vagy elemek/;
 */

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
 import { getWeek } from "date-fns";
+import { DateTime } from "luxon";
 import axios from "axios";
 import FridgeContext from "../Contexts/FridgeContext";
 import FreezerContext from "../Contexts/FreezerContext";
@@ -19,45 +20,43 @@ export default function ShoppingList({
   setExpenditure,
   userId,
 }) {
-
-    
   // useContext for fridge_items
 
-  const {fridgeState} = useContext(FridgeContext);
-  const {setFridgeState} = useContext(FridgeContext);
+  const { fridgeState } = useContext(FridgeContext);
+  const { setFridgeState } = useContext(FridgeContext);
 
   const toggleFridgeState = () => {
     setFridgeState(!fridgeState);
-  }
+  };
 
   // useContext for freezer_items
 
-  const {freezerState} = useContext(FreezerContext);
-  const {setFreezerState} = useContext(FreezerContext);
+  const { freezerState } = useContext(FreezerContext);
+  const { setFreezerState } = useContext(FreezerContext);
 
   const toggleFreezerState = () => {
     setFreezerState(!freezerState);
-  }
+  };
 
   // useContext for chamber_items
 
-  const {chamberState} = useContext(ChamberContext);
-  const {setChamberState} = useContext(ChamberContext);
+  const { chamberState } = useContext(ChamberContext);
+  const { setChamberState } = useContext(ChamberContext);
 
   const toggleChamberState = () => {
     setChamberState(!chamberState);
-  }
+  };
 
   // useContext for others_items
 
-  const {othersState} = useContext(OthersContext);
-  const {setOthersState} = useContext(OthersContext);
+  const { othersState } = useContext(OthersContext);
+  const { setOthersState } = useContext(OthersContext);
 
   const toggleOthersState = () => {
     setOthersState(!othersState);
-  }
+  };
 
-  const {sLState} = useContext(SLContext);
+  const { sLState } = useContext(SLContext);
 
   // Input values
 
@@ -88,13 +87,15 @@ export default function ShoppingList({
 
     if (isVisibleS && formRef.current) {
       addSLFormRef.current.focus();
-      formRef.current.scrollIntoView({behavior: 'smooth', block: 'start'})
+      formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     if (isVisibleMoveTo && formRefMove.current) {
-      formRefMove.current.scrollIntoView({behavior: 'smooth', block: 'start'});
+      formRefMove.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
-
   }, [isVisibleAmount, isVisibleQty, isVisibleS, isVisibleMoveTo]);
 
   // Visible Add form
@@ -200,8 +201,8 @@ export default function ShoppingList({
   // Elemek mozgatása komponensek között //
 
   const moveItem = async (itemName, sourceTable, targetTable) => {
+    const dateNow = DateTime.now().toISO().replace(/T.*/, "");
     const userId = localStorage.getItem("userId");
-    console.log("moveItem function userId: ", userId);
     const validTables = [
       "fridge_items",
       "freezer_items",
@@ -228,6 +229,7 @@ export default function ShoppingList({
           itemName,
           sourceTable: trimmedSourceTable,
           targetTable: trimmedTargetTable,
+          dateNow,
           userId,
         }
       );
@@ -250,15 +252,13 @@ export default function ShoppingList({
         alert("Hiba a mozgatáskor: " + error.message);
       }
     }
-    console.log('A céltábla amit renderelni kell: ', targetTable);
-    // toggleRenderState();
-    if (targetTable === 'fridge_items') {
+    if (targetTable === "fridge_items") {
       toggleFridgeState();
-    } else if (targetTable === 'freezer_items') {
+    } else if (targetTable === "freezer_items") {
       toggleFreezerState();
-    } else if (targetTable === 'chamber_items') {
+    } else if (targetTable === "chamber_items") {
       toggleChamberState();
-    } else if (targetTable === 'others_items') {
+    } else if (targetTable === "others_items") {
       toggleOthersState();
     }
   };

@@ -417,7 +417,7 @@ app.delete("/expenses", verifyId, function (req, res) {
 // Elemek mozgatása a shoppingList komponensből a többi komponensbe.
 
 app.post("/move_item", verifyId, (req, res) => {
-  const { itemName, sourceTable, targetTable, userId } = req.body;
+  const { itemName, sourceTable, targetTable, dateNow, userId } = req.body;
   // const userId = req.user.id;
   console.log("Received request body:", req.body);
 
@@ -478,8 +478,8 @@ app.post("/move_item", verifyId, (req, res) => {
               const updatedQuantity = `${newQuantity} ${targetUnit}`;
 
               db.run(
-                `UPDATE ${targetTable} SET quantity = ? WHERE name = ? AND user_id = ?`,
-                [updatedQuantity, itemName, userId],
+                `UPDATE ${targetTable} SET quantity = ?, date_added = ? WHERE name = ? AND user_id = ?`,
+                [updatedQuantity, dateNow, itemName, userId],
                 function (err) {
                   if (err) return res.status(500).json({ error: err.message });
 
