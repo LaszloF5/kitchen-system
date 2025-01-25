@@ -1,0 +1,12 @@
+body {
+    background-color: gray;
+}
+
+.usage-container {
+    min-height: calc(100vh - (10vh + 50px));
+}
+
+h2 {
+    font-size: 2rem;
+    margin: 0;
+}

@@ -34,8 +34,7 @@
 
 .header {
   height: 50px;
-  /* background-color: #4A4A4A; */
-  background-color: #2c3e50; /*Ez jobb.*/
+  background-color: #2c3e50;
   color: whitesmoke;
   display: flex;
   align-items: center;
@@ -138,7 +137,7 @@ p {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid black;
+  outline: 2px solid black;
 }
 
 @media screen and (max-width: 992px) {
@@ -156,7 +155,7 @@ p {
     background-color: rgb(44,62,80);
     padding: 20px;
     margin-bottom: 0;
-    animation: slideIn 0.5s ease forwards; /* Megjelenési animáció */
+    animation: slideIn 0.5s ease forwards;
   }
 
   .hidden-ham-menu {
@@ -166,7 +165,7 @@ p {
     background-color: rgb(44,62,80);
     padding: 20px;
     margin-bottom: 0;
-    animation: slideOut 0.5s ease forwards; /* Eltűnési animáció */
+    animation: slideOut 0.5s ease forwards;
   }
 
   @keyframes slideIn {

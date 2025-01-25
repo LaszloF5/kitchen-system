@@ -15,6 +15,7 @@ import FreezerContext from "./Contexts/FreezerContext";
 import ChamberContext from "./Contexts/ChamberContext";
 import OthersContext from "./Contexts/OthersContext";
 import SLContext from "./Contexts/SLContext";
+import Usage from "./Components/Usage";
 import "./App.css";
 
 export default function App() {
@@ -272,6 +273,9 @@ export default function App() {
                   Home
                 </Link>
               </li>
+              <li>
+                <Link className="header-nav_ul_li_link" to='/usage' onClick={handleCloseHamMenu}>Usage</Link>
+              </li>
               {userId === null ? (
                 <li>
                   <Link className="header-nav_ul_li_link" to="/register" onClick={handleCloseHamMenu}>
@@ -333,6 +337,7 @@ export default function App() {
           />
         )}
         <Routes>
+          <Route path="/Usage" element={<Usage/>}/>
           <Route path="/Register" element={<Register />} />
           <Route
             path="/Login"
@@ -468,10 +473,11 @@ export default function App() {
   - Ha van szerver kapcsolat, viszont nincs bejelentkezve a felhasználó, akkor ne dobáljon hibaüzeneteket.
   - To top arrow.
   - Ha az Add to SL nyitva van, ne lehessen kinyitni az update itemet, és fordítva. (Szarul néz ki + helytakarékosság.)
-
-  TODO:
-  - Footer.
   - Responsive design.
   - Hamburger icon --> white.
+
+  TODO:
+  - usage
+  - Footer.
   - Egy input mező, ahova be lehet írni / másolni hozzávalókat ételekhez, és végigfuttatni egy keresést arra vonatkozóan, hogy a beadott    elemek szerepelnek-e valamelyik containerbe. Visszatérési érték az az elem lenne, amelyik nem található meg egyik container-be sem /Vagy elemek/;
 */

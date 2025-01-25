@@ -28,8 +28,8 @@ export default function Expenses() {
   };
 
   const handleExpense = async (e) => {
-    setIsWorking(true);
     e.preventDefault();
+    setIsWorking(true);
     const amount = e.target.expense.value.trim();
     const today = DateTime.now();
     const year = today.year;
