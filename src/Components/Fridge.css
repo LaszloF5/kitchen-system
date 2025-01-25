@@ -185,6 +185,7 @@ label {
 
 .centerBtn {
   margin: 5px auto 5px;
+  width: 100px;
 }
 
 /*Add visible and hidden styles*/

@@ -193,7 +193,7 @@ export default function Chamber({
           isVisibleTransferForm ? "visibleTransferForm" : "hiddenTransferForm"
         }`}
       >
-        <label htmlFor="setQty">Set the quantity</label>
+        <label htmlFor="setQty">Set quantity</label>
         <input
           type="text"
           name="setQuantity"
@@ -270,12 +270,11 @@ export default function Chamber({
             onChange={(e) => setNewQuantity(e.target.value)}
           />
         </div>
-        <input
+        <button
           type="submit"
-          value="Update"
           onClick={handleAddChamber}
           className="btn btn-others centerBtn"
-        />
+        >Add</button>
       </form>
     </>
   );

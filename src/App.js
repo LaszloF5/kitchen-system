@@ -308,6 +308,7 @@ export default function App() {
               className="currencyForm_input"
               type="text"
               name="currency"
+              id="currency-id"
               placeholder="ex. USD"
               autoComplete="off"
               autoFocus
@@ -441,7 +442,25 @@ export default function App() {
             }
           />
         </Routes>
-        <footer className="footer">Footer</footer>
+        <footer className="footer">
+          <p className="footer_p">�� 2025 Kitchen System. All rights reserved.</p>
+            <div className="footer-icons-container">
+            <a href="https://github.com/LaszloF5/kitchen-system" target="_blank">
+              <img
+                className="footer-icons"
+                src={process.env.PUBLIC_URL + "github-icon-blue.png"}
+                alt="GitHub icon"
+              />
+            </a>
+            <a href="#" target="_blank">
+              <img
+                className="footer-icons"
+                src={process.env.PUBLIC_URL + "linkedin-icon-blue.png"}
+                alt="LinkedIn icon"
+              />
+            </a>
+            </div>
+        </footer>
       </HashRouter>
     </div>
   );
@@ -475,9 +494,9 @@ export default function App() {
   - Ha az Add to SL nyitva van, ne lehessen kinyitni az update itemet, és fordítva. (Szarul néz ki + helytakarékosság.)
   - Responsive design.
   - Hamburger icon --> white.
+  - Usage
+  - Footer
 
   TODO:
-  - usage
-  - Footer.
   - Egy input mező, ahova be lehet írni / másolni hozzávalókat ételekhez, és végigfuttatni egy keresést arra vonatkozóan, hogy a beadott    elemek szerepelnek-e valamelyik containerbe. Visszatérési érték az az elem lenne, amelyik nem található meg egyik container-be sem /Vagy elemek/;
 */

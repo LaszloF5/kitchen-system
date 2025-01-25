@@ -3,10 +3,118 @@ body {
 }
 
 .usage-container {
+    max-width: 800px;
     min-height: calc(100vh - (10vh + 50px));
+    margin: 0 auto;
+    padding: 20px;
+    background-color: rgb(200,200,200);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .usage-container_important_message {
+    font-weight: bold;
+  }
+  
+  .usage-container_h2, .usage-container_h3, .usage-container_h4 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #333;
 }
 
-h2 {
-    font-size: 2rem;
-    margin: 0;
-}
+.usage-container_h2 {
+      font-size: 2rem;
+      color: #2c3e50;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 10px;
+  }
+  
+  .usage-container_h3 {
+    font-size: 1.5rem;
+    color: #34495e;
+  }
+  
+  .usage-container_h4 {
+    font-size: 1.2rem;
+    color: rgb(7,138,237);
+  }
+  
+  .usage-container_p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #383737;
+    margin-bottom: 15px;
+  }
+  
+  .usage-container a {
+    color: rgb(237, 7, 34);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .usage-container a:hover {
+    text-decoration: underline;
+  }
+
+  .usage_pictures {
+    width: 100%;
+  }
+
+  .usage_pictures_small {
+    width: 50%;
+  }
+  
+  @media (max-width: 768px) {
+    .usage-container {
+      padding: 15px;
+    }
+  
+    .usage-container_h2 {
+      font-size: 1.8rem;
+    }
+  
+    .usage-container_h3 {
+      font-size: 1.4rem;
+    }
+  
+    .usage-container_h4 {
+      font-size: 1.1rem;
+    }
+  
+    .usage-container_p {
+      font-size: 0.95rem;
+    }
+    .usage_pictures_small {
+      width: 75%;
+    }
+  }
+
+  @media screen and (max-width: 576px) {
+    .usage_pictures_small {
+      width: 90%;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .usage-container {
+      padding: 10px;
+    }
+  
+    .usage-container_h2 {
+      font-size: 1.6rem;
+    }
+  
+    .usage-container_h3 {
+      font-size: 1.2rem;
+    }
+  
+    .usage-container_h4 {
+      font-size: 1rem;
+    }
+  
+    .usage-container_p {
+      font-size: 0.9rem;
+    }
+  }
+  

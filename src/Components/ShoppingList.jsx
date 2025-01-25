@@ -100,7 +100,7 @@ export default function ShoppingList({
 
   // Visible Add form
 
-  const isTextS = isVisibleS ? "Close add form" : "Add item";
+  const isTextS = isVisibleS ? "Close Add form" : "Add item";
   const handleVisibleAdd = () => {
     setIsVisibleS(!isVisibleS);
   };
@@ -465,12 +465,11 @@ export default function ShoppingList({
             onChange={(e) => setNewQuantity(e.target.value)}
           />
         </div>
-        <input
+        <button
           type="submit"
-          value="Update"
           onClick={handleAdd}
           className="btn btn-others centerBtn"
-        />
+        >Add</button>
       </form>
     </>
   );

@@ -197,7 +197,7 @@ export default function Fridge({
           isVisibleTransferForm ? "visibleTransferForm" : "hiddenTransferForm"
         }`}
       >
-        <label htmlFor="setQty">Set the quantity:</label>
+        <label htmlFor="setQty">Set quantity:</label>
         <input
           type="text"
           name="setQuantity"
@@ -283,12 +283,11 @@ export default function Fridge({
             }}
           />
         </div>
-        <input
+        <button
           className="btn btn-others centerBtn"
           type="submit"
-          value="Update"
           onClick={handleAddFridge}
-        />
+        >Add</button>
       </form>
     </>
   );

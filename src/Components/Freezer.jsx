@@ -190,7 +190,7 @@ export default function Freezer({
         }`}
         onSubmit={handleSubmit}
       >
-        <label htmlFor="setQty">Set the quantity:</label>
+        <label htmlFor="setQty">Set quantity:</label>
         <input
           type="text"
           name="setQuantity"
@@ -274,12 +274,11 @@ export default function Freezer({
             }}
           />
         </div>
-        <input
+        <button
           className="btn btn-others centerBtn"
           type="submit"
-          value="Update"
           onClick={handleAddFreezer}
-        />
+        >Add</button>
       </form>
     </>
   );
