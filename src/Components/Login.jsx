@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from 'react-helmet-async';
 import "./Login.css";
 
 export default function Login({ userId, setUserId }) {
@@ -29,16 +30,22 @@ export default function Login({ userId, setUserId }) {
         userName,
         password,
       });
-      console.log("Bejelentkezés sikeres", response.data);
       const myUserId = response.data.userId;
       localStorage.setItem("userId", myUserId);
       setUserId(localStorage.getItem("userId"));
-      alert("Bejelentkezés sikeres!");
-      console.log("A bejelentkezett felhasználó id-je: ", myUserId);
+      alert("Successfully login!");
       navigate("/");
     } catch (error) {
-      console.log("Bejelentkezés sikertelen", error);
-      setErrorMessage("Hibás felhasználónév vagy jelszó!");
+      console.error("Login failed", error);
+      if (error.message === 'Network Error') {
+        setErrorMessage("Network Error! Please try again later!");
+      } else if (error.response.status === 401) {
+        setErrorMessage("Username or password is incorrect! Please try again!");
+      } else {
+        setErrorMessage('Login failed!');
+      }
+      e.target.username.value = '';
+      e.target.password.value = '';
     } finally {
       setIsLoading(false);
     }
@@ -47,9 +54,9 @@ export default function Login({ userId, setUserId }) {
   const handleLogOut = async () => {
     localStorage.removeItem("userId");
     setUserId(null);
-    alert("Kijelentkezés sikeres!");
-    console.log("Kijelentkezés sikeres!");
+    alert("Successfully logout!");
     settoggleChangePw(false);
+    navigate('/');
   };
 
   const handleDeleteAccount = async () => {
@@ -66,7 +73,8 @@ export default function Login({ userId, setUserId }) {
     );
 
     if (!confirmDelete) {
-      console.log("Delete account canceled.");
+      alert("Delete account canceled.");
+      setIsLoading(false);
       return;
     }
 
@@ -82,7 +90,8 @@ export default function Login({ userId, setUserId }) {
       localStorage.removeItem("curr");
       setUserId(null);
       settoggleChangePw(false);
-      window.location.reload();
+      // window.location.reload();
+      navigate('/');
     } catch {
       console.error("Failed to delete account.");
       return;
@@ -119,7 +128,6 @@ export default function Login({ userId, setUserId }) {
   
       if (response.status === 200) {
         alert("Password changed successfully!");
-        console.log("Password changed successfully!");
         e.target.oldPassword.value = '';
         e.target.newPassword.value = '';
         settoggleChangePw(false);
@@ -135,6 +143,9 @@ export default function Login({ userId, setUserId }) {
 
   return (
     <div className="login-container">
+      <Helmet>
+        <title>My Food Minder | {userId === null ? 'Login' : 'Logout'}</title>
+      </Helmet>
       {userId && userId.length > 0 ? (
         <div className="is-logged-in-container">
           <button className="login-form_button" disabled={isLoading} onClick={handleLogOut}>
@@ -173,7 +184,7 @@ export default function Login({ userId, setUserId }) {
         </div>
       ) : (
         <form className="login-form" onSubmit={handleLogin}>
-          <p>Login</p>
+          <h3 className="login-form_h3">Login</h3>
           <input
             className="login-form_input"
             type="text"
@@ -191,6 +202,7 @@ export default function Login({ userId, setUserId }) {
             required
             autoComplete="false"
           />
+          {errorMessage && <p className='login-error'>{errorMessage}</p>}
           <button
             className="login-form_button"
             type="submit"
@@ -207,7 +219,6 @@ export default function Login({ userId, setUserId }) {
           </button>
         </form>
       )}
-      {errorMessage && <div style={{ color: "red" }}>{errorMessage}</div>}
     </div>
   );
 }

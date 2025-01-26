@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { HashRouter, Route, Routes, Link } from "react-router-dom";
 import axios from "axios";
 import { DateTime } from "luxon";
+import { HelmetProvider, Helmet } from "react-helmet-async";
 import Fridge from "./Components/Fridge";
 import Freezer from "./Components/Freezer";
 import Chamber from "./Components/Chamber";
@@ -52,7 +53,7 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // hamburger menu
+  // Hamburger menu
 
   useEffect(() => {
     const handleResize = () => {
@@ -73,11 +74,11 @@ export default function App() {
 
   const toggleHamMenu = () => {
     setIsVisibleHamMenu(!isVisibleHamMenu);
-  }
+  };
 
   const handleCloseHamMenu = () => {
     setIsVisibleHamMenu(false);
-  }
+  };
 
   // Contexts
 
@@ -114,7 +115,6 @@ export default function App() {
   const fetchItems = useCallback(async (table) => {
     const userId = localStorage.getItem("userId");
     if (userId === null) {
-      // console.log('You need to be logged in to perform this aciton.');
       return [];
     }
     try {
@@ -132,7 +132,6 @@ export default function App() {
 
   const addItem = async (table, newItem, newQuantity, setItems) => {
     const userId = localStorage.getItem("userId");
-    console.log("Frontend userId: ", userId);
     if (newItem.length > 0 && newQuantity.length > 0) {
       const validQty = Number(...newQuantity.match(regexQtyBreakdown));
       const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
@@ -183,8 +182,6 @@ export default function App() {
   const updateItem = async (table, modifyQuantity, updateId, setItems) => {
     const userId = localStorage.getItem("userId");
     const dateNow = DateTime.now().toISO().replace(/T.*/, "");
-    console.log("date: ", dateNow);
-    console.log("updateItem id: ", userId);
 
     if (!userId) {
       console.error("No userId found in localStorage!");
@@ -224,8 +221,6 @@ export default function App() {
     setSLState(!sLState);
   };
 
-  /* Csak a targetTable renderelése kell ebben az esetben. vagyis a sl-items. */
-
   const handleCurrency = (e) => {
     e.preventDefault();
     if (e.target.currency.value.length === 0) {
@@ -252,7 +247,6 @@ export default function App() {
       setPrevCurrency(currency);
     }
   }, [currency]);
-  /*header-nav_ul temoprary delete */
   return (
     <div className={`${isDarkMode ? "getDark" : "getLight"} App`}>
       {isVisibleScrollBtn && (
@@ -264,239 +258,254 @@ export default function App() {
         />
       )}
       <HashRouter>
-        <header className="header">
-          <nav className="header-nav">
-            <img className={`${isMobile ? 'hamburger-menu-icon' : 'hidden-ham-icon'}`} src={process.env.PUBLIC_URL + "hamburger-menu.png"} alt="hamburger menu icon" onClick={toggleHamMenu}/>
-            <ul className={`${isMobile ? 'hidden-menu' : 'header-nav_ul'} ${isVisibleHamMenu ? 'visible-ham-menu' : 'hidden-ham-menu'}`}>
-              <li>
-                <Link className="header-nav_ul_li_link" to="/" onClick={handleCloseHamMenu}>
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link className="header-nav_ul_li_link" to='/usage' onClick={handleCloseHamMenu}>Usage</Link>
-              </li>
-              {userId === null ? (
+        <HelmetProvider>
+          <header className="header">
+            <nav className="header-nav">
+              <img
+                className={`${
+                  isMobile ? "hamburger-menu-icon" : "hidden-ham-icon"
+                }`}
+                src={process.env.PUBLIC_URL + "hamburger-menu.png"}
+                alt="hamburger menu icon"
+                onClick={toggleHamMenu}
+              />
+              <ul
+                className={`${isMobile ? "hidden-menu" : "header-nav_ul"} ${
+                  isVisibleHamMenu ? "visible-ham-menu" : "hidden-ham-menu"
+                }`}
+              >
                 <li>
-                  <Link className="header-nav_ul_li_link" to="/register" onClick={handleCloseHamMenu}>
-                    Register
+                  <Link
+                    className="header-nav_ul_li_link"
+                    to="/"
+                    onClick={handleCloseHamMenu}
+                  >
+                    Home
                   </Link>
                 </li>
-              ) : (
-                ""
-              )}
-              <li>
-                <Link className="header-nav_ul_li_link" to="/login" onClick={handleCloseHamMenu}>
-                  {userId === null ? "Login" : "Logout"}
-                </Link>
-              </li>
-              {userId === null ? (
-                ""
-              ) : (
                 <li>
-                  <Link className="header-nav_ul_li_link" to="/expenses" onClick={handleCloseHamMenu}>
-                    Expenses
+                  <Link
+                    className="header-nav_ul_li_link"
+                    to="/usage"
+                    onClick={handleCloseHamMenu}
+                  >
+                    Usage
                   </Link>
                 </li>
-              )}
-            </ul>
-          </nav>
-        </header>
-        {isVisibleCurrencyForm ? (
-          <form className="currencyForm" onSubmit={handleCurrency}>
-            <input
-              className="currencyForm_input"
-              type="text"
-              name="currency"
-              id="currency-id"
-              placeholder="ex. USD"
-              autoComplete="off"
-              autoFocus
+                {userId === null ? (
+                  <li>
+                    <Link
+                      className="header-nav_ul_li_link"
+                      to="/register"
+                      onClick={handleCloseHamMenu}
+                    >
+                      Register
+                    </Link>
+                  </li>
+                ) : (
+                  ""
+                )}
+                <li>
+                  <Link
+                    className="header-nav_ul_li_link"
+                    to="/login"
+                    onClick={handleCloseHamMenu}
+                  >
+                    {userId === null ? "Login" : "Logout"}
+                  </Link>
+                </li>
+                {userId === null ? (
+                  ""
+                ) : (
+                  <li>
+                    <Link
+                      className="header-nav_ul_li_link"
+                      to="/expenses"
+                      onClick={handleCloseHamMenu}
+                    >
+                      Expenses
+                    </Link>
+                  </li>
+                )}
+              </ul>
+            </nav>
+          </header>
+          {isVisibleCurrencyForm ? (
+            <form className="currencyForm" onSubmit={handleCurrency}>
+              <input
+                className="currencyForm_input"
+                type="text"
+                name="currency"
+                id="currency-id"
+                placeholder="ex. USD"
+                autoComplete="off"
+                autoFocus
+              />
+              <button className="btn btn-others" type="submit">
+                Currency
+              </button>
+            </form>
+          ) : null}
+          {isDarkMode ? (
+            <img
+              className="white-filter darkOrLight"
+              src={process.env.PUBLIC_URL + "dark-mode.png"}
+              alt="Dark mode"
+              role="button"
+              tabIndex="0"
+              onClick={toggleDarkMode}
             />
-            <button className="btn btn-others" type="submit">
-              Currency
-            </button>
-          </form>
-        ) : null}
-        {isDarkMode ? (
-          <img
-            className="white-filter darkOrLight"
-            src={process.env.PUBLIC_URL + "dark-mode.png"}
-            alt="Dark mode"
-            role="button"
-            tabIndex="0"
-            onClick={toggleDarkMode}
-          />
-        ) : (
-          <img
-            className="darkOrLight"
-            src={process.env.PUBLIC_URL + "light-mode.png"}
-            alt="Light mode"
-            role="button"
-            tabIndex="0"
-            onClick={toggleDarkMode}
-          />
-        )}
-        <Routes>
-          <Route path="/Usage" element={<Usage/>}/>
-          <Route path="/Register" element={<Register />} />
-          <Route
-            path="/Login"
-            element={<Login userId={userId} setUserId={setUserId} />}
-          />
-          <Route path="/Expenses" element={<Expenses />} />
-          <Route
-            path="/"
-            element={
-              <>
-                <h1>Kitchen system</h1>
-                <FridgeContext.Provider value={{ fridgeState, setFridgeState }}>
-                  <Fridge
-                    items={fridgeItems}
-                    setItems={setFridgeItems}
-                    fetchItems={fetchItems}
-                    addItem={addItem}
-                    deleteItem={deleteItem}
-                    updateItem={updateItem}
-                    moveToSL={moveToSL}
-                    regex={regex}
-                    userId={userId}
-                    setUserId={setUserId}
-                  />
-                </FridgeContext.Provider>
-                <FreezerContext.Provider
-                  value={{ freezerState, setFreezerState }}
-                >
-                  <Freezer
-                    items={freezerItems}
-                    setItems={setFreezerItems}
-                    fetchItems={fetchItems}
-                    addItem={addItem}
-                    deleteItem={deleteItem}
-                    updateItem={updateItem}
-                    moveToSL={moveToSL}
-                    regex={regex}
-                    userId={userId}
-                    setUserId={setUserId}
-                  />
-                </FreezerContext.Provider>
-                <ChamberContext.Provider
-                  value={{ chamberState, setChamberState }}
-                >
-                  <Chamber
-                    items={chamberItems}
-                    setItems={setChamberItems}
-                    fetchItems={fetchItems}
-                    addItem={addItem}
-                    deleteItem={deleteItem}
-                    updateItem={updateItem}
-                    moveToSL={moveToSL}
-                    regex={regex}
-                    userId={userId}
-                    setUserId={setUserId}
-                  />
-                </ChamberContext.Provider>
-                <OthersContext.Provider value={{ othersState, setOthersState }}>
-                  <Others
-                    items={otherItems}
-                    setItems={setOtherItems}
-                    fetchItems={fetchItems}
-                    addItem={addItem}
-                    deleteItem={deleteItem}
-                    updateItem={updateItem}
-                    moveToSL={moveToSL}
-                    regex={regex}
-                    userId={userId}
-                    setUserId={setUserId}
-                  />
-                </OthersContext.Provider>
-                <FridgeContext.Provider value={{ fridgeState, setFridgeState }}>
+          ) : (
+            <img
+              className="darkOrLight"
+              src={process.env.PUBLIC_URL + "light-mode.png"}
+              alt="Light mode"
+              role="button"
+              tabIndex="0"
+              onClick={toggleDarkMode}
+            />
+          )}
+          <Routes>
+            <Route path="/Usage" element={<Usage />} />
+            <Route path="/Register" element={<Register />} />
+            <Route
+              path="/Login"
+              element={<Login userId={userId} setUserId={setUserId} />}
+            />
+            <Route path="/Expenses" element={<Expenses />} />
+            <Route
+              path="/"
+              element={
+                <>
+                  <Helmet>
+                    <title>My Food Minder</title>
+                  </Helmet>
+                  <h1>My Food Minder</h1>
+                  <FridgeContext.Provider
+                    value={{ fridgeState, setFridgeState }}
+                  >
+                    <Fridge
+                      items={fridgeItems}
+                      setItems={setFridgeItems}
+                      fetchItems={fetchItems}
+                      addItem={addItem}
+                      deleteItem={deleteItem}
+                      updateItem={updateItem}
+                      moveToSL={moveToSL}
+                      regex={regex}
+                      userId={userId}
+                      setUserId={setUserId}
+                    />
+                  </FridgeContext.Provider>
                   <FreezerContext.Provider
                     value={{ freezerState, setFreezerState }}
                   >
-                    <ChamberContext.Provider
-                      value={{ chamberState, setChamberState }}
-                    >
-                      <OthersContext.Provider
-                        value={{ othersState, setOthersState }}
-                      >
-                        <SLContext.Provider value={{ sLState, setSLState }}>
-                          <ShoppingList
-                            items={shoppingListItems}
-                            setItems={setShoppingListItems}
-                            fetchItems={fetchItems}
-                            addItem={addItem}
-                            deleteItem={deleteItem}
-                            updateItem={updateItem}
-                            expenditure={yourAmount}
-                            setExpenditure={setYourAmount}
-                            userId={userId}
-                            setUserId={setUserId}
-                          />
-                        </SLContext.Provider>
-                      </OthersContext.Provider>
-                    </ChamberContext.Provider>
+                    <Freezer
+                      items={freezerItems}
+                      setItems={setFreezerItems}
+                      fetchItems={fetchItems}
+                      addItem={addItem}
+                      deleteItem={deleteItem}
+                      updateItem={updateItem}
+                      moveToSL={moveToSL}
+                      regex={regex}
+                      userId={userId}
+                      setUserId={setUserId}
+                    />
                   </FreezerContext.Provider>
-                </FridgeContext.Provider>
-              </>
-            }
-          />
-        </Routes>
-        <footer className="footer">
-          <p className="footer_p">�� 2025 Kitchen System. All rights reserved.</p>
+                  <ChamberContext.Provider
+                    value={{ chamberState, setChamberState }}
+                  >
+                    <Chamber
+                      items={chamberItems}
+                      setItems={setChamberItems}
+                      fetchItems={fetchItems}
+                      addItem={addItem}
+                      deleteItem={deleteItem}
+                      updateItem={updateItem}
+                      moveToSL={moveToSL}
+                      regex={regex}
+                      userId={userId}
+                      setUserId={setUserId}
+                    />
+                  </ChamberContext.Provider>
+                  <OthersContext.Provider
+                    value={{ othersState, setOthersState }}
+                  >
+                    <Others
+                      items={otherItems}
+                      setItems={setOtherItems}
+                      fetchItems={fetchItems}
+                      addItem={addItem}
+                      deleteItem={deleteItem}
+                      updateItem={updateItem}
+                      moveToSL={moveToSL}
+                      regex={regex}
+                      userId={userId}
+                      setUserId={setUserId}
+                    />
+                  </OthersContext.Provider>
+                  <FridgeContext.Provider
+                    value={{ fridgeState, setFridgeState }}
+                  >
+                    <FreezerContext.Provider
+                      value={{ freezerState, setFreezerState }}
+                    >
+                      <ChamberContext.Provider
+                        value={{ chamberState, setChamberState }}
+                      >
+                        <OthersContext.Provider
+                          value={{ othersState, setOthersState }}
+                        >
+                          <SLContext.Provider value={{ sLState, setSLState }}>
+                            <ShoppingList
+                              items={shoppingListItems}
+                              setItems={setShoppingListItems}
+                              fetchItems={fetchItems}
+                              addItem={addItem}
+                              deleteItem={deleteItem}
+                              updateItem={updateItem}
+                              expenditure={yourAmount}
+                              setExpenditure={setYourAmount}
+                              userId={userId}
+                              setUserId={setUserId}
+                            />
+                          </SLContext.Provider>
+                        </OthersContext.Provider>
+                      </ChamberContext.Provider>
+                    </FreezerContext.Provider>
+                  </FridgeContext.Provider>
+                </>
+              }
+            />
+          </Routes>
+          <footer className="footer">
+            <p className="footer_p">
+              �� 2025 My Food Minder. All rights reserved.
+            </p>
             <div className="footer-icons-container">
-            <a href="https://github.com/LaszloF5/kitchen-system" target="_blank">
-              <img
-                className="footer-icons"
-                src={process.env.PUBLIC_URL + "github-icon-blue.png"}
-                alt="GitHub icon"
-              />
-            </a>
-            <a href="#" target="_blank">
+              <a
+                href="https://github.com/LaszloF5/kitchen-system"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <img
+                  className="footer-icons"
+                  src={process.env.PUBLIC_URL + "github-icon-blue.png"}
+                  alt="GitHub icon"
+                />
+              </a>
+              {/* <a href="#" target="_blank">
               <img
                 className="footer-icons"
                 src={process.env.PUBLIC_URL + "linkedin-icon-blue.png"}
                 alt="LinkedIn icon"
               />
-            </a>
+            </a> */}
             </div>
-        </footer>
+          </footer>
+        </HelmetProvider>
       </HashRouter>
     </div>
   );
 }
-
-/*
-/////////////////          DONE:          /////////////////
-
-  - Első körben 1 ugyanolyan system mint eddig.
-  - Az összes komponensbe be lehet építeni egy olyan visszajelzőt, hogy jelzi, ha az adott tételből kevés van. Pl 1 db/l vagy más mértékegység. Ha 1 van belőle, a tétel színe pirosra vált, a font-weight: bold-ra. Regex.
-  - 1 move to gomb, amivel át lehet csoportosítani a tételeket, ahova a felhasználó szeretné. Gomb neve: "Move to..."
-  - A move to gomb kattintásával, felajálja a 4 lehetséges csoportot, ahova beszúrhatjuk a tételt.
-  - Amint a kiválasztott csoportba helyezzük az adott tételt, ellenőrizni kell, hogy van-e már olyan tétel a kiválasztott csoportban: - ha igen: akkor össze kell vonni a 2 mennyiséget, és nem hozunk létre újabb tételt. -ha nincs: akkor létrehozunk egy új tételt, az elem nevével és mennyiségével.
-  - Ha az adott tételt beszúrtuk valahova, akkor a ShoppingList felsorolásból automatikusan el kell távolítani.
-  A komponensekhez adni 1 gombot, amivel fel lehet venni az adott tételt a bevásárlólistára, mennyiség megadásával.
-  - Localstorage létrehozása.
-  - Container nevek nagyobb betűméret;
-  - Füzetszerű ábrázolás;
-  - Dark mode;
-  - Dátumozva, mi mikor került az adott container-be. /HTML details/ UPDATE: Nem details-el oldottam meg, találtam ésszerűbb megoldást.;
-  - Bevásárlólista más színű;
-  - DARK MODE-BAN AZ ADD ITEM MEGNYITÁSAKOR A SZÖVEG NEM LÁTSZÓDIK, MA KÖTELEZŐ JAVÍTANI! 2024-10-11. + A VONALAZÁST IS;
-  - Dark mode-ban az árnyék alul és jobb oldalon legyen;
-  - Adatbázis készítése, összekötni az oldallal;
-  - Bejelentkezési felület, és bejelentkezés;
-  A valuta megadására hívja fel a figyelmet, ha az nincs megadva. Ez külön legyen kezelve a form-tól.
-  - A bevásárlások értékének bevitele.Ezeket gyűjteni egy objektumba, heti és havi kimutatást készíteni diagram formájában is, de szerintem csak ha az aktuális heti, és havi ráfordítás megjelnne az is jó lenne. A diagramok pedig külön oldalon szerepelnének.
-  - A shoppinglistből a célkomponensbe nem frissül a dátum.
-  - Ha van szerver kapcsolat, viszont nincs bejelentkezve a felhasználó, akkor ne dobáljon hibaüzeneteket.
-  - To top arrow.
-  - Ha az Add to SL nyitva van, ne lehessen kinyitni az update itemet, és fordítva. (Szarul néz ki + helytakarékosság.)
-  - Responsive design.
-  - Hamburger icon --> white.
-  - Usage
-  - Footer
-
-  TODO:
-  - Egy input mező, ahova be lehet írni / másolni hozzávalókat ételekhez, és végigfuttatni egy keresést arra vonatkozóan, hogy a beadott    elemek szerepelnek-e valamelyik containerbe. Visszatérési érték az az elem lenne, amelyik nem található meg egyik container-be sem /Vagy elemek/;
-*/

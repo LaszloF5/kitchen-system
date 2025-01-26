@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { DateTime } from "luxon";
+import { Helmet } from 'react-helmet-async';
 import "./Expenses.css";
 
 export default function Expenses() {
@@ -37,14 +38,13 @@ export default function Expenses() {
     const week = today.weekNumber;
     const userId = localStorage.getItem("userId");
     try {
-      const response = await axios.post("http://localhost:5500/expenses", {
+      await axios.post("http://localhost:5500/expenses", {
         amount,
         year,
         month,
         week,
         userId,
       });
-      console.log("Expense added successfully: ", response.data);
       e.target.expense.value = "";
       setExpenses((prevExpenses) => Number(prevExpenses) + Number(amount));
       setIsVisibleExForm(false);
@@ -70,10 +70,9 @@ export default function Expenses() {
     const userId = localStorage.getItem("userId");
     setIsWorking(true);
     try {
-      const response = await axios.delete("http://localhost:5500/expenses", {
+      await axios.delete("http://localhost:5500/expenses", {
         params: { userId },
       });
-      console.log("Expenses deleted successfully", response.data);
     } catch (err) {
       console.error({ err: err.message });
     } finally {
@@ -104,12 +103,6 @@ export default function Expenses() {
           }
         });
         setMonthlyDatas(monthlyData);
-        console.log("Monthly data: ", monthlyData);
-        console.log(
-          "Válasz: ",
-          response.data.expenses[response.data.expenses.length - 1].amount
-        );
-        console.log("A teljes adathalmaz: ", data);
         setExpenses(
           response.data.expenses[response.data.expenses.length - 1].amount
         );
@@ -125,6 +118,9 @@ export default function Expenses() {
 
   return (
     <div className="expenses-container">
+      <Helmet>
+        <title>My Food Minder | Expenses</title>
+      </Helmet>
       <header className="expenses-header">
         <button className="btn btn-others" onClick={handleToggleExForm}>
           {button1Text}

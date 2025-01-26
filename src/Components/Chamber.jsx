@@ -100,8 +100,6 @@ export default function Chamber({
     setIsVisibleTransferForm(false);
   };
 
-  // Item modifier functions
-
   // Datas from the database
 
   useEffect(() => {

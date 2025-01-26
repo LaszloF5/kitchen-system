@@ -6,12 +6,12 @@
   cursor: pointer;
   position: fixed;
   bottom: 20px;
-  right: 45px;
+  right: 25px;
   width: 40px;
   height: 40px;
   transform: scale(1);
   transition: transform 200ms ease-in-out;
-  z-index: 100;
+  z-index: 10;
 }
 
 .top-arrow:hover {
@@ -124,7 +124,7 @@ p {
   height: 40px;
   position: absolute;
   top: 5px;
-  right: 45px;
+  right: 25px;
   cursor: pointer;
 }
 
@@ -133,7 +133,7 @@ p {
 }
 
 .footer {
-  height: 10vh;
+  height: 75px;
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -192,6 +192,7 @@ p {
     to {
       transform: translateY(0);
       opacity: 1;
+      z-index: 10;
     }
   }
 
@@ -218,5 +219,3 @@ p {
     right: 10px;
   }
 }
-
-/*MOBILE VIEW STARTS AT: 768px*/

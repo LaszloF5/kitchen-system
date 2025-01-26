@@ -50,8 +50,8 @@ export default function Fridge({
   };
 
   const SLText = isVisibleTransferForm ? "Close modification" : "Add to SL";
+  
   // to the shopping list
-  // Solution: Shallow copy --> Csak az első szintet másolja érték szerint (a többit referencia szerint), viszont nincs több szint, ezért elég. Így nem fogja módosítani az eredeti items tömböt, és a benne lévő objektumokat.
 
   const handleTransferItem = () => {
     if (tempQty !== "") {

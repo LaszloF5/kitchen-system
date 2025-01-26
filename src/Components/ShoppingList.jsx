@@ -200,8 +200,6 @@ export default function ShoppingList({
     setModifyQuantity("");
   };
 
-  // Elemek mozgatása komponensek között //
-
   const moveItem = async (itemName, sourceTable, targetTable) => {
     const dateNow = DateTime.now().toISO().replace(/T.*/, "");
     const userId = localStorage.getItem("userId");
@@ -220,7 +218,7 @@ export default function ShoppingList({
       !validTables.includes(trimmedSourceTable) ||
       !validTables.includes(trimmedTargetTable)
     ) {
-      console.log("Invalid table name.");
+      console.error("Invalid table name.");
       return;
     }
 
@@ -248,7 +246,7 @@ export default function ShoppingList({
     } catch (error) {
       console.error("Error during moving item:", error);
       if (error.response) {
-        console.log("Server response:", error.response.data);
+        console.error("Server response:", error.response.data);
         alert("Hiba a mozgatáskor: " + error.response.data.error);
       } else {
         alert("Hiba a mozgatáskor: " + error.message);

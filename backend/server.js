@@ -82,19 +82,20 @@ app.post("/register", async (req, res) => {
     return res.status(400).json({ error: "Missing required fields." });
   }
 
-  console.log("userName: ", userName, "password: ", password);
-
   try {
-    // Ellenőrizze, hogy a felhasználónév már létezik-e
     const existingUser = await getUserByUserName(userName);
     if (existingUser) {
-      return res.status(400).json({ error: "Felhasználónév már foglalt." });
+      return res
+        .status(400)
+        .json({
+          error: "This username is already exist. Please choose another one.",
+        });
     }
 
     await registerUser(userName, password);
-    res.status(201).send("Sikeres regisztráció.");
+    res.status(201).send("Successfully registration.");
   } catch (err) {
-    res.status(500).send("Hiba történt a regisztráció során.");
+    res.status(500).send("An error occurred during registration");
   }
 
   async function getUserByUserName(userName) {
@@ -130,7 +131,7 @@ app.post("/register", async (req, res) => {
         });
       });
 
-      console.log("Sikeres regisztráció.");
+      console.log("Successfully registration.");
     } catch (err) {
       throw err;
     }
@@ -161,7 +162,6 @@ app.post("/change-password", async (req, res) => {
     await updatePassword(userId, hashedPassword);
 
     res.status(200).json({ message: "Password changed successfully." });
-
   } catch (err) {
     console.error("Error during password change:", err);
     res.status(500).send("An error occurred during password change.");
@@ -180,7 +180,7 @@ app.post("/change-password", async (req, res) => {
   }
 
   async function updatePassword(userId, newPassword) {
-    const sql = 'UPDATE register SET password = ? WHERE id = ?';
+    const sql = "UPDATE register SET password = ? WHERE id = ?";
 
     return new Promise((resolve, reject) => {
       db.run(sql, [newPassword, userId], (err) => {
@@ -193,7 +193,6 @@ app.post("/change-password", async (req, res) => {
   }
 });
 
-
 app.post("/login", async (req, res) => {
   const { userName, password } = req.body;
 
@@ -203,9 +202,9 @@ app.post("/login", async (req, res) => {
 
   try {
     const userId = await loginUser(userName, password);
-    res.status(200).send({ message: "Sikeres bejelentkezés", userId });
+    res.status(200).send({ message: "Successfully login", userId });
   } catch (err) {
-    res.status(401).send("Hibás bejelentkezési adatok.");
+    res.status(401).send("Wrong login data.");
   }
 });
 
@@ -220,13 +219,13 @@ async function loginUser(userName, password) {
   });
 
   if (!row) {
-    throw new Error("Felhasználó nem található.");
+    throw new Error("User not found.");
   }
 
   const match = await bcrypt.compare(password, row.password);
 
   if (!match) {
-    throw new Error("Hibás jelszó.");
+    throw new Error("Wrong password.");
   }
 
   return row.id;
@@ -255,7 +254,6 @@ function verifyId(req, res, next) {
       return res.status(404).json({ error: "User not found." });
     }
     req.user = row;
-    console.log('VerifyId: ', req.user);
     next();
   });
 }
@@ -287,7 +285,6 @@ app.delete("/delete-account", verifyId, async (req, res) => {
             console.error(`Error deleting from table ${table}`, err.message);
             reject(err);
           }
-          console.log(`Deleted from table ${table}: `, this.changes, "rows");
           resolve();
         });
       });
@@ -314,7 +311,7 @@ app.delete("/delete-account", verifyId, async (req, res) => {
   });
 });
 
-// Kiadások kezelése
+// Manage expenses
 
 app.get("/expenses", verifyId, (req, res) => {
   const userId = req.user.id;
@@ -338,9 +335,6 @@ app.post("/expenses", verifyId, (req, res) => {
   const userId = req.user.id;
   const { amount, year, month, week } = req.body;
 
-  console.log("Request body: ", amount, year, month, week);
-  console.log("User id: ", userId);
-
   if (!amount || !year || !month || !week) {
     return res.status(400).json({ error: "Missing required fields." });
   }
@@ -348,7 +342,7 @@ app.post("/expenses", verifyId, (req, res) => {
   if (!userId) {
     return res.status(400).json({ error: "User ID is missing." });
   }
-  // Ha már van bevitt amount az aktuális héten.
+
   const sql = `SELECT amount FROM expenses WHERE year = ? AND month = ? AND week = ? AND user_id = ?`;
 
   db.get(sql, [year, month, week, userId], (err, result) => {
@@ -369,7 +363,6 @@ app.post("/expenses", verifyId, (req, res) => {
         });
       });
     } else {
-      // Ha nincs egyezés új sort hozunk létre
       const insertSql = `INSERT INTO expenses (amount, year, month, week, user_id) VALUES(?, ?, ?, ?, ?)`;
 
       db.run(insertSql, [amount, year, month, week, userId], (err) => {
@@ -390,7 +383,7 @@ app.delete("/expenses", verifyId, function (req, res) {
   if (!userId) {
     return res.status(400).json({ error: "User ID is missing." });
   }
-  // Ellenőrizzük, hogy a felhasználóhoz van-e elérhető rekord.
+
   const sql = `SELECT * FROM expenses WHERE user_id = ?`;
   db.get(sql, [userId], (err, row) => {
     if (err) {
@@ -403,7 +396,7 @@ app.delete("/expenses", verifyId, function (req, res) {
         .json({ message: "No expenses found for this user." });
     }
   });
-  // Ha van, akkor töröljük.
+
   const deleteSql = `DELETE FROM expenses WHERE user_id = ?`;
 
   db.run(deleteSql, [userId], (err) => {
@@ -414,13 +407,8 @@ app.delete("/expenses", verifyId, function (req, res) {
   });
 });
 
-// Elemek mozgatása a shoppingList komponensből a többi komponensbe.
-
 app.post("/move_item", verifyId, (req, res) => {
   const { itemName, sourceTable, targetTable, dateNow, userId } = req.body;
-  // const userId = req.user.id;
-  console.log("Received request body:", req.body);
-
   const validTables = [
     "fridge_items",
     "freezer_items",
@@ -449,14 +437,12 @@ app.post("/move_item", verifyId, (req, res) => {
       if (err) return res.status(500).json({ error: err.message });
       if (!sourceRow) return res.status(404).json({ error: "Item not found." });
 
-      // Forrás mennyiség és mértékegység bontása
       const cleanedSourceQuantity = sourceRow.quantity
         .replace(/\s+/, " ")
         .trim();
       const [sourceQuantity, sourceUnit] = cleanedSourceQuantity.split(" ");
       const sourceQuantityValue = parseFloat(sourceQuantity);
 
-      // Cél tábla lekérdezése az itemName alapján
       db.get(
         `SELECT * FROM ${targetTable} WHERE name = ? AND user_id = ?`,
         [itemName, userId],
@@ -464,7 +450,6 @@ app.post("/move_item", verifyId, (req, res) => {
           if (err) return res.status(500).json({ error: err.message });
 
           if (targetRow) {
-            // Cél mennyiség és mértékegység bontása
             const cleanedTargetQuantity = targetRow.quantity
               .replace(/\s+/, " ")
               .trim();
@@ -472,7 +457,6 @@ app.post("/move_item", verifyId, (req, res) => {
               cleanedTargetQuantity.split(" ");
             const targetQuantityValue = parseFloat(targetQuantity);
 
-            // Ellenőrzi, hogy a mértékegységek egyeznek-e
             if (sourceUnit === targetUnit) {
               const newQuantity = sourceQuantityValue + targetQuantityValue;
               const updatedQuantity = `${newQuantity} ${targetUnit}`;
@@ -483,7 +467,6 @@ app.post("/move_item", verifyId, (req, res) => {
                 function (err) {
                   if (err) return res.status(500).json({ error: err.message });
 
-                  // Sikeres UPDATE után törli a forrástáblából
                   db.run(
                     `DELETE FROM ${sourceTable} WHERE name = ? AND user_id = ?`,
                     [itemName, userId],
@@ -504,7 +487,6 @@ app.post("/move_item", verifyId, (req, res) => {
                 .json({ error: "Unit mismatch between source and target." });
             }
           } else {
-            // Ha nincs cél tábla sor, akkor beszúrja az új elemet
             db.run(
               `INSERT INTO ${targetTable} (name, quantity, date_added, user_id) VALUES (?, ?, ?, ?)`,
               [
@@ -516,7 +498,6 @@ app.post("/move_item", verifyId, (req, res) => {
               function (err) {
                 if (err) return res.status(500).json({ error: err.message });
 
-                // Sikeres INSERT után törli a forrástáblából
                 db.run(
                   `DELETE FROM ${sourceTable} WHERE name = ? AND user_id = ?`,
                   [itemName, userId],
@@ -537,8 +518,6 @@ app.post("/move_item", verifyId, (req, res) => {
     }
   );
 });
-
-// Elemek mozgatása a shoppingList komponensbe.
 
 app.post("/moveto_sl", verifyId, (req, res) => {
   const { itemName, newQuantity, date, sourceTable, targetTable } = req.body;
@@ -575,9 +554,8 @@ app.post("/moveto_sl", verifyId, (req, res) => {
       if (err) {
         return res.status(400).json({ error: err.message });
       }
-      // Ha az elem megtalálható az SL-ben.
+
       if (targetItem) {
-        // Mennyiség kivonása és ellenőrzés, hogy ne legyen hiba, ha nincs találat
         const numReg = /\d+(\.\d+)?/;
         const tempQty = newQuantity.match(numReg);
 
@@ -601,12 +579,10 @@ app.post("/moveto_sl", verifyId, (req, res) => {
           res.json({ message: "Item quantity updated successfully." });
         });
       } else {
-        // Ha nem, létrehozzuk az elemet.
-        const numRegex = /\d+(\.\d+)?/; // Egy tömböt ad vissza.
+        const numRegex = /\d+(\.\d+)?/;
         const qty = newQuantity.match(numRegex)[0];
         const unit = newQuantity.replace(Number.parseFloat(newQuantity), "");
         const validQty = `${qty} ${unit}`;
-        console.log("QTY ami eddig nem jelent meg: ", validQty);
         const sql4 = `INSERT INTO ${targetTable} (name, quantity, date_added, user_id) VALUES (?, ?, ?, ?)`;
         db.run(
           sql4,
@@ -622,8 +598,6 @@ app.post("/moveto_sl", verifyId, (req, res) => {
     });
   });
 });
-
-// fridge items
 
 app.get("/:table", verifyId, (req, res) => {
   const { table } = req.params;
@@ -664,7 +638,6 @@ app.post("/:table", verifyId, (req, res) => {
   if (!validTables.includes(table)) {
     return res.status(400).json({ error: "Invalid table name." });
   }
-  console.log('A date_added formátuma: ', date_added);
   const sql = `INSERT INTO ${table} (name, quantity, date_added, user_id) VALUES(?, ?, ?, ?)`;
   db.run(sql, [name, quantity, date_added, userId], function (err) {
     if (err) {
@@ -701,7 +674,7 @@ app.delete("/:table/:id", verifyId, (req, res) => {
     if (row.count === 0) {
       db.run(
         "UPDATE sqlite_sequence SET seq = 0 WHERE name = ?",
-        [table], // Escape elérés a table változóhoz.
+        [table],
         (err) => {
           if (err) {
             res.status(400).json({ err: err.message });
@@ -727,7 +700,6 @@ app.put("/:table/:id", verifyId, (req, res) => {
     "shoppingList_items",
   ];
   const { quantity, dateNow } = req.body;
-  console.log("VerifyId ok.");
   if (!validTables.includes(table)) {
     return res.status(400).json({ error: "Invalid table name." });
   }
@@ -747,35 +719,15 @@ app.put("/:table/:id", verifyId, (req, res) => {
       res.status(400).json({ error: err.message });
       return;
     }
-    res.json({ message: "Item quantity and date updated", id, quantity, dateNow });
+    res.json({
+      message: "Item quantity and date updated",
+      id,
+      quantity,
+      dateNow,
+    });
   });
 });
-
-function getDatas() {
-  const sql = `SELECT * FROM shoppingList_items WHERE user_id = ?`;
-  db.all(sql, [2], (err, rows) => {
-    if (err) {
-      console.error(err);
-    } else {
-      console.log(rows);
-    }
-  });
-};
-
-getDatas();
-
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-// process.on('SIGINT', () => {
-//   db.close((err) => {
-//     if (err) {
-//       console.error('Error closing db: ', err.message)
-//     } else {
-//       console.log('DB connection closed')
-//       process.exit(0)
-//     }
-//   })
-// })

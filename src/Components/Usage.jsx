@@ -1,10 +1,22 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Helmet } from 'react-helmet-async';
 import "./Usage.css";
 
 export default function Usage() {
+
+  const handleRegister = (e) => {
+    const currUserId = localStorage.getItem("userId");
+    if (currUserId !== null) {
+      e.preventDefault();
+    }
+  };
+  
   return (
     <div className="usage-container">
+      <Helmet>
+        <title>My Food Minder | Usage</title>
+      </Helmet>
       <h2 className="usage-container_h2">Usage</h2>
       <p className="usage-container_p">
         Discover the web application that simplifies and enhances your daily
@@ -57,12 +69,12 @@ export default function Usage() {
       <h3 className="usage-container_h3">How it works?</h3>
       <p className="usage-container_important_message">
         The functions are only available after{" "}
-        <Link to="/Register">registration </Link> and{" "}
+        <Link to="/Register" onClick={handleRegister}>registration </Link> and{" "}
         <Link to="/Login">login</Link>!
       </p>
       <h4 className="usage-container_h4">Register or Log in</h4>
       <p className="usage-container_p">
-        To create an account, click on the <Link to="/Register">Register</Link>{" "}
+        To create an account, click on the <Link to="/Register" onClick={handleRegister}>Register</Link>{" "}
         menu item in the header and fill out the 'Username' and 'Password'
         fields. If you already have an account, click on the{" "}
         <Link to="/Login">Log in</Link> menu item in the header and fill out the
@@ -70,19 +82,24 @@ export default function Usage() {
       </p>
       <h4 className="usage-container_h4">Add item</h4>
       <p className="usage-container_p">
-        To add a new item, click on the 'Add item' button and fill out the 'New item
-        name' and 'New item quantity' fields.
+        To add a new item, click on the 'Add item' button and fill out the 'New
+        item name' and 'New item quantity' fields.
       </p>
       <img
         className="usage_pictures"
-        src={process.env.PUBLIC_URL + "add-item.png"} alt='add item pic'
+        src={process.env.PUBLIC_URL + "add-item.png"}
+        alt="add item pic"
       />
       <h4 className="usage-container_h4">Update item</h4>
       <p className="usage-container_p">
         To update the quantity of an item, click on the 'Update item' button and
         fill out the 'New quantity' field.
       </p>
-      <img className='usage_pictures' src={process.env.PUBLIC_URL + 'update-item.png'} alt='update item pic'/>
+      <img
+        className="usage_pictures"
+        src={process.env.PUBLIC_URL + "update-item.png"}
+        alt="update item pic"
+      />
       <h4 className="usage-container_h4">Delete item</h4>
       <p className="usage-container_p">
         To delete an item, click on the 'Delete item' button.
@@ -92,7 +109,11 @@ export default function Usage() {
         To add an item to the shopping list, click on the 'Add to SL' button,
         and fill out the 'Set quantity' field.
       </p>
-      <img className='usage_pictures' src={process.env.PUBLIC_URL + 'moveto-sl.png'} alt='move to shopping list pic'/>
+      <img
+        className="usage_pictures"
+        src={process.env.PUBLIC_URL + "moveto-sl.png"}
+        alt="move to shopping list pic"
+      />
       <h4 className="usage-container_h4">Add new item in the shopping list</h4>
       <p className="usage-container_p">
         This action is the same as adding an item.
@@ -104,21 +125,33 @@ export default function Usage() {
         To move an item from the shopping list, click on the 'Move to...'
         button, select one of the options below, and click on it.
       </p>
-      <img className='usage_pictures' src={process.env.PUBLIC_URL + 'moveto.png'} alt='move from pic'/>
+      <img
+        className="usage_pictures"
+        src={process.env.PUBLIC_URL + "moveto.png"}
+        alt="move from pic"
+      />
       <h4 className="usage-container_h4">Add expense</h4>
       <p className="usage-container_p">
         To record your expense, click on the 'Expenses' menu item in the header.
         Then click on the 'Add expense' button, and fill out the 'Add new
         expense' field.
       </p>
-      <img className='usage_pictures_small' src={process.env.PUBLIC_URL + 'set-expenses.png'} alt='set expenses pic'/>
+      <img
+        className="usage_pictures_small"
+        src={process.env.PUBLIC_URL + "set-expenses.png"}
+        alt="set expenses pic"
+      />
       <h4 className="usage-container_h4">Add or modify currency</h4>
       <p className="usage-container_p">
         To add or modify your currency, click on the 'Set currency' button and
         fill out the 'Set new currency' field. After performing this action, you
         will see your expenses and currency displayed per week and per month.
       </p>
-      <img className='usage_pictures_small' src={process.env.PUBLIC_URL + 'set-currency.png'} alt='set currency pic'/>
+      <img
+        className="usage_pictures_small"
+        src={process.env.PUBLIC_URL + "set-currency.png"}
+        alt="set currency pic"
+      />
       <h4 className="usage-container_h4">Log out</h4>
       <p className="usage-container_p">
         To log out of your account, click on the 'Log out' menu item in the
