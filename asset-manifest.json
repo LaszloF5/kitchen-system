@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/kitchen-system/static/css/main.3272835a.css",
+    "main.js": "/kitchen-system/static/js/main.5601b77f.js",
+    "static/js/453.894492c1.chunk.js": "/kitchen-system/static/js/453.894492c1.chunk.js",
+    "index.html": "/kitchen-system/index.html",
+    "main.3272835a.css.map": "/kitchen-system/static/css/main.3272835a.css.map",
+    "main.5601b77f.js.map": "/kitchen-system/static/js/main.5601b77f.js.map",
+    "453.894492c1.chunk.js.map": "/kitchen-system/static/js/453.894492c1.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.3272835a.css",
+    "static/js/main.5601b77f.js"
+  ]
+}
