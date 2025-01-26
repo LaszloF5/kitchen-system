@@ -2,13 +2,15 @@ const express = require("express");
 const sqlite3 = require("sqlite3");
 const cors = require("cors");
 const app = express();
-const PORT = 5500;
+require("dotenv").config();
+const PORT = process.env.PORT || 3500;
+const DB_PATH = process.env.DB_PATH || "./database.sqlite";
 const bcrypt = require("bcrypt");
 
 app.use(cors());
 app.use(express.json());
 
-const db = new sqlite3.Database("./database.sqlite", (err) => {
+const db = new sqlite3.Database(DB_PATH, (err) => {
   if (err) {
     console.error("Error opening database: ", err.message);
   } else {
@@ -85,11 +87,9 @@ app.post("/register", async (req, res) => {
   try {
     const existingUser = await getUserByUserName(userName);
     if (existingUser) {
-      return res
-        .status(400)
-        .json({
-          error: "This username is already exist. Please choose another one.",
-        });
+      return res.status(400).json({
+        error: "This username is already exist. Please choose another one.",
+      });
     }
 
     await registerUser(userName, password);
