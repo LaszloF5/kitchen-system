@@ -38,7 +38,7 @@ export default function Expenses() {
     const week = today.weekNumber;
     const userId = localStorage.getItem("userId");
     try {
-      await axios.post("http://localhost:5500/expenses", {
+      await axios.post("https://kitchen-system.onrender.com/expenses", {
         amount,
         year,
         month,
@@ -70,7 +70,7 @@ export default function Expenses() {
     const userId = localStorage.getItem("userId");
     setIsWorking(true);
     try {
-      await axios.delete("http://localhost:5500/expenses", {
+      await axios.delete("https://kitchen-system.onrender.com/expenses", {
         params: { userId },
       });
     } catch (err) {
@@ -84,7 +84,7 @@ export default function Expenses() {
     const getExpenses = async () => {
       const userId = localStorage.getItem("userId");
       try {
-        const response = await axios.get("http://localhost:5500/expenses", {
+        const response = await axios.get("https://kitchen-system.onrender.com/expenses", {
           params: { userId },
         });
         const data = response.data.expenses;
