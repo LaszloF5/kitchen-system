@@ -224,7 +224,7 @@ export default function ShoppingList({
 
     try {
       const response = await axios.post(
-        `http://localhost:5500/move_item?user_id=${userId}`,
+        `https://kitchen-system.onrender.com/move_item?user_id=${userId}`,
         {
           itemName,
           sourceTable: trimmedSourceTable,
@@ -236,20 +236,20 @@ export default function ShoppingList({
 
       if (response.status === 200) {
         const newList = await axios.get(
-          `http://localhost:5500/shoppingList_items?user_id=${userId}`
+          `https://kitchen-system.onrender.com/shoppingList_items?user_id=${userId}`
         );
         setItems(newList.data.items);
         setIsVisibleMoveTo(false);
         setNewIndex(null);
-        alert("Elem sikeresen áthelyezve.");
+        alert("Item successfully placed.");
       }
     } catch (error) {
       console.error("Error during moving item:", error);
       if (error.response) {
         console.error("Server response:", error.response.data);
-        alert("Hiba a mozgatáskor: " + error.response.data.error);
+        alert("Error while moving: " + error.response.data.error);
       } else {
-        alert("Hiba a mozgatáskor: " + error.message);
+        alert("Error while moving: " + error.message);
       }
     }
     if (targetTable === "fridge_items") {

@@ -87,7 +87,7 @@ export default function Usage() {
       </p>
       <img
         className="usage_pictures"
-        src={process.env.PUBLIC_URL + "add-item.png"}
+        src={process.env.PUBLIC_URL + "/add-item.png"}
         alt="add item pic"
       />
       <h4 className="usage-container_h4">Update item</h4>
@@ -97,7 +97,7 @@ export default function Usage() {
       </p>
       <img
         className="usage_pictures"
-        src={process.env.PUBLIC_URL + "update-item.png"}
+        src={process.env.PUBLIC_URL + "/update-item.png"}
         alt="update item pic"
       />
       <h4 className="usage-container_h4">Delete item</h4>
@@ -111,7 +111,7 @@ export default function Usage() {
       </p>
       <img
         className="usage_pictures"
-        src={process.env.PUBLIC_URL + "moveto-sl.png"}
+        src={process.env.PUBLIC_URL + "/moveto-sl.png"}
         alt="move to shopping list pic"
       />
       <h4 className="usage-container_h4">Add new item in the shopping list</h4>
@@ -127,7 +127,7 @@ export default function Usage() {
       </p>
       <img
         className="usage_pictures"
-        src={process.env.PUBLIC_URL + "moveto.png"}
+        src={process.env.PUBLIC_URL + "/moveto.png"}
         alt="move from pic"
       />
       <h4 className="usage-container_h4">Add expense</h4>
@@ -138,7 +138,7 @@ export default function Usage() {
       </p>
       <img
         className="usage_pictures_small"
-        src={process.env.PUBLIC_URL + "set-expenses.png"}
+        src={process.env.PUBLIC_URL + "/set-expenses.png"}
         alt="set expenses pic"
       />
       <h4 className="usage-container_h4">Add or modify currency</h4>
@@ -149,7 +149,7 @@ export default function Usage() {
       </p>
       <img
         className="usage_pictures_small"
-        src={process.env.PUBLIC_URL + "set-currency.png"}
+        src={process.env.PUBLIC_URL + "/set-currency.png"}
         alt="set currency pic"
       />
       <h4 className="usage-container_h4">Log out</h4>

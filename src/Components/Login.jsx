@@ -26,7 +26,7 @@ export default function Login({ userId, setUserId }) {
     setIsLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:5500/login", {
+      const response = await axios.post("https://kitchen-system.onrender.com/login", {
         userName,
         password,
       });
@@ -80,7 +80,7 @@ export default function Login({ userId, setUserId }) {
 
     try {
       const response = await axios.delete(
-        "http://localhost:5500/delete-account",
+        "https://kitchen-system.onrender.com/delete-account",
         {
           data: { userId },
         }
@@ -118,7 +118,7 @@ export default function Login({ userId, setUserId }) {
   
     try {
       const response = await axios.post(
-        "http://localhost:5500/change-password",
+        "https://kitchen-system.onrender.com/change-password",
         {
           userId,
           oldPassword,

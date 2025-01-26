@@ -118,7 +118,7 @@ export default function App() {
       return [];
     }
     try {
-      const response = await axios.get(`http://localhost:5500/${table}`, {
+      const response = await axios.get(`https://kitchen-system.onrender.com/${table}`, {
         params: { userId },
       });
       return Array.isArray(response.data.items) ? response.data.items : [];
@@ -142,7 +142,7 @@ export default function App() {
       };
       try {
         const response = await axios.post(
-          `http://localhost:5500/${table}`,
+          `https://kitchen-system.onrender.com/${table}`,
           newItemData,
           {
             params: { userId },
@@ -164,7 +164,7 @@ export default function App() {
   const deleteItem = async (table, itemToDelete, setItems) => {
     const userId = localStorage.getItem("userId");
     try {
-      await axios.delete(`http://localhost:5500/${table}/${itemToDelete.id}`, {
+      await axios.delete(`https://kitchen-system.onrender.com/${table}/${itemToDelete.id}`, {
         params: { userId },
       });
 
@@ -189,12 +189,12 @@ export default function App() {
     }
 
     await axios.put(
-      `http://localhost:5500/${table}/${updateId}?user_id=${userId}`,
+      `https://kitchen-system.onrender.com/${table}/${updateId}?user_id=${userId}`,
       { quantity: modifyQuantity.trim(), dateNow }
     );
 
     const response = await axios.get(
-      `http://localhost:5500/${table}?user_id=${userId}`
+      `https://kitchen-system.onrender.com/${table}?user_id=${userId}`
     );
     setItems(response.data.items);
   };
@@ -208,7 +208,7 @@ export default function App() {
   ) => {
     const userId = localStorage.getItem("userId");
     try {
-      await axios.post(`http://localhost:5500/moveto_sl?userId=${userId}`, {
+      await axios.post(`https://kitchen-system.onrender.com/moveto_sl?userId=${userId}`, {
         itemName,
         newQuantity,
         date,
@@ -252,7 +252,7 @@ export default function App() {
       {isVisibleScrollBtn && (
         <img
           className="top-arrow"
-          src={process.env.PUBLIC_URL + "top-arrow.png"}
+          src={process.env.PUBLIC_URL + "/top-arrow.png"}
           alt="top arrow button"
           onClick={handleScrollToTop}
         />
@@ -265,7 +265,7 @@ export default function App() {
                 className={`${
                   isMobile ? "hamburger-menu-icon" : "hidden-ham-icon"
                 }`}
-                src={process.env.PUBLIC_URL + "hamburger-menu.png"}
+                src={process.env.PUBLIC_URL + "/hamburger-menu.png"}
                 alt="hamburger menu icon"
                 onClick={toggleHamMenu}
               />
@@ -349,7 +349,7 @@ export default function App() {
           {isDarkMode ? (
             <img
               className="white-filter darkOrLight"
-              src={process.env.PUBLIC_URL + "dark-mode.png"}
+              src={process.env.PUBLIC_URL + "/dark-mode.png"}
               alt="Dark mode"
               role="button"
               tabIndex="0"
@@ -358,7 +358,7 @@ export default function App() {
           ) : (
             <img
               className="darkOrLight"
-              src={process.env.PUBLIC_URL + "light-mode.png"}
+              src={process.env.PUBLIC_URL + "/light-mode.png"}
               alt="Light mode"
               role="button"
               tabIndex="0"
@@ -491,14 +491,14 @@ export default function App() {
               >
                 <img
                   className="footer-icons"
-                  src={process.env.PUBLIC_URL + "github-icon-blue.png"}
+                  src={process.env.PUBLIC_URL + "/github-icon-blue.png"}
                   alt="GitHub icon"
                 />
               </a>
               {/* <a href="#" target="_blank">
               <img
                 className="footer-icons"
-                src={process.env.PUBLIC_URL + "linkedin-icon-blue.png"}
+                src={process.env.PUBLIC_URL + "/linkedin-icon-blue.png"}
                 alt="LinkedIn icon"
               />
             </a> */}

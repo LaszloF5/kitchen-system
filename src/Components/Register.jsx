@@ -20,7 +20,7 @@ export default function Register() {
     const password = e.target.password.value;
     setIsWaiting(true);
     try {
-      await axios.post("http://localhost:5500/register", {
+      await axios.post("https://kitchen-system.onrender.com/register", {
         userName,
         password,
       });
